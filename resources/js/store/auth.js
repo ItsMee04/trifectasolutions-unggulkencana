@@ -1,16 +1,28 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { STORAGE_URL, BASE_DEFAULT_IMAGE_URL } from '../helper/base';
 
 export const useAuthStore = defineStore('auth', () => {
-    // Ambil data awal dari sessionStorage agar tidak hilang saat refresh
     const authToken = ref(sessionStorage.getItem('auth_token') || null);
     const user = ref(JSON.parse(sessionStorage.getItem('user_data')) || null);
+
+    // Getter modular untuk foto profil
+    const profileImage = computed(() => {
+        if (user.value?.image && user.value.image !== '' && user.value.image !== 'null') {
+            return `${STORAGE_URL}/images/pegawai/${user.value.image}`;
+        }
+        return BASE_DEFAULT_IMAGE_URL;
+    });
+
+    // FUNGSI BARU: Untuk memperbarui data user secara reaktif
+    function updateUser(newUserData) {
+        user.value = { ...user.value, ...newUserData };
+        sessionStorage.setItem('user_data', JSON.stringify(user.value));
+    }
 
     function setSession(token, userData) {
         authToken.value = token;
         user.value = userData;
-
-        // Simpan ke sessionStorage (otomatis terhapus jika browser/tab ditutup)
         sessionStorage.setItem('auth_token', token);
         sessionStorage.setItem('user_data', JSON.stringify(userData));
     }
@@ -22,5 +34,5 @@ export const useAuthStore = defineStore('auth', () => {
         sessionStorage.removeItem('user_data');
     }
 
-    return { authToken, user, setSession, logout };
+    return { authToken, user, profileImage, updateUser, setSession, logout };
 });

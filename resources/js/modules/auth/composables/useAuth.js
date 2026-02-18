@@ -33,19 +33,19 @@ export function useAuth() {
         errors.value.password = !form.value.password;
 
         if (errors.value.email) {
-            toast.warning("Email wajib diisi!");
+            toast.error("Email wajib diisi!");
             return false;
         }
 
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailPattern.test(form.value.email)) {
             errors.value.email = true; // Tandai merah jika format salah
-            toast.warning("Format email tidak valid!");
+            toast.error("Format email tidak valid!");
             return false;
         }
 
         if (errors.value.password) {
-            toast.warning("Password wajib diisi!");
+            toast.error("Password wajib diisi!");
             return false;
         }
 
@@ -53,25 +53,32 @@ export function useAuth() {
     };
 
     const handleLogin = async () => {
-        // Jalankan validasi sebelum memproses login
         if (!validate()) return;
 
         isLoading.value = true;
         try {
-            // Mengirim form.value langsung ke service
             const response = await AuthService.login(form.value);
 
-            toast.success("Login berhasil!");
+            // Perhatikan ini:
+            // 1. Backend Anda mengirim 'access_token'
+            // 2. Store Anda menggunakan fungsi 'setSession' (bukan setToken)
+            if (response.access_token) {
 
-            authStore.setToken(response.token);
-            authStore.setUser(response.user);
+                // Panggil fungsi yang ada di store Anda
+                authStore.setSession(response.access_token, response.user);
 
-            router.push('/dashboard');
+                toast.success("Login berhasil!");
+
+                // Navigasi otomatis ke dashboard
+                await router.push('/dashboard');
+            }
         } catch (error) {
-            // Error 401/500 sudah ditangani di apiClient interceptor,
-            // di sini kita menangani pesan spesifik jika ada.
-            if (error.response?.status === 422) {
+            if (error.response?.status === 401) {
                 toast.error("Email atau Password salah!");
+            } else if (error.response?.status === 403) {
+                toast.error("Akun Anda belum aktif!");
+            } else {
+                toast.error("Gagal terhubung ke server");
             }
         } finally {
             isLoading.value = false;

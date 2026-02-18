@@ -13,7 +13,7 @@ class Pegawai extends Model
     use HasFactory;
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected $table = 'pegawai';
-    protected $fillable = ['nip', 'name', 'alamat', 'kontak', 'jabatan_id', 'image', 'status'];
+    protected $fillable = ['nip', 'nama', 'alamat', 'kontak', 'jabatan_id', 'image', 'status'];
 
     /**
      * Get the jabatan that owns the Pegawai
