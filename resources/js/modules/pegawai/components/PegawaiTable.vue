@@ -9,12 +9,8 @@
                         <span class="input-group-text bg-transparent border-end-0">
                             <i data-feather="search" style="width: 14px; height: 14px;"></i>
                         </span>
-                        <input
-                            type="text"
-                            class="form-control border-start-0 ps-0"
-                            placeholder="Cari Pegawai..."
-                            v-model="searchQuery"
-                        />
+                        <input type="text" class="form-control border-start-0 ps-0" placeholder="Cari Pegawai..."
+                            v-model="searchQuery" />
                     </div>
                 </div>
             </div>
@@ -23,13 +19,13 @@
                     <table class="table text-nowrap table-striped table-hover">
                         <thead>
                             <tr>
-                                <th style="width: 5%;">NO.</th>
-                                <th style="width: 20%;">NIP</th>
-                                <th style="width: 20%;">NAMA</th>
-                                <th style="width: 20%;">KONTAK</th>
-                                <th style="width: 20%;">JABATAN</th>
-                                <th style="width: 20%;">STATUS</th>
-                                <th style="width: 20%;" class="text-center">ACTIONS</th>
+                                <th scope="col">NO.</th>
+                                <th scope="col">NIP</th>
+                                <th scope="col">NAMA</th>
+                                <th scope="col">KONTAK</th>
+                                <th scope="col">JABATAN</th>
+                                <th scope="col">STATUS</th>
+                                <th scope="col" class="text-center">ACTIONS</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -55,12 +51,12 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="d-flex align-items-center">
-                                        <div>
-                                            <div class="lh-1">
-                                                <span>{{ item.nama }}</span>
-                                            </div>
-                                        </div>
+                                    <div class="productimgname">
+                                        <a href="javascript:void(0);" class="product-img stock-img">
+                                            <img :src="item.image ? `/storage/images/pegawai/${item.image}?t=${new Date().getTime()}` : BASE_DEFAULT_IMAGE_URL"
+                                                :alt="item.nama">
+                                        </a>
+                                        <a href="javascript:void(0);">{{ item.nama }} </a>
                                     </div>
                                 </td>
                                 <td>
@@ -89,17 +85,12 @@
                                         INACTIVE
                                     </span>
                                 </td>
-                                <td>
-                                    <div class="hstack gap-2 fs-15 justify-content-center">
-                                        <a href="javascript:void(0);"
-                                            class="btn btn-icon btn-sm btn-soft-info rounded-pill"
-                                            @click.prevent="handleEdit(item)">
+                                <td class="action-table-data justify-content-center">
+                                    <div class="edit-delete-action">
+                                        <a class="me-2 p-2" @click.prevent="handleEdit(item)">
                                             <i data-feather="edit" class="feather-edit"></i>
                                         </a>
-
-                                        <a href="javascript:void(0);"
-                                            class="btn btn-icon btn-sm btn-soft-danger rounded-pill"
-                                            @click.prevent="handleDelete(item)">
+                                        <a class="confirm-text p-2" @click.prevent="handleDelete(item)">
                                             <i data-feather="trash-2" class="feather-trash-2"></i>
                                         </a>
                                     </div>
@@ -123,15 +114,18 @@
                             </a>
                         </li>
                         <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                            <a class="page-link" href="javascript:void(0);" @click="currentPage > 1 ? currentPage-- : null">
+                            <a class="page-link" href="javascript:void(0);"
+                                @click="currentPage > 1 ? currentPage-- : null">
                                 Previous
                             </a>
                         </li>
-                        <li v-for="page in displayedPages" :key="page" class="page-item" :class="{ active: page === currentPage }">
+                        <li v-for="page in displayedPages" :key="page" class="page-item"
+                            :class="{ active: page === currentPage }">
                             <a class="page-link" href="javascript:void(0);" @click="currentPage = page">{{ page }}</a>
                         </li>
                         <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                            <a class="page-link" href="javascript:void(0);" @click="currentPage < totalPages && currentPage++">
+                            <a class="page-link" href="javascript:void(0);"
+                                @click="currentPage < totalPages && currentPage++">
                                 Next
                             </a>
                         </li>
@@ -140,7 +134,7 @@
                                 <i class="fas fa-angle-double-right"></i>
                             </a>
                         </li>
-                     </ul>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -150,6 +144,7 @@
 import { onMounted, watch } from 'vue';
 import { useFeather } from '../../../helper/feather';
 import { usePegawai } from '../composables/usePegawai';
+import { BASE_URL, STORAGE_URL, BASE_DEFAULT_IMAGE_URL } from '../../../helper/base';
 
 const {
     filteredPegawai,

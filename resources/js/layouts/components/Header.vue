@@ -74,7 +74,7 @@
                     <span class="user-info">
                         <span class="user-letter">
                             <img :src="authStore.profileImage" @error="(e) => e.target.src = BASE_DEFAULT_IMAGE_URL"
-                                alt="User Image" class="img-fluid" />
+                                alt="User Image" />
                         </span>
                         <span class="user-detail">
                             <span class="user-name">{{ authStore.user?.nama || 'Guest' }}</span>
@@ -88,7 +88,7 @@
                         <div class="profileset">
                             <span class="user-img">
                                 <img :src="authStore.profileImage" @error="(e) => e.target.src = BASE_DEFAULT_IMAGE_URL"
-                                    alt="User Image" />
+                                alt="User Image" />
                                 <span class="status online"></span>
                             </span>
                             <div class="profilesets">
@@ -119,13 +119,12 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref, computed } from 'vue';
 import { useFeather } from '../../helper/feather';
 import { useAuthStore } from '../../store/auth';
 import toast from '../../helper/toast';
 import router from '../../router';
-import { BASE_URL, STORAGE_URL } from '../../helper/base';
-import { BASE_DEFAULT_IMAGE_URL } from '../../helper/base';
+import { BASE_URL, STORAGE_URL, BASE_DEFAULT_IMAGE_URL } from '../../helper/base';
 const { initFeather } = useFeather();
 
 // State

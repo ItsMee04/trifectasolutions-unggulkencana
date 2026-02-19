@@ -25,14 +25,14 @@
         </div>
     </div>
 
-    <!-- <PegawaiModal /> -->
+    <PegawaiModal />
 </template>
 
 <script setup>
 import { onMounted } from 'vue';
 import { usePegawai } from '../composables/usePegawai';
 import PegawaiTable from '../components/PegawaiTable.vue';
-// import PegawaiModal from '../components/PegawaiModal.vue';
+import PegawaiModal from '../components/PegawaiModal.vue';
 
 const { fetchPegawai, handleRefresh, handleCreate } = usePegawai();
 onMounted(() => {

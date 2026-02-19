@@ -11,9 +11,9 @@ class PegawaiController extends Controller
 {
     public function getPegawai()
     {
-        $data = Pegawai::with(['jabatan'])->where('status',1)->get();
+        $data = Pegawai::with(['jabatan'])->where('status', 1)->get();
 
-        if($data->isEmpty()){
+        if ($data->isEmpty()) {
             return response()->json([
                 'status' => false,
                 'message' => 'Data pegawai tidak ditemukan',
@@ -32,32 +32,32 @@ class PegawaiController extends Controller
     {
         $request->validate([
             'nip'           => 'required|string|max:100|unique:pegawai',
-            'name'          => 'required|string|max:100',
+            'nama'          => 'required|string|max:100',
             'alamat'        => 'nullable|string',
             'kontak'        => 'nullable|string|max:14',
-            'jabatan_id'    => 'required|exists:jabatan,id',
-            'image'         => 'nullable|mimes:jpeg,png,jpg|max:1024',
+            'jabatan'       => 'required|exists:jabatan,id',
+            'image'         => 'image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $image = '';
         if ($request->hasFile('image')) {
             $extension = $request->file('image')->getClientOriginalExtension();
             $image = $request->nip . '.' . $extension;
-            $request->file('image')->storeAs('images/pegawai', $image);
+            $request->file('image')->storeAs('images/pegawai', $image, 'public');
             $request['image'] = $image;
         }
 
         $pegawai = Pegawai::create([
             'nip'           => $request->nip,
-            'name'          => $request->name,
-            'alamat'        => $request->alamat,
+            'nama'          => strtoupper($request->nama),
+            'alamat'        => strtoupper($request->alamat),
             'kontak'        => $request->kontak,
-            'jabatan_id'    => $request->jabatan_id,
+            'jabatan_id'    => $request->jabatan,
             'image'         => $image,
             'status'        => 1
         ]);
 
-        if($pegawai){
+        if ($pegawai) {
             User::create([
                 'pegawai_id'    => $pegawai->id,
                 'status'        => 1
@@ -76,11 +76,11 @@ class PegawaiController extends Controller
         $request->validate([
             'id'            => 'required|exists:pegawai,id',
             'nip'           => 'required|string|max:100|unique:pegawai,nip,' . $request->id,
-            'name'          => 'required|string|max:100',
+            'nama'          => 'required|string|max:100',
             'alamat'        => 'nullable|string',
             'kontak'        => 'nullable|string|max:14',
-            'jabatan_id'    => 'required|exists:jabatan,id',
-            'image'         => 'nullable|mimes:jpeg,png,jpg|max:1024',
+            'jabatan'       => 'required|exists:jabatan,id',
+            'image'         => 'image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $pegawai = Pegawai::find($request->id);
@@ -97,15 +97,16 @@ class PegawaiController extends Controller
         if ($request->hasFile('image')) {
             $extension = $request->file('image')->getClientOriginalExtension();
             $image = $request->nip . '.' . $extension;
-            $request->file('image')->storeAs('images/pegawai', $image);
+            $request->file('image')->storeAs('images/pegawai', $image, 'public');
+            $request['image'] = $image;
         }
 
         $pegawai->update([
             'nip'           => $request->nip,
-            'name'          => $request->name,
-            'alamat'        => $request->alamat,
+            'nama'          => strtoupper($request->nama),
+            'alamat'        => strtoupper($request->alamat),
             'kontak'        => $request->kontak,
-            'jabatan_id'    => $request->jabatan_id,
+            'jabatan_id'    => $request->jabatan,
             'image'         => $image,
         ]);
 
@@ -128,9 +129,16 @@ class PegawaiController extends Controller
             ], 404);
         }
 
-        $pegawai->update([
+        $deletepegawai = $pegawai->update([
             'status' => 0
         ]);
+
+        if ($deletepegawai) {
+            User::where('pegawai_id', $request->id)
+                ->update([
+                    'status' => 0
+                ]);
+        }
 
         return response()->json([
             'status' => true,

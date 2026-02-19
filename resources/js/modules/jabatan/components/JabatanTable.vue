@@ -9,12 +9,8 @@
                         <span class="input-group-text bg-transparent border-end-0">
                             <i data-feather="search" style="width: 14px; height: 14px;"></i>
                         </span>
-                        <input
-                            type="text"
-                            class="form-control border-start-0 ps-0"
-                            placeholder="Cari Jabatan..."
-                            v-model="searchQuery"
-                        />
+                        <input type="text" class="form-control border-start-0 ps-0" placeholder="Cari Jabatan..."
+                            v-model="searchQuery" />
                     </div>
                 </div>
             </div>
@@ -59,7 +55,7 @@
                                         INACTIVE
                                     </span>
                                 </td>
-                                <td>
+                                <!-- <td>
                                     <div class="hstack gap-2 fs-15 justify-content-center">
                                         <a href="javascript:void(0);"
                                             class="btn btn-icon btn-sm btn-soft-info rounded-pill"
@@ -70,6 +66,16 @@
                                         <a href="javascript:void(0);"
                                             class="btn btn-icon btn-sm btn-soft-danger rounded-pill"
                                             @click.prevent="handleDelete(item)">
+                                            <i data-feather="trash-2" class="feather-trash-2"></i>
+                                        </a>
+                                    </div>
+                                </td> -->
+                                <td class="action-table-data justify-content-center">
+                                    <div class="edit-delete-action">
+                                        <a class="me-2 p-2" @click.prevent="handleEdit(item)">
+                                            <i data-feather="edit" class="feather-edit"></i>
+                                        </a>
+                                        <a class="confirm-text p-2"  @click.prevent="handleDelete(item)">
                                             <i data-feather="trash-2" class="feather-trash-2"></i>
                                         </a>
                                     </div>
@@ -93,15 +99,18 @@
                             </a>
                         </li>
                         <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                            <a class="page-link" href="javascript:void(0);" @click="currentPage > 1 ? currentPage-- : null">
+                            <a class="page-link" href="javascript:void(0);"
+                                @click="currentPage > 1 ? currentPage-- : null">
                                 Previous
                             </a>
                         </li>
-                        <li v-for="page in displayedPages" :key="page" class="page-item" :class="{ active: page === currentPage }">
+                        <li v-for="page in displayedPages" :key="page" class="page-item"
+                            :class="{ active: page === currentPage }">
                             <a class="page-link" href="javascript:void(0);" @click="currentPage = page">{{ page }}</a>
                         </li>
                         <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                            <a class="page-link" href="javascript:void(0);" @click="currentPage < totalPages && currentPage++">
+                            <a class="page-link" href="javascript:void(0);"
+                                @click="currentPage < totalPages && currentPage++">
                                 Next
                             </a>
                         </li>
@@ -110,7 +119,7 @@
                                 <i class="fas fa-angle-double-right"></i>
                             </a>
                         </li>
-                     </ul>
+                    </ul>
                 </div>
             </div>
         </div>
