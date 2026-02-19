@@ -28,6 +28,11 @@ const routes = [
                 path: 'pegawai',
                 name: 'pegawai',
                 component: () => import('@/modules/pegawai/views/PegawaiView.vue')
+            },
+            {
+                path: 'role',
+                name: 'role',
+                component: () => import('@/modules/role/views/RoleView.vue')
             }
         ]
     }
