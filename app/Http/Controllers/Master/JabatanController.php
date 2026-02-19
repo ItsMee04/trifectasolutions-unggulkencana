@@ -34,7 +34,7 @@ class JabatanController extends Controller
         ]);
 
         $jabatan = Jabatan::create([
-            'jabatan' => $request->jabatan,
+            'jabatan' => strtoupper($request->jabatan),
             'status' => 1
         ]);
 
@@ -62,7 +62,7 @@ class JabatanController extends Controller
         }
 
         $jabatan->update([
-            'jabatan' => $request->jabatan,
+            'jabatan' => strtoupper($request->jabatan),
         ]);
 
         return response()->json([

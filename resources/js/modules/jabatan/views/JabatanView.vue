@@ -9,16 +9,13 @@
             </div>
             <ul class="table-top-head">
                 <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh" @click="handleRefresh"><i data-feather="rotate-ccw"
-                            class="feather-rotate-ccw"></i></a>
-                </li>
-                <li>
-                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i
-                            data-feather="chevron-up" class="feather-chevron-up"></i></a>
+                    <a data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh" @click="handleRefresh"><i
+                            data-feather="rotate-ccw" class="feather-rotate-ccw"></i></a>
                 </li>
             </ul>
             <div class="page-btn import">
-                <a href="#" class="btn btn-added color" @click="handleCreate"><i data-feather="plus-circle" class="me-2"></i>Tambah
+                <a href="#" class="btn btn-added color" @click="handleCreate"><i data-feather="plus-circle"
+                        class="me-2"></i>Tambah
                     Jabatan</a>
             </div>
         </div>
@@ -27,14 +24,16 @@
             <JabatanTable />
         </div>
     </div>
+
+    <JabatanModal />
 </template>
 <script setup>
 import { onMounted } from 'vue';
 import { useJabatan } from '../composables/useJabatan';
 import JabatanTable from '../components/JabatanTable.vue';
+import JabatanModal from '../components/JabatanModal.vue';
 
 const { fetchJabatan, handleRefresh, handleCreate } = useJabatan();
-
 onMounted(() => {
     fetchJabatan();
 });

@@ -1,5 +1,7 @@
 import { ref, computed, reactive } from 'vue';
 import toast from '../../../helper/toast'
+import Swal from 'sweetalert2';
+
 import { jabatanService } from '../services/jabatanService'
 
 const jabatan = ref([]);
@@ -8,7 +10,7 @@ const searchQuery = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 10;
 const isEdit = ref(false);
-const errors = ref({}); // Error ditaruh di shared state agar sinkron dengan modal
+const errors = ref({});
 
 const formJabatan = reactive({
     id: null,
@@ -43,7 +45,7 @@ export function useJabatan() {
         formJabatan.id = null;
         formJabatan.jabatan = '';
         errors.value = {};
-        const modal = new bootstrap.Modal(document.getElementById('modalJabatan'));
+        const modal = new bootstrap.Modal(document.getElementById('jabatanModal'));
         modal.show();
     };
 
@@ -55,7 +57,7 @@ export function useJabatan() {
         try {
             // 📦 Siapkan Payload
             const payload = {
-                nama: formJabatan.jabatan
+                jabatan: formJabatan.jabatan
             };
 
             let response;
@@ -71,7 +73,7 @@ export function useJabatan() {
             toast.success(response.message || 'Data berhasil disimpan');
 
             // Tutup Modal
-            const modalElement = document.getElementById('modalJabatan');
+            const modalElement = document.getElementById('jabatanModal');
             const modalInstance = bootstrap.Modal.getInstance(modalElement);
             if (modalInstance) modalInstance.hide();
 
@@ -102,7 +104,7 @@ export function useJabatan() {
         errors.value = {};
         formJabatan.id = item.id;
         formJabatan.jabatan = item.jabatan;
-        const modal = new bootstrap.Modal(document.getElementById('modalJabatan'));
+        const modal = new bootstrap.Modal(document.getElementById('jabatanModal'));
         modal.show();
     };
 
@@ -112,7 +114,7 @@ export function useJabatan() {
             text: `Data Jabatan "${item.jabatan}" yang dihapus tidak dapat dikembalikan!`,
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
+            cancelButtonColor: '#092139',
             confirmButtonText: 'Ya, hapus!',
             cancelButtonText: 'Batal',
             reverseButtons: true // Opsional: menukar posisi tombol Batal & Hapus
@@ -191,6 +193,7 @@ export function useJabatan() {
         handleRefresh,
         totalPages,
         displayedPages,
+        searchQuery,
         filteredJabatan: computed(() => {
             const query = searchQuery.value.toLowerCase();
             return jabatan.value.filter(item => (item.jabatan || '').toLowerCase().includes(query));

@@ -24,5 +24,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-     Route::get('jabatan/getJabatan', [JabatanController::class, 'getJabatan']);
+    Route::get('jabatan/getJabatan', [JabatanController::class, 'getJabatan']);
+    Route::post('jabatan/storeJabatan', [JabatanController::class, 'storeJabatan']);
+    Route::post('jabatan/updateJabatan', [JabatanController::class, 'updateJabatan']);
+    Route::post('jabatan/deleteJabatan', [JabatanController::class, 'deleteJabatan']);
 });
