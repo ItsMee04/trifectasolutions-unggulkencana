@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Authentication\AuthController;
 use App\Http\Controllers\Master\JabatanController;
+use App\Http\Controllers\Master\PegawaiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,4 +29,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('jabatan/storeJabatan', [JabatanController::class, 'storeJabatan']);
     Route::post('jabatan/updateJabatan', [JabatanController::class, 'updateJabatan']);
     Route::post('jabatan/deleteJabatan', [JabatanController::class, 'deleteJabatan']);
+
+    Route::get('pegawai/getPegawai', [PegawaiController::class, 'getPegawai']);
+    Route::post('pegawai/storePegawai', [PegawaiController::class, 'storePegawai']);
+    Route::post('pegawai/updatePegawai', [PegawaiController::class, 'updatePegawai']);
+    Route::post('pegawai/deletePegawai', [PegawaiController::class, 'deletePegawai']);
+
+
 });

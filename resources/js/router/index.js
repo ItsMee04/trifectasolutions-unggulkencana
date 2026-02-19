@@ -23,6 +23,11 @@ const routes = [
                 path: 'jabatan',
                 name: 'jabatan',
                 component: () => import('@/modules/jabatan/views/JabatanView.vue')
+            },
+            {
+                path: 'pegawai',
+                name: 'pegawai',
+                component: () => import('@/modules/pegawai/views/PegawaiView.vue')
             }
         ]
     }
