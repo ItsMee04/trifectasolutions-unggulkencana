@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\Authentication\AuthController;
+use App\Http\Controllers\Master\HargaController;
 use App\Http\Controllers\Master\JabatanController;
+use App\Http\Controllers\Master\JenisKaratController;
+use App\Http\Controllers\Master\KaratController;
 use App\Http\Controllers\Master\KondisiController;
 use App\Http\Controllers\Master\PegawaiController;
 use App\Http\Controllers\Master\RoleController;
@@ -50,4 +53,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('kondisi/storeKondisi', [KondisiController::class, 'storeKondisi']);
     Route::post('kondisi/updateKondisi', [KondisiController::class, 'updateKondisi']);
     Route::post('kondisi/deleteKondisi', [KondisiController::class, 'deleteKondisi']);
+
+    Route::get('karat/getKarat', [KaratController::class, 'getKarat']);
+    Route::post('karat/storeKarat', [KaratController::class, 'storeKarat']);
+    Route::post('karat/updateKarat', [KaratController::class, 'updateKarat']);
+    Route::post('karat/deleteKarat', [KaratController::class, 'deleteKarat']);
+
+    Route::get('jeniskarat/getJenisKarat', [JenisKaratController::class, 'getJenisKarat']);
+    Route::post('jeniskarat/storeJenisKarat', [JenisKaratController::class, 'storeJenisKarat']);
+    Route::post('jeniskarat/updateJenisKarat', [JenisKaratController::class, 'updateJenisKarat']);
+    Route::post('jeniskarat/deleteJenisKarat', [JenisKaratController::class, 'deleteJenisKarat']);
+
+    Route::get('harga/getHarga', [HargaController::class, 'getHarga']);
+    Route::post('harga/storeHarga', [HargaController::class, 'storeHarga']);
+    Route::post('harga/updateHarga', [HargaController::class, 'updateHarga']);
+    Route::post('harga/deleteHarga', [HargaController::class, 'deleteHarga']);
 });

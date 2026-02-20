@@ -2,9 +2,9 @@ import { ref, computed, reactive } from 'vue';
 import toast from '../../../helper/toast';
 import Swal from 'sweetalert2';
 
-import { kondisiService } from '../services/kondisiService';
+import { karatService } from '../services/karatService';
 
-const kondisi = ref([]);
+const karat = ref([]);
 const isLoading = ref(false);
 const searchQuery = ref('');
 const currentPage = ref(1);
@@ -12,20 +12,20 @@ const itemsPerPage = 10;
 const isEdit = ref(false);
 const errors = ref({});
 
-const formKondisi = reactive({
+const formKarat = reactive({
     id: null,
-    kondisi: ''
+    karat: ''
 });
 
-export function useKondisi() {
+export function useKarat() {
 
-    const fetchKondisi = async () => {
+    const fetchKarat = async () => {
         isLoading.value = true;
         try {
-            const response = await kondisiService.getKondisi();
-            kondisi.value = Array.isArray(response) ? response : (response.data || []);
+            const response = await karatService.getKarat();
+            karat.value = Array.isArray(response) ? response : (response.data || []);
         } catch (error) {
-            kondisi.value = [];
+            karat.value = [];
         } finally {
             isLoading.value = false;
         }
@@ -34,60 +34,68 @@ export function useKondisi() {
     // --- LOGIKA VALIDASI ---
     const validateForm = () => {
         errors.value = {}; // Reset error
-        if (!formKondisi.kondisi || formKondisi.kondisi.trim() === '') {
-            errors.value.kondisi = 'Kondisi tidak boleh kosong.';
+
+        // Validasi Karat
+        if (!formKarat.karat || String(formKarat.karat).trim() === '') {
+            errors.value.karat = 'Karat tidak boleh kosong.';
+        } else if (isNaN(formKarat.karat)) {
+            errors.value.karat = 'Karat harus berupa angka.';
+        } else if (Number(formKarat.karat) <= 0) {
+            // Opsional: Validasi jika angka tidak boleh nol atau negatif
+            errors.value.karat = 'Karat harus lebih besar dari 0.';
         }
+
         return Object.keys(errors.value).length === 0;
     };
 
     const handleCreate = () => {
         isEdit.value = false;
-        formKondisi.id = null;
-        formKondisi.kondisi = '';
+        formKarat.id = null;
+        formKarat.karat = '';
         errors.value = {};
-        const modal = new bootstrap.Modal(document.getElementById('kondisiModal'));
+        const modal = new bootstrap.Modal(document.getElementById('karatModal'));
         modal.show();
     };
 
     const handleEdit = (item) => {
         isEdit.value = true;
         errors.value = {};
-        formKondisi.id = item.id;
-        formKondisi.kondisi = item.kondisi;
-        const modal = new bootstrap.Modal(document.getElementById('kondisiModal'));
+        formKarat.id = item.id;
+        formKarat.karat = item.karat;
+        const modal = new bootstrap.Modal(document.getElementById('karatModal'));
         modal.show();
     };
 
     // --- LOGIKA SUBMIT (STORE & UPDATE) ---
-    const submitKondisi = async () => {
+    const submitKarat = async () => {
         if (!validateForm()) return false;
 
         isLoading.value = true;
         try {
             // 📦 Siapkan Payload
             const payload = {
-                kondisi: formKondisi.kondisi
+                karat: formKarat.karat
             };
 
             let response;
             if (isEdit.value) {
                 // Mode Edit: Kirim ID dan Payload
-                payload.id = formKondisi.id;
-                response = await kondisiService.updateKondisi(payload);
+                payload.id = formKarat.id;
+                response = await karatService.updateKarat(payload);
             } else {
                 // Mode Tambah: Kirim Payload saja
-                response = await kondisiService.storeKondisi(payload);
+                response = await karatService.storeKarat(payload);
             }
 
             toast.success(response.message || 'Data berhasil disimpan');
 
             // Tutup Modal
-            const modalElement = document.getElementById('kondisiModal');
+            const modalElement = document.getElementById('karatModal');
             const modalInstance = bootstrap.Modal.getInstance(modalElement);
             if (modalInstance) modalInstance.hide();
 
             // Refresh tabel tanpa reload halaman [cite: 2025-10-25]
-            await fetchKondisi();
+            await fetchKarat();
 
             return true;
         } catch (error) {
@@ -111,7 +119,7 @@ export function useKondisi() {
     const handleDelete = async (item) => {
         const result = await Swal.fire({
             title: 'Apakah Anda yakin?',
-            text: `Data Kondisi "${item.kondisi}" yang dihapus tidak dapat dikembalikan!`,
+            text: `Data Karat "${item.karat}" yang dihapus tidak dapat dikembalikan!`,
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#092139',
@@ -128,15 +136,15 @@ export function useKondisi() {
                     id: item.id,
                 };
                 // Mengirim payload id sesuai kebutuhan service Anda
-                await kondisiService.deleteKondisi(payload);
+                await karatService.deleteKarat(payload);
 
-                toast.success('Kondisi berhasil dihapus.');
+                toast.success('Karat berhasil dihapus.');
 
-                // Memanggil fetchKondisi agar tabel terupdate otomatis tanpa reload
-                await fetchKondisi();
+                // Memanggil fetchKarat agar tabel terupdate otomatis tanpa reload
+                await fetchKarat();
             } catch (error) {
-                console.error('Gagal menghapus data Kondisi:', error);
-                toast.error('Gagal menghapus data Kondisi.');
+                console.error('Gagal menghapus data Karat:', error);
+                toast.error('Gagal menghapus data Karat.');
             } finally {
                 isLoading.value = false;
             }
@@ -144,14 +152,16 @@ export function useKondisi() {
     };
 
     const handleRefresh = async () => {
-        await fetchKondisi();
+        await fetchKarat();
     }
 
     const totalPages = computed(() => {
-        const query = searchQuery.value.toLowerCase(); // Ambil string pencarian
-        const filteredCount = kondisi.value.filter(item =>
-            (item.kondisi || '').toLowerCase().includes(query)
-        ).length;
+        const query = String(searchQuery.value || '').toLowerCase();
+        const filteredCount = (karat.value || []).filter(item => {
+            // Konversi item.karat ke string sebelum toLowerCase
+            const val = String(item.karat ?? '').toLowerCase();
+            return val.includes(query);
+        }).length;
 
         return Math.ceil(filteredCount / itemsPerPage) || 1;
     });
@@ -177,7 +187,7 @@ export function useKondisi() {
     });
 
     return {
-        kondisi,
+        karat,
         isLoading,
         searchQuery,
         currentPage,
@@ -186,21 +196,28 @@ export function useKondisi() {
         displayedPages,
         isEdit,
         errors,
-        formKondisi,
-        fetchKondisi,
+        formKarat,
+        fetchKarat,
         handleCreate,
         handleEdit,
         handleDelete,
         handleRefresh,
-        submitKondisi,
-        filteredKondisi: computed(() => {
-            const query = searchQuery.value.toLowerCase();
-            return kondisi.value.filter(item => (item.kondisi || '').toLowerCase().includes(query));
+        submitKarat,
+        filteredKarat: computed(() => {
+            const query = String(searchQuery.value || '').toLowerCase();
+            return (karat.value || []).filter(item =>
+                String(item.karat ?? '').toLowerCase().includes(query)
+            );
         }),
-        paginatedKondisi: computed(() => {
+        paginatedKarat: computed(() => {
             const start = (currentPage.value - 1) * itemsPerPage;
-            return (kondisi.value.filter(item => (item.kondisi || '').toLowerCase().includes(searchQuery.value.toLowerCase())))
-                .slice(start, start + itemsPerPage);
+            const query = String(searchQuery.value || '').toLowerCase();
+
+            const filtered = (karat.value || []).filter(item =>
+                String(item.karat ?? '').toLowerCase().includes(query)
+            );
+
+            return filtered.slice(start, start + itemsPerPage);
         })
     }
 }

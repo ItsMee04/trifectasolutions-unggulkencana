@@ -44,6 +44,21 @@ const routes = [
                 name: 'kondisi',
                 component: () => import('@/modules/kondisi/views/KondisiView.vue')
             },
+            {
+                path: 'karat',
+                name: 'karat',
+                component: () => import('@/modules/karat/views/KaratView.vue')
+            },
+            {
+                path: 'jeniskarat',
+                name: 'jeniskarat',
+                component: () => import('@/modules/jeniskarat/views/JenisKaratView.vue')
+            },
+            {
+                path: 'harga',
+                name: 'harga',
+                component: () => import('@/modules/harga/views/HargaView.vue')
+            },
         ]
     }
 ];
