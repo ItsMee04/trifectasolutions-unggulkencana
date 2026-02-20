@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class JenisKarat extends Model
 {
     use HasFactory;
-    use HasFactory;
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected $table = 'jeniskarat';
     protected $fillable = ['karat_id', 'jenis', 'status'];

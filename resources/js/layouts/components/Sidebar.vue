@@ -106,7 +106,7 @@ const menuGroups = {
                     { name: 'Jabatan', path: '/jabatan' },
                     { name: 'Pegawai', path: '/pegawai' },
                     { name: 'Role', path: '/role' },
-                    { name: 'User', path: '/user' },
+                    { name: 'User', path: '/users' },
                 ]
             },
             product: {

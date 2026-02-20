@@ -59,6 +59,16 @@ const routes = [
                 name: 'harga',
                 component: () => import('@/modules/harga/views/HargaView.vue')
             },
+            {
+                path: 'diskon',
+                name: 'diskon',
+                component: () => import('@/modules/diskon/views/DiskonView.vue')
+            },
+            {
+                path: 'jenisproduk',
+                name: 'jenisproduk',
+                component: () => import('@/modules/jenisproduk/views/JenisProdukView.vue')
+            },
         ]
     }
 ];

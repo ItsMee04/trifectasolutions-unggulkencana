@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Authentication\AuthController;
+use App\Http\Controllers\Master\DiskonController;
 use App\Http\Controllers\Master\HargaController;
 use App\Http\Controllers\Master\JabatanController;
 use App\Http\Controllers\Master\JenisKaratController;
+use App\Http\Controllers\Master\JenisProdukController;
 use App\Http\Controllers\Master\KaratController;
 use App\Http\Controllers\Master\KondisiController;
 use App\Http\Controllers\Master\PegawaiController;
@@ -68,4 +70,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('harga/storeHarga', [HargaController::class, 'storeHarga']);
     Route::post('harga/updateHarga', [HargaController::class, 'updateHarga']);
     Route::post('harga/deleteHarga', [HargaController::class, 'deleteHarga']);
+
+    Route::get('diskon/getDiskon', [DiskonController::class, 'getDiskon']);
+    Route::post('diskon/storeDiskon', [DiskonController::class, 'storeDiskon']);
+    Route::post('diskon/updateDiskon', [DiskonController::class, 'updateDiskon']);
+    Route::post('diskon/deleteDiskon', [DiskonController::class, 'deleteDiskon']);
+
+    Route::get('jenisproduk/getJenisProduk', [JenisProdukController::class, 'getJenisProduk']);
+    Route::post('jenisproduk/storeJenisProduk', [JenisProdukController::class, 'storeJenisProduk']);
+    Route::post('jenisproduk/updateJenisProduk', [JenisProdukController::class, 'updateJenisProduk']);
+    Route::post('jenisproduk/deleteJenisProduk', [JenisProdukController::class, 'deleteJenisProduk']);
 });
