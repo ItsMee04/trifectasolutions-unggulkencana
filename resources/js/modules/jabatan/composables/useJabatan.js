@@ -193,7 +193,6 @@ export function useJabatan() {
         handleRefresh,
         totalPages,
         displayedPages,
-        searchQuery,
         filteredJabatan: computed(() => {
             const query = searchQuery.value.toLowerCase();
             return jabatan.value.filter(item => (item.jabatan || '').toLowerCase().includes(query));

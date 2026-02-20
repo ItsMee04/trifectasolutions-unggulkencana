@@ -31,8 +31,8 @@ class UserController extends Controller
     public function updateUser(Request $request)
     {
         $request->validate([
-            'password' => 'nullable|string|min:6',
-            'role_id' => 'nullable|exists:role,id',
+            'password'  => 'nullable|string|min:6',
+            'role'      => 'nullable|exists:role,id',
         ]);
 
         $user = User::find($request->id);
@@ -73,7 +73,7 @@ class UserController extends Controller
         $user->update([
             'email' => $request->email ?? $user->email,
             'password' => !empty($request->password) ? Hash::make($request->password) : $user->password,
-            'role_id' => $request->role_id ?? $user->role_id,
+            'role_id' => $request->role ?? $user->role_id,
         ]);
 
         return response()->json([

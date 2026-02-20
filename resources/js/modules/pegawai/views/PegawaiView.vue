@@ -4,7 +4,7 @@
             <div class="add-item d-flex">
                 <div class="page-title">
                     <h4>Halaman Pegawai</h4>
-                    <h6>Kelola pegawai Anda</h6>
+                    <h6>Kelola Pegawai Anda</h6>
                 </div>
             </div>
             <ul class="table-top-head">

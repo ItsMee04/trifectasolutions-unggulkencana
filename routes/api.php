@@ -3,6 +3,8 @@
 use App\Http\Controllers\Authentication\AuthController;
 use App\Http\Controllers\Master\JabatanController;
 use App\Http\Controllers\Master\PegawaiController;
+use App\Http\Controllers\Master\RoleController;
+use App\Http\Controllers\Master\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -35,5 +37,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('pegawai/updatePegawai', [PegawaiController::class, 'updatePegawai']);
     Route::post('pegawai/deletePegawai', [PegawaiController::class, 'deletePegawai']);
 
+    Route::get('role/getRole', [RoleController::class, 'getRole']);
+    Route::post('role/storeRole', [RoleController::class, 'storeRole']);
+    Route::post('role/updateRole', [RoleController::class, 'updateRole']);
+    Route::post('role/deleteRole', [RoleController::class, 'deleteRole']);
 
+    Route::get('users/getUsers', [UserController::class, 'getUser']);
+    Route::post('users/updateUsers', [UserController::class, 'updateUser']);
 });

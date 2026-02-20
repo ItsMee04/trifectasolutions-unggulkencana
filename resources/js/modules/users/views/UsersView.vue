@@ -3,8 +3,8 @@
         <div class="page-header">
             <div class="add-item d-flex">
                 <div class="page-title">
-                    <h4>Halaman Role</h4>
-                    <h6>Kelola Role Anda</h6>
+                    <h4>Halaman Users Account</h4>
+                    <h6>Kelola Users Anda</h6>
                 </div>
             </div>
             <ul class="table-top-head">
@@ -14,28 +14,23 @@
                     </a>
                 </li>
             </ul>
-            <div class="page-btn import">
-                <a href="#" class="btn btn-added color" @click="handleCreate">
-                    <i data-feather="plus-circle" class="me-2"></i>Tambah Role
-                </a>
-            </div>
         </div>
 
         <div class="row">
-            <RoleTable />
+            <UsersTable />
         </div>
     </div>
 
-    <RoleModal />
+    <UsersModal />
 </template>
 <script setup>
 import { onMounted } from 'vue';
-import { useRole } from '../composables/useRole';
-import RoleTable from '../components/RoleTable.vue';
-import RoleModal from '../components/RoleModal.vue';
+import { useUsers } from '../composables/useUsers';
+import UsersTable from '../components/UsersTable.vue';
+import UsersModal from '../components/UsersModal.vue';
 
-const { fetchRole, handleRefresh, handleCreate } = useRole();
+const { fetchUsers, handleRefresh } = useUsers();
 onMounted(() => {
-    fetchRole();
+    fetchUsers();
 });
 </script>

@@ -55,48 +55,6 @@ const { initFeather } = useFeather();
 // State logic
 const openMenuId = ref(null); // Menu mana yang sedang terbuka (accordion)
 
-// CONFIG MENU: Anda cukup edit di sini untuk menambah menu baru
-// const menuGroups = {
-//     main: {
-//         header: 'Main',
-//         menus: {
-//             dashboard: {
-//                 label: 'Dashboard',
-//                 icon: 'grid',
-//                 submenus: [
-//                     { name: 'Admin Dashboard', path: '/dashboard' },
-//                     { name: 'Sales Dashboard', path: '/sales-dashboard' },
-//                 ]
-//             },
-//             application: {
-//                 label: 'Application',
-//                 icon: 'smartphone',
-//                 submenus: [
-//                     { name: 'Chat', path: '/chat' },
-//                     { name: 'Calendar', path: '/calendar' },
-//                     { name: 'Email', path: '/email' },
-//                 ]
-//             }
-//         }
-//     },
-//     inventory: {
-//         header: 'Inventory',
-//         menus: {
-//             products: { label: 'Products', icon: 'box', path: '/product-list' },
-//             add_product: { label: 'Create Product', icon: 'plus-square', path: '/add-product' },
-//             category: { label: 'Category', icon: 'codepen', path: '/category-list' },
-//             brands: { label: 'Brands', icon: 'tag', path: '/brand-list' },
-//         }
-//     },
-//     stock: {
-//         header: 'Stock',
-//         menus: {
-//             manage_stock: { label: 'Manage Stock', icon: 'package', path: '/manage-stocks' },
-//             adjustment: { label: 'Stock Adjustment', icon: 'clipboard', path: '/stock-adjustment' },
-//         }
-//     }
-// };
-
 const menuGroups = {
     main: {
         header: 'Main',
@@ -114,7 +72,7 @@ const menuGroups = {
                     { name: 'Jabatan', path: '/jabatan' },
                     { name: 'Pegawai', path: '/pegawai' },
                     { name: 'Role', path: '/role' },
-                    { name: 'User', path: '/user' },
+                    { name: 'User', path: '/users' },
                 ]
             },
             product: {
