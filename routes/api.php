@@ -9,6 +9,7 @@ use App\Http\Controllers\Master\JenisProdukController;
 use App\Http\Controllers\Master\KaratController;
 use App\Http\Controllers\Master\KondisiController;
 use App\Http\Controllers\Master\PegawaiController;
+use App\Http\Controllers\Master\ProdukController;
 use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\UserController;
 use Illuminate\Support\Facades\Route;
@@ -80,4 +81,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('jenisproduk/storeJenisProduk', [JenisProdukController::class, 'storeJenisProduk']);
     Route::post('jenisproduk/updateJenisProduk', [JenisProdukController::class, 'updateJenisProduk']);
     Route::post('jenisproduk/deleteJenisProduk', [JenisProdukController::class, 'deleteJenisProduk']);
+
+    Route::get('produk/getProduk', [ProdukController::class, 'getProduk']);
+    Route::post('produk/storeProduk', [ProdukController::class, 'storeProduk']);
+    Route::post('produk/updateProduk', [ProdukController::class, 'updateProduk']);
+    Route::post('produk/deleteProduk', [ProdukController::class, 'deleteProduk']);
 });

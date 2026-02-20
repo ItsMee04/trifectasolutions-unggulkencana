@@ -69,6 +69,11 @@ const routes = [
                 name: 'jenisproduk',
                 component: () => import('@/modules/jenisproduk/views/JenisProdukView.vue')
             },
+            {
+                path: 'produk',
+                name: 'produk',
+                component: () => import('@/modules/produk/views/ProdukView.vue')
+            },
         ]
     }
 ];
