@@ -2,14 +2,14 @@
     <div class="col-xl-12">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <div class="card-title mb-0"><b>DAFTAR ROLE</b></div>
+                <div class="card-title mb-0"><b>DAFTAR KONDISI</b></div>
 
                 <div class="d-flex align-items-center">
                     <div class="input-group input-group-sm" style="width: 250px;">
                         <span class="input-group-text bg-transparent border-end-0">
                             <i data-feather="search" style="width: 14px; height: 14px;"></i>
                         </span>
-                        <input type="text" class="form-control border-start-0 ps-0" placeholder="Cari Role..."
+                        <input type="text" class="form-control border-start-0 ps-0" placeholder="Cari Kondisi..."
                             v-model="searchQuery" />
                     </div>
                 </div>
@@ -20,7 +20,7 @@
                         <thead>
                             <tr>
                                 <th scope="col">NO.</th>
-                                <th scope="col">ROLE</th>
+                                <th scope="col">KONDISI</th>
                                 <th scope="col">STATUS</th>
                                 <th scope="col" class="text-center">ACTIONS</th>
                             </tr>
@@ -33,16 +33,16 @@
                                     Memuat data...
                                 </td>
                             </tr>
-                            <tr v-else-if="paginatedRole.length === 0">
+                            <tr v-else-if="paginatedKondisi.length === 0">
                                 <td colspan="4" class="text-center">Tidak ada data.</td>
                             </tr>
-                            <tr v-else v-for="(item, index) in paginatedRole" :key="item.id">
+                            <tr v-else v-for="(item, index) in paginatedKondisi" :key="item.id">
                                 <td scope="row">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div>
                                             <div class="lh-1">
-                                                <span>{{ item.role }}</span>
+                                                <span>{{ item.kondisi }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -70,11 +70,11 @@
                     </table>
                 </div>
 
-                <div v-if="filteredRole.length > 0" class="d-flex justify-content-between align-items-center p-3">
+                <div v-if="filteredKondisi.length > 0" class="d-flex justify-content-between align-items-center p-3">
                     <div class="text-muted small">
                         Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to
-                        {{ Math.min(currentPage * itemsPerPage, filteredRole.length) }} of
-                        {{ filteredRole.length }} entries
+                        {{ Math.min(currentPage * itemsPerPage, filteredKondisi.length) }} of
+                        {{ filteredKondisi.length }} entries
                     </div>
 
                     <ul class="pagination mb-0">
@@ -113,11 +113,11 @@
 <script setup>
 import { onMounted, watch } from 'vue';
 import { useFeather } from '../../../helper/feather';
-import { useRole } from '../composables/useRole';
+import { useKondisi } from '../composables/useKondisi';
 
 const {
-    filteredRole,
-    paginatedRole,
+    filteredKondisi,
+    paginatedKondisi,
     currentPage,
     itemsPerPage,
     isLoading,
@@ -126,12 +126,12 @@ const {
     totalPages,
     handleEdit,
     handleDelete
-} = useRole();
+} = useKondisi();
 
 const { initFeather } = useFeather();
 
 // SOLUSI: Pantau perubahan data agar feather.replace() dijalankan ulang
-watch(paginatedRole, () => {
+watch(paginatedKondisi, () => {
     initFeather();
 }, { deep: true });
 

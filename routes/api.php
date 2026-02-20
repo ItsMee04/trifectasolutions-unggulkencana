@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Authentication\AuthController;
 use App\Http\Controllers\Master\JabatanController;
+use App\Http\Controllers\Master\KondisiController;
 use App\Http\Controllers\Master\PegawaiController;
 use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\UserController;
@@ -44,4 +45,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('users/getUsers', [UserController::class, 'getUser']);
     Route::post('users/updateUsers', [UserController::class, 'updateUser']);
+
+    Route::get('kondisi/getKondisi', [KondisiController::class, 'getKondisi']);
+    Route::post('kondisi/storeKondisi', [KondisiController::class, 'storeKondisi']);
+    Route::post('kondisi/updateKondisi', [KondisiController::class, 'updateKondisi']);
+    Route::post('kondisi/deleteKondisi', [KondisiController::class, 'deleteKondisi']);
 });

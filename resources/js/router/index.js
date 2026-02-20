@@ -38,7 +38,12 @@ const routes = [
                 path: 'users',
                 name: 'users',
                 component: () => import('@/modules/users/views/UsersView.vue')
-            }
+            },
+            {
+                path: 'kondisi',
+                name: 'kondisi',
+                component: () => import('@/modules/kondisi/views/KondisiView.vue')
+            },
         ]
     }
 ];
