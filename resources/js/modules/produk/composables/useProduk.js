@@ -323,7 +323,7 @@ export function useProduk() {
                 };
                 await produkService.deleteProduk(payload);
                 toast.success('Data Produk berhasil dihapus.');
-                fetchPegawai();
+                fetchProduk();
             } catch (error) {
                 console.log('Gagal menghapus data Produk:', error);
                 toast.error(error.response?.message || 'Gagal menghapus data.');

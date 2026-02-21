@@ -74,6 +74,11 @@ const routes = [
                 name: 'produk',
                 component: () => import('@/modules/produk/views/ProdukView.vue')
             },
+            {
+                path: 'nampan',
+                name: 'nampan',
+                component: () => import('@/modules/nampan/views/NampanView.vue')
+            },
         ]
     }
 ];

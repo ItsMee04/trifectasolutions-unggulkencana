@@ -88,6 +88,14 @@ const menuGroups = {
                     { name: 'Produk', path: '/produk' },
                 ]
             },
+            nampan:{
+                label: 'Nampan',
+                icon: 'layers',
+                submenus: [
+                    { name: 'Nampan', path: '/nampan'},
+                    { name: 'Nampan Produk', path: '/nampanproduk'}
+                ]
+            }
         }
     },
     keuangan: {

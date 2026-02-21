@@ -8,6 +8,7 @@ use App\Http\Controllers\Master\JenisKaratController;
 use App\Http\Controllers\Master\JenisProdukController;
 use App\Http\Controllers\Master\KaratController;
 use App\Http\Controllers\Master\KondisiController;
+use App\Http\Controllers\Master\NampanController;
 use App\Http\Controllers\Master\PegawaiController;
 use App\Http\Controllers\Master\ProdukController;
 use App\Http\Controllers\Master\RoleController;
@@ -86,4 +87,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('produk/storeProduk', [ProdukController::class, 'storeProduk']);
     Route::post('produk/updateProduk', [ProdukController::class, 'updateProduk']);
     Route::post('produk/deleteProduk', [ProdukController::class, 'deleteProduk']);
+
+    Route::get('nampan/getNampan', [NampanController::class, 'getNampan']);
+    Route::post('nampan/storeNampan', [NampanController::class, 'storeNampan']);
+    Route::post('nampan/updateNampan', [NampanController::class, 'updateNampan']);
+    Route::post('nampan/deleteNampan', [NampanController::class, 'deleteNampan']);
 });
