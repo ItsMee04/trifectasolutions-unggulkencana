@@ -9,6 +9,7 @@ use App\Http\Controllers\Master\JenisProdukController;
 use App\Http\Controllers\Master\KaratController;
 use App\Http\Controllers\Master\KondisiController;
 use App\Http\Controllers\Master\NampanController;
+use App\Http\Controllers\Master\NampanProdukController;
 use App\Http\Controllers\Master\PegawaiController;
 use App\Http\Controllers\Master\ProdukController;
 use App\Http\Controllers\Master\RoleController;
@@ -92,4 +93,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('nampan/storeNampan', [NampanController::class, 'storeNampan']);
     Route::post('nampan/updateNampan', [NampanController::class, 'updateNampan']);
     Route::post('nampan/deleteNampan', [NampanController::class, 'deleteNampan']);
+
+    Route::post('nampanproduk/getNampanProdukByNampan', [NampanProdukController::class, 'getNampanProdukByNampan']);
 });

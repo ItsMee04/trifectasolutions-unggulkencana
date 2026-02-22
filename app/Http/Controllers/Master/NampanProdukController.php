@@ -10,9 +10,9 @@ class NampanProdukController extends Controller
 {
     public function getNampanProduk()
     {
-        $data = NampanProduk::with(['nampan','produk','users'])->where('status', 1)->get();
+        $data = NampanProduk::with(['nampan', 'produk', 'users'])->where('status', 1)->get();
 
-        if($data->isEmpty()) {
+        if ($data->isEmpty()) {
             return response()->json([
                 'status'    => false,
                 'message'   => 'Data nampan produk tidak ditemukan',
@@ -27,8 +27,26 @@ class NampanProdukController extends Controller
         ], 200);
     }
 
-    public function storeNampanProduk(Request $request)
+    public function getNampanProdukByNampan(Request $request)
     {
+        $data = NampanProduk::with(['nampan', 'produk', 'users'])
+            ->where('nampan_id', $request->id)
+            ->where('status', 1)->get();
 
+        if ($data->isEmpty()) {
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Data nampan produk tidak ditemukan',
+                'data'      => [],
+            ], 404);
+        }
+
+        return response()->json([
+            'status'    => true,
+            'message'   => 'Data nampan produk berhasil ditemukan',
+            'data'      => $data,
+        ], 200);
     }
+
+    public function storeNampanProduk(Request $request) {}
 }
