@@ -95,6 +95,15 @@ const menuGroups = {
                     { name: 'Nampan', path: '/nampan'},
                     { name: 'Nampan Produk', path: '/nampanproduk'}
                 ]
+            },
+            pelanggan:{
+                label: 'Pelanggan',
+                icon: 'users',
+                submenus: [
+                    { name: 'Pelanggan', path: '/pelanggan'},
+                    { name: 'Suplier', path: '/suplier'},
+                    { name: 'Pesan', path: '/pesan'},
+                ]
             }
         }
     },

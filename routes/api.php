@@ -11,6 +11,7 @@ use App\Http\Controllers\Master\KondisiController;
 use App\Http\Controllers\Master\NampanController;
 use App\Http\Controllers\Master\NampanProdukController;
 use App\Http\Controllers\Master\PegawaiController;
+use App\Http\Controllers\Master\PelangganController;
 use App\Http\Controllers\Master\ProdukController;
 use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\UserController;
@@ -99,4 +100,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('nampanproduk/storeNampanProduk', [NampanProdukController::class, 'storeNampanProduk']);
     Route::post('nampanproduk/pindahNampanProduk', [NampanProdukController::class, 'pindahNampanProduk']);
     Route::post('nampanproduk/deleteNampanProduk', [NampanProdukController::class, 'deleteNampanProduk']);
+
+    Route::get('pelanggan/getPelanggan', [PelangganController::class, 'getPelanggan']);
+    Route::post('pelanggan/storePelanggan', [PelangganController::class, 'storePelanggan']);
+    Route::post('pelanggan/updatePelanggan', [PelangganController::class, 'updatePelanggan']);
+    Route::post('pelanggan/deletePelanggan', [PelangganController::class, 'deletePelanggan']);
 });
