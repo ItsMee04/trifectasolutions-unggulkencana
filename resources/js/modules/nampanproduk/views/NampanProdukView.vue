@@ -9,13 +9,13 @@
       </div>
       <ul class="table-top-head">
         <li>
-          <a data-bs-toggle="tooltip" title="Refresh">
+          <a data-bs-toggle="tooltip" title="Refresh" @click="handleRefresh">
             <i data-feather="rotate-ccw"></i>
           </a>
         </li>
       </ul>
       <div class="page-btn import">
-        <a href="#" class="btn btn-added color">
+        <a href="#" class="btn btn-added color" @click="handleCreate">
           <i data-feather="plus-circle" class="me-2"></i>Tambah Produk
         </a>
       </div>
@@ -31,15 +31,15 @@
       </div>
     </div>
   </div>
+  <NampanProdukModal />
 </template>
 
 <script setup>
 import { computed } from 'vue';
-// import { useNampanProduk } from '../composables/useNampanProduk'
+import { useNampanProduk } from '../composables/useNampanProduk'
 import NampanList from '../components/NampanList.vue';
 import NampanProdukTable from '../components/NampanProdukTable.vue';
+import NampanProdukModal from '../components/NampanProdukModal.vue';
 
-// onMounted(() => {
-//     fetchNampan();
-// });
+const { handleCreate, handleRefresh } = useNampanProduk();
 </script>

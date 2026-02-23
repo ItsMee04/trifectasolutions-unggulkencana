@@ -9,6 +9,14 @@ export const nampanprodukService = {
         const response = await apiClient.post('/nampanproduk/getNampanProdukByNampan', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
+    async getProdukByJenisNampan(payload) {
+        const response = await apiClient.post('/nampanproduk/getProdukByJenisNampan', payload);
+        return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
+    },
+    async storeNampanProduk(payload) {
+        const response = await apiClient.post('/nampanproduk/storeNampanProduk', payload);
+        return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
+    },
     async storeNampanProduk(payload) {
         const response = await apiClient.post('/nampanproduk/storeNampanProduk', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda

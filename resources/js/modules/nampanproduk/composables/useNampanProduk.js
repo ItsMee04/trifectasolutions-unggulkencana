@@ -12,14 +12,19 @@ const selectedNampanId = ref(null);
 const produk = ref([]);
 const isLoading = ref(false);
 const isLoadingNampanProduk = ref(false);
+const isLoadingProduk = ref(false);
 const searchNampanQuery = ref('');
 const searchNampanProdukQuery = ref('')
+const searchProdukQuery = ref('');
 const currentPage = ref(1);
 const currentPageNampanProduk = ref(1);
+const currentPageProduk = ref(1);
 const itemsPerPageNampan = 5;
 const itemsPerPageNampanProduk = 10;
+const itemsPerPageProduk = 10;
 const isEdit = ref(false)
 const errors = ref({});
+const selectedProdukIds = ref([]);
 
 const formNampanProduk = reactive({
     id: null,
@@ -80,6 +85,79 @@ export function useNampanProduk() {
         selectNampan(item.id);
     }
 
+    const handleCreate = async () => {
+        if (!selectedNampanId.value) {
+            toast.error("Silahkan pilih nampan terlebih dahulu!");
+            return false;
+        }
+
+        // 1. Ambil nilai jenisproduk_id dari data nampan yang dipilih
+        // Menggunakan optional chaining (?.) untuk menghindari error jika data belum load
+        const jenisProdukId = selectedNampanData.value?.jenisproduk_id || selectedNampanData.value?.jenisproduk?.id;
+
+        try {
+            const payload = {
+                jenisproduk: jenisProdukId
+            }
+            // Memanggil service berdasarkan ID nampan yang aktif
+            const response = await nampanprodukService.getProdukByJenisNampan(payload);
+            produk.value = Array.isArray(response) ? response : (response.data || []);
+        } catch (error) {
+            produk.value = [];
+        }
+
+        // 3. Jika Anda ingin memasukkan nilai ini secara otomatis ke form modal:
+        // formNampanProduk.jenisproduk_id = jenisProdukId;
+
+        errors.value = {};
+        const modal = new bootstrap.Modal(document.getElementById('nampanprodukModal'));
+        modal.show();
+    };
+
+    const submitProduk = async () => {
+        // 1. Validasi Client-side (Dasar)
+        if (selectedProdukIds.value.length === 0) {
+            toast.error("Silahkan pilih setidaknya satu produk!");
+            return;
+        }
+
+        if (!selectedNampanId.value) {
+            toast.error("Data nampan tidak ditemukan!");
+            return;
+        }
+
+        isLoadingProduk.value = true;
+        try {
+            const payload = {
+                nampan_id: selectedNampanId.value,
+                produk_id: selectedProdukIds.value
+            };
+
+            // Kirim ke Service
+            const response = await nampanprodukService.storeNampanProduk(payload);
+
+            // Jika backend mengirim status success (200)
+            // Kita gunakan response.data.message agar pesan dinamis dari Laravel muncul
+            toast.success(response.data.message || "Produk berhasil diproses");
+
+            // Reset & Refresh
+            selectedProdukIds.value = [];
+            await fetchNampanProduk();
+
+            // Tutup Modal
+            const modalElement = document.getElementById('nampanprodukModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) modalInstance.hide();
+
+        } catch (error) {
+            // Jika backend melempar 422 (duplikat), pesan dari Laravel akan ditangkap disini
+            const errorMessage = error.response?.data?.message || "Terjadi kesalahan saat menyimpan data";
+            toast.error(errorMessage);
+        } finally {
+            isLoadingProduk.value = false;
+        }
+    };
+
     const totalPagesNampan = computed(() => {
         const query = String(searchNampanQuery.value || '').toLowerCase();
         const filteredCount = (nampan.value || []).filter(item => {
@@ -104,6 +182,17 @@ export function useNampanProduk() {
         }).length;
 
         return Math.ceil(filteredCount / itemsPerPageNampanProduk) || 1;
+    });
+
+    const totalPagesProduk = computed(() => {
+        const query = String(searchProdukQuery.value || '').toLowerCase();
+        // PERBAIKAN: Gunakan nampanproduk.value, bukan nampan.value
+        const filteredCount = (produk.value || []).filter(item => {
+            return String(item.nama ?? '').toLowerCase().includes(query) ||
+                String(item.kodeproduk ?? '').toLowerCase().includes(query)
+        }).length;
+
+        return Math.ceil(filteredCount / itemsPerPageProduk) || 1;
     });
 
     const displayedPagesNampan = computed(() => {
@@ -143,6 +232,23 @@ export function useNampanProduk() {
         return pages;
     });
 
+    const displayedPagesProduk = computed(() => {
+        const total = totalPagesProduk.value;
+        const current = currentPageProduk.value; // PERBAIKAN: Gunakan currentPageNampanProduk
+        const maxVisible = 5;
+
+        let start = Math.max(current - Math.floor(maxVisible / 2), 1);
+        let end = start + maxVisible - 1;
+        if (end > total) {
+            end = total;
+            start = Math.max(end - maxVisible + 1, 1);
+        }
+
+        const pages = [];
+        for (let i = start; i <= end; i++) { pages.push(i); }
+        return pages;
+    });
+
     const handleRefresh = async () => {
         await fetchNampan();
     }
@@ -150,22 +256,28 @@ export function useNampanProduk() {
     return {
         nampan,
         nampanproduk,
+        produk,
         selectedNampanId,
         selectNampan,
         selectedNampanData,
         handlePilihNampan,
         currentPage,
         currentPageNampanProduk,
+        currentPageProduk,
         itemsPerPageNampan,
         itemsPerPageNampanProduk,
+        itemsPerPageProduk,
         totalPagesNampan,
         totalPagesNampanProduk,
+        totalPagesProduk,
         displayedPagesNampan,
         displayedPagesNampanProduk,
+        displayedPagesProduk,
         fetchNampan,
         fetchNampanProduk,
         searchNampanQuery,
         searchNampanProdukQuery,
+        searchProdukQuery,
         filteredNampan: computed(() => {
             const query = String(searchNampanQuery.value || '').toLowerCase();
             return (nampan.value || []).filter(item =>
@@ -208,11 +320,35 @@ export function useNampanProduk() {
 
             return filtered.slice(start, start + itemsPerPageNampanProduk);
         }),
+        filteredProduk: computed(() => {
+            const query = String(searchProdukQuery.value || '').toLowerCase();
+            return (produk.value || []).filter(item =>
+
+                String(item.kodeproduk ?? '').toLowerCase().includes(query) ||
+                String(item.nama ?? '').toLowerCase().includes(query)
+            );
+        }),
+        paginatedProduk: computed(() => {
+            // PERBAIKAN: Gunakan currentPageNampanProduk.value
+            const start = (currentPageProduk.value - 1) * itemsPerPageProduk;
+            const query = String(searchProdukQuery.value || '').toLowerCase();
+
+            const filtered = (produk.value || []).filter(item =>
+                String(item.kodeproduk ?? '').toLowerCase().includes(query) ||
+                String(item.nama ?? '').toLowerCase().includes(query)
+            );
+
+            return filtered.slice(start, start + itemsPerPageNampanProduk);
+        }),
         isLoading,
         isLoadingNampanProduk,
+        isLoadingProduk,
         isEdit,
         errors,
         formNampanProduk,
+        handleCreate,
         handleRefresh,
+        selectedProdukIds,
+        submitProduk,
     }
 }

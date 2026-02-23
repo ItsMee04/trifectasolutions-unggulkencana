@@ -95,4 +95,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('nampan/deleteNampan', [NampanController::class, 'deleteNampan']);
 
     Route::post('nampanproduk/getNampanProdukByNampan', [NampanProdukController::class, 'getNampanProdukByNampan']);
+    Route::post('nampanproduk/getProdukByJenisNampan', [NampanProdukController::class, 'getProdukByJenisNampan']);
+    Route::post('nampanproduk/storeNampanProduk', [NampanProdukController::class, 'storeNampanProduk']);
 });
