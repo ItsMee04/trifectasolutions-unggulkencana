@@ -15,7 +15,7 @@
                 </div>
                 <div class="col-md-4 mb-2 mb-md-0">
                     <small class="text-muted d-block">Total Produk</small>
-                    <span class="fw-bold">3 Item</span>
+                    <span class="fw-bold">{{ filteredNampanProduk.length }} Item</span>
                 </div>
                 <div class="col-md-4 text-md-end">
                     <small class="text-muted d-block">Status</small>
@@ -110,10 +110,7 @@
                             <td class="action-table-data justify-content-center">
                                 <div class="edit-delete-action">
                                     <a class="me-2 p-2" @click.prevent="handlePindah(item)">
-                                        <i data-feather="arrow-left" class="feather-eye"></i>
-                                    </a>
-                                    <a class="me-2 p-2" @click.prevent="handleKeluar(item)">
-                                        <i data-feather="arrow-right" class="feather-edit"></i>
+                                        <i data-feather="arrow-left" class="feather-edit"></i>
                                     </a>
                                     <a class="confirm-text p-2" @click.prevent="handleDelete(item)">
                                         <i data-feather="trash-2" class="feather-trash-2"></i>
@@ -171,6 +168,8 @@ import { useNampanProduk } from '../composables/useNampanProduk';
 
 // Ambil state dari composable
 const {
+    handlePindah,
+    handleDelete,
     isLoadingNampanProduk,
     currentPageNampanProduk,
     itemsPerPageNampanProduk,

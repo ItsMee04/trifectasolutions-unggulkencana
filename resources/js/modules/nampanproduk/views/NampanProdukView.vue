@@ -32,6 +32,7 @@
     </div>
   </div>
   <NampanProdukModal />
+<NampanProdukPindah />
 </template>
 
 <script setup>
@@ -40,6 +41,7 @@ import { useNampanProduk } from '../composables/useNampanProduk'
 import NampanList from '../components/NampanList.vue';
 import NampanProdukTable from '../components/NampanProdukTable.vue';
 import NampanProdukModal from '../components/NampanProdukModal.vue';
+import NampanProdukPindah from '../components/NampanProdukPindah.vue';
 
 const { handleCreate, handleRefresh } = useNampanProduk();
 </script>

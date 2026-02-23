@@ -151,4 +151,95 @@ class NampanProdukController extends Controller
             ], 500);
         }
     }
+
+    public function pindahNampanProduk(Request $request)
+    {
+        $request->validate([
+            'nampan'   => 'required|exists:nampan,id',
+            'produk' => 'required|exists:produk,id'
+        ]);
+
+        try {
+            return DB::transaction(function () use ($request) {
+                // 1. Ambil data
+                $recordAktif = NampanProduk::findOrFail($request->produk);
+                $tglSekarang = now()->toDateString();
+
+                // 2. Matikan yang lama
+                $recordAktif->update(['status' => 0]);
+
+                // 3. Catatan History Keluar
+                NampanProduk::create([
+                    'nampan_id' => $recordAktif->nampan_id,
+                    'produk_id' => $recordAktif->produk_id,
+                    'jenis'     => 'KELUAR',
+                    'tanggal'   => $tglSekarang,
+                    'status'    => 0,
+                    'oleh'      => Auth::user()->id
+                ]);
+
+                // 4. Catatan Masuk Baru
+                NampanProduk::create([
+                    'nampan_id' => $request->nampan,
+                    'produk_id' => $recordAktif->produk_id,
+                    'jenis'     => 'MASUK',
+                    'tanggal'   => $tglSekarang,
+                    'status'    => 1,
+                    'oleh'      => Auth::user()->id
+                ]);
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Produk berhasil dipindahkan.'
+                ]);
+            });
+        } catch (\Exception $e) {
+            // Jika ada satu saja yang gagal, semua langkah di atas BATAL (ROLLBACK)
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal pindah: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteNampanProduk(Request $request)
+    {
+        $request->validate([
+            'produk' => 'required|exists:nampanproduk,id'
+        ]);
+
+        try {
+            return DB::transaction(function () use ($request) {
+                // 1. Ambil record yang sedang aktif saat ini
+                $recordAktif = NampanProduk::findOrFail($request->produk);
+                $tglSekarang = now()->toDateString();
+
+                // 2. Update status record aktif menjadi 0 (Tutup buku)
+                $recordAktif->update([
+                    'status' => 0
+                ]);
+
+                // 3. Insert record baru sebagai bukti riwayat KELUAR
+                NampanProduk::create([
+                    'nampan_id' => $recordAktif->nampan_id,
+                    'produk_id' => $recordAktif->produk_id,
+                    'jenis'     => 'KELUAR',
+                    'tanggal'   => $tglSekarang,
+                    'status'    => 0, // Status 0 karena barang sudah tidak ada di nampan
+                    'oleh'      => Auth::user()->id
+                ]);
+
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Produk berhasil dikeluarkan dari nampan (History tersimpan).'
+                ]);
+            });
+        } catch (\Exception $e) {
+            // Jika terjadi error di tengah jalan, database akan ROLLBACK otomatis
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal menghapus produk: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -25,10 +25,12 @@ const itemsPerPageProduk = 10;
 const isEdit = ref(false)
 const errors = ref({});
 const selectedProdukIds = ref([]);
+const targetPindahItem = ref(null);
 
 const formNampanProduk = reactive({
     id: null,
-    produk: ''
+    produk: '',
+    nampantujuan_id: '' // Tambahkan ini
 })
 
 const fetchNampanProduk = async () => {
@@ -155,6 +157,101 @@ export function useNampanProduk() {
             toast.error(errorMessage);
         } finally {
             isLoadingProduk.value = false;
+        }
+    };
+
+    // 1. Filter Nampan: Jenis sama dengan produk, tapi bukan nampan asal
+    const availableNampanTujuan = computed(() => {
+        if (!targetPindahItem.value) return [];
+
+        // Ambil jenisproduk_id dari produk yang ada di baris tersebut
+        const jenisIdTarget = targetPindahItem.value.produk?.jenisproduk_id;
+
+        return nampan.value.filter(n =>
+            n.jenisproduk_id === jenisIdTarget &&
+            n.id !== selectedNampanId.value
+        );
+    });
+
+    const handlePindah = (item) => {
+        isEdit.value = true;
+        errors.value = {};
+
+        targetPindahItem.value = item;
+
+        // Mapping data ke form untuk modal
+        formNampanProduk.id = item.id; // ID relasi nampan_produk
+        formNampanProduk.produk = item.produk?.nama;
+        formNampanProduk.nampantujuan_id = ''; // Reset pilihan
+
+        const modal = new bootstrap.Modal(document.getElementById('nampanprodukpindahModal'));
+        modal.show();
+    };
+
+    // 3. Fungsi Submit Pindah
+    const submitPindah = async () => {
+        if (!formNampanProduk.nampantujuan_id) {
+            toast.error("Silahkan pilih nampan tujuan!");
+            return;
+        }
+
+        isLoadingProduk.value = true;
+        try {
+            const payload = {
+                produk: formNampanProduk.id, // ID nampan_produk
+                nampan: formNampanProduk.nampantujuan_id?.id
+            };
+
+            const response = await nampanprodukService.pindahNampanProduk(payload);
+            toast.success(response.message || "Produk berhasil dipindahkan");
+
+            // Refresh tabel (Produk akan hilang dari nampan asal karena nampan_id berubah)
+            await fetchNampanProduk();
+
+            // Tutup Modal
+            const modalElement = document.getElementById('nampanprodukpindahModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) modalInstance.hide();
+        } catch (error) {
+            const errorMessage = error.response?.message || "Gagal memindahkan produk";
+            toast.error(errorMessage);
+        } finally {
+            isLoadingProduk.value = false;
+        }
+    };
+
+    const handleDelete = async (item) => {
+        const result = await Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: `Data Produk "${item.produk?.nama}" yang dihapus tidak dapat dikembalikan!`,
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#092139',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true // Opsional: menukar posisi tombol Batal & Hapus
+        });
+
+        if (result.isConfirmed) {
+            isLoading.value = true; // Set loading agar UI tetap konsisten [cite: 2025-10-25]
+            try {
+                // 📦 Siapkan Payload
+                const payload = {
+                    produk: item.id,
+                };
+                // Mengirim payload id sesuai kebutuhan service Anda
+                await nampanprodukService.deleteNampanProduk(payload);
+
+                toast.success('Produk berhasil dihapus.');
+
+                // Memanggil fetchKarat agar tabel terupdate otomatis tanpa reload
+                await fetchNampanProduk();
+            } catch (error) {
+                console.error('Gagal menghapus data Produk:', error);
+                toast.error('Gagal menghapus data Produk.');
+            } finally {
+                isLoading.value = false;
+            }
         }
     };
 
@@ -347,6 +444,11 @@ export function useNampanProduk() {
         errors,
         formNampanProduk,
         handleCreate,
+        availableNampanTujuan,
+        submitPindah,
+        targetPindahItem,
+        handlePindah,
+        handleDelete,
         handleRefresh,
         selectedProdukIds,
         submitProduk,

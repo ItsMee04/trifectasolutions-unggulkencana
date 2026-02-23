@@ -51,7 +51,7 @@ class ProdukController extends Controller
             'jeniskarat'    => 'required|exists:jeniskarat,id',
             'lingkar'       => 'nullable|integer',
             'panjang'       => 'nullable|integer',
-            'harga'         => 'required|exists:hargas,id', // Sesuai diskusi, ini harga_id
+            'harga'         => 'required|exists:harga,id', // Sesuai diskusi, ini harga_id
             'keterangan'    => 'nullable|string',
             'image'         => 'image|mimes:jpeg,png,jpg|max:2048',
         ]);
