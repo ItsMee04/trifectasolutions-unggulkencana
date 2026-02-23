@@ -109,8 +109,11 @@
                             </td>
                             <td class="action-table-data justify-content-center">
                                 <div class="edit-delete-action">
-                                    <a class="me-2 p-2" @click.prevent="handleEdit(item)">
-                                        <i data-feather="edit" class="feather-edit"></i>
+                                    <a class="me-2 p-2" @click.prevent="handlePindah(item)">
+                                        <i data-feather="arrow-left" class="feather-eye"></i>
+                                    </a>
+                                    <a class="me-2 p-2" @click.prevent="handleKeluar(item)">
+                                        <i data-feather="arrow-right" class="feather-edit"></i>
                                     </a>
                                     <a class="confirm-text p-2" @click.prevent="handleDelete(item)">
                                         <i data-feather="trash-2" class="feather-trash-2"></i>
