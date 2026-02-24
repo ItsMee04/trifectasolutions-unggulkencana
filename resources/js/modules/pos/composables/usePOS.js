@@ -6,16 +6,16 @@ import { STORAGE_URL } from '../../../helper/base';
 
 import { jenisprodukService } from '../../../modules/jenisproduk/services/jenisprodukService'
 import { nampanprodukService } from '../../nampanproduk/services/nampanprodukService'
-// import { karatService } from '../../../modules/karat/services/karatService'
-// import { jeniskaratService } from '../../../modules/jeniskarat/services/jeniskaratService'
+import { pelangganService } from '../../../modules/pelanggan/services/pelangganService'
+import { diskonService } from '../../../modules/diskon/services/diskonService'
 // import { hargaService } from '../../../modules/harga/services/hargaService'
 
 const jenisprodukList = ref([]);
 const selectedJenisProduk = ref('all');
 const produk = ref([]);
-// const karatList = ref([]);
-// const jeniskaratList = ref([]);
-// const allJenisKarat = ref([]);
+const PelangganList = ref([]);
+const DiskonList = ref([]);
+const selectedDiskon = ref(null);
 const isLoading = ref(false);
 const isLoadingProduk = ref(false);
 const searchProdukQuery = ref('');
@@ -23,22 +23,12 @@ const currentPageProduk = ref(1);
 const itemsPerPageProduk = 8;
 // const isEdit = ref(false);
 const errors = ref({});
-// const currentImagePreview = ref(null);
 
-// const formProduk = reactive({
-//     id: null,
-//     nama: '',
-//     berat: '',
-//     jenisproduk: null,
-//     karat: null,
-//     jeniskarat: null,
-//     lingkar: '',
-//     panjang: '',
-//     harga_id: null,
-//     harga_display: '',
-//     keterangan: '',
-//     image: null,
-// });
+const formPOS = reactive({
+    id: null,
+    pelanggan: null,
+    diskon: null,
+});
 
 export function usePOS() {
 
@@ -83,6 +73,50 @@ export function usePOS() {
             isLoadingProduk.value = false;
         }
     };
+
+    const handlePilihProduk = async (kodeproduk) => {
+        console.log('Produk dipilih:', kodeproduk);
+
+        // Contoh: Cari data detail produk berdasarkan kode
+        const detailProduk = produk.value.find(p => p.kodeproduk === kodeproduk);
+
+        if (detailProduk) {
+            // Lakukan sesuatu, misalnya masukkan ke keranjang/cart
+            toast.success(`Produk ${detailProduk.nama} dipilih`);
+        }
+    };
+
+    const fetchPelanggan = async () => {
+        try {
+            const response = await pelangganService.getPelanggan();
+            // Map data agar formatnya { value: id, label: 'nama' } sesuai standar Multiselect
+            PelangganList.value = response.data.map(PelangganList => ({
+                value: PelangganList.id,
+                label: PelangganList.nama // Sesuaikan field 'role' dengan nama kolom di tabel roles Anda
+            }));
+        } catch (error) {
+            console.error("Gagal memuat Pelanggan:", error);
+        }
+    };
+
+    const fetchDiskon = async () => {
+        try {
+            const response = await diskonService.getDiskon();
+            // Map data agar formatnya { value: id, label: 'nama' } sesuai standar Multiselect
+            DiskonList.value = response.data.map(DiskonList => ({
+                value: DiskonList.id,
+                label: DiskonList.diskon,
+                nilai: DiskonList.nilai
+            }));
+        } catch (error) {
+            console.error("Gagal memuat Diskon:", error);
+        }
+    };
+
+    // Computed ini sekarang membaca ke selectedDiskon, bukan formPOS.diskon
+    const selectedDiskonNilai = computed(() => {
+        return selectedDiskon.value ? selectedDiskon.value.nilai : 0;
+    });
 
     // const fetchKarat = async () => {
     //     try {
@@ -420,22 +454,22 @@ export function usePOS() {
         jenisprodukList,
         selectedJenisProduk,
         produk,
-        // karatList,
-        // jeniskaratList: filteredJenisKaratList,
-        // allJenisKarat,
+        PelangganList,
+        DiskonList,
+        selectedDiskon,
+        selectedDiskonNilai,
         isLoading,
         // searchQuery,
         // currentPage,
         // itemsPerPage,
         // isEdit,
         errors,
-        // formProduk,
+        formPOS,
         // resetForm,
         fetchJenisProduk,
         fetchProduk,
-        // fetchKarat,
-        // fetchJenisKarat,
-        // handleKaratChange,
+        fetchPelanggan,
+        fetchDiskon,
         totalPagesProduk,
         itemsPerPageProduk,
         displayedPagesProduk,
@@ -485,6 +519,7 @@ export function usePOS() {
         //         (item.keterangan || '').toLowerCase().includes(searchQuery.value.toLowerCase())
         //     )).slice(start, start + itemsPerPage);
         // }),
+        handlePilihProduk,
         // handleCreate,
         // handleEdit,
         // submitProduk,

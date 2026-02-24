@@ -42,7 +42,7 @@
                         <div class="row">
                             <div v-for="product in paginatedProduk" :key="product.kodeproduk"
                                 class="col-sm-12 col-md-6 col-lg-3 col-xl-3 mb-3">
-                                <div class="product-info default-cover card">
+                                <div class="product-info default-cover card" @click="handlePilihProduk(product.kodeproduk)">
                                     <a href="javascript:void(0);" class="img-bg">
                                         <img :src="product.image ? `/storage/images/produk/${product.image}?t=${new Date().getTime()}` : BASE_DEFAULT_IMAGE_URL"
                                             :alt="product.nama"
@@ -149,8 +149,8 @@ const {
     totalPagesProduk,
     displayedPagesProduk,
     fetchJenisProduk,
-    fetchProduk
-
+    fetchProduk,
+    handlePilihProduk,
 } = usePOS();
 
 const { initFeather } = useFeather();
