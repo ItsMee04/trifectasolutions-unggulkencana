@@ -39,7 +39,7 @@ class MutasiSaldoController extends Controller
             'jumlah'        => 'required|integer',
         ]);
 
-        $rekening = Saldo::where('id', $request->rekening)->first();
+        $rekening = Saldo::where('id', $request->saldo)->first();
 
         if (!$rekening) {
             return response()->json([
@@ -49,7 +49,7 @@ class MutasiSaldoController extends Controller
         }
 
         $data = MutasiSaldo::create([
-            'saldo_id'      => $request->rekening,
+            'saldo_id'      => $request->saldo,
             'tanggal'       => $request->tanggal,
             'keterangan'    => $request->keterangan,
             'jenis'         => $request->jenis,
@@ -134,7 +134,7 @@ class MutasiSaldoController extends Controller
         ], 200);
     }
 
-    public function deleteDiskon(Request $request)
+    public function deleteMutasiSaldo(Request $request)
     {
         $mutasisaldo = MutasiSaldo::find($request->id);
 
@@ -147,7 +147,7 @@ class MutasiSaldoController extends Controller
         }
 
         // 2. Ambil data rekening terkait
-        $rekening = Saldo::where('id', $mutasisaldo->saldo)->first();
+        $rekening = Saldo::where('id', $mutasisaldo->saldo_id)->first();
 
         if ($rekening) {
             // 3. REVERT: Balikkan saldo karena transaksi dibatalkan

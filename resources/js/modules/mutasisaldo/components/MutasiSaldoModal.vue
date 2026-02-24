@@ -19,10 +19,10 @@
                                 <form @submit.prevent="handleSubmit">
                                     <div class="mb-3">
                                         <label for="rekening" class="form-label">Rekening</label>
-                                        <Multiselect v-model="formMutasiSaldo.rekening" :options="saldoList"
+                                        <Multiselect v-model="formMutasiSaldo.saldo" :options="saldoList"
                                             :searchable="true" label="label" track-by="value"
                                             placeholder="Pilih rekening" id="statusList" />
-                                        <div class="invalid-feedback" v-if="errors.rekening">{{ errors.rekening }}
+                                        <div class="invalid-feedback" v-if="errors.saldo">{{ errors.saldo }}
                                         </div>
                                     </div>
                                     <div class="mb-3">

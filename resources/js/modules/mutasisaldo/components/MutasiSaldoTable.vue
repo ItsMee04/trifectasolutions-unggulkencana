@@ -22,6 +22,7 @@
                                 <th scope="col">NO.</th>
                                 <th scope="col">REKENING</th>
                                 <th scope="col">KETERANGAN</th>
+                                <th scope="col">JENIS</th>
                                 <th scope="col">JUMLAH</th>
                                 <th scope="col">STATUS</th>
                                 <th scope="col" class="text-center">ACTIONS</th>
@@ -29,14 +30,14 @@
                         </thead>
                         <tbody>
                             <tr v-if="isLoading">
-                                <td colspan="6" class="text-center">
+                                <td colspan="7" class="text-center">
                                     <span class="spinner-border spinner-border-sm me-2 text-secondary" role="status"
                                         aria-hidden="true"></span>
                                     Memuat data...
                                 </td>
                             </tr>
                             <tr v-else-if="paginatedMutasiSaldo.length === 0">
-                                <td colspan="6" class="text-center">Tidak ada data.</td>
+                                <td colspan="7" class="text-center">Tidak ada data.</td>
                             </tr>
                             <tr v-else v-for="(item, index) in paginatedMutasiSaldo" :key="item.id">
                                 <td scope="row">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
@@ -57,6 +58,14 @@
                                             </div>
                                         </div>
                                     </div>
+                                </td>
+                                <td>
+                                    <span v-if="item.jenis == 'MASUK'" class="badge bg-success">
+                                        MASUK
+                                    </span>
+                                    <span v-else class="badge bg-danger">
+                                        KELUAR
+                                    </span>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">

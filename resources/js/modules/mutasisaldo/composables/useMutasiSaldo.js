@@ -113,7 +113,7 @@ export function useMutasiSaldo() {
         formMutasiSaldo.tanggal = item.tanggal;
         formMutasiSaldo.keterangan = item.keterangan;
         const currentJenis = jenisList.find(j => j.value === item.jenis);
-        fetchMutasiSaldo.jenis = currentJenis || null;
+        formMutasiSaldo.jenis = currentJenis || null;
         formMutasiSaldo.jumlah = item.jumlah;
         const modal = new bootstrap.Modal(document.getElementById('mutasisaldoModal'));
         modal.show();
