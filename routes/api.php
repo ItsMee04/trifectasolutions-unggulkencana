@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Authentication\AuthController;
+use App\Http\Controllers\Keuangan\MutasiSaldoController;
+use App\Http\Controllers\Keuangan\SaldoController;
 use App\Http\Controllers\Master\DiskonController;
 use App\Http\Controllers\Master\HargaController;
 use App\Http\Controllers\Master\JabatanController;
@@ -12,8 +14,10 @@ use App\Http\Controllers\Master\NampanController;
 use App\Http\Controllers\Master\NampanProdukController;
 use App\Http\Controllers\Master\PegawaiController;
 use App\Http\Controllers\Master\PelangganController;
+use App\Http\Controllers\Master\PesanController;
 use App\Http\Controllers\Master\ProdukController;
 use App\Http\Controllers\Master\RoleController;
+use App\Http\Controllers\Master\SuplierController;
 use App\Http\Controllers\Master\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -105,4 +109,24 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('pelanggan/storePelanggan', [PelangganController::class, 'storePelanggan']);
     Route::post('pelanggan/updatePelanggan', [PelangganController::class, 'updatePelanggan']);
     Route::post('pelanggan/deletePelanggan', [PelangganController::class, 'deletePelanggan']);
+
+    Route::get('suplier/getSuplier', [SuplierController::class, 'getSuplier']);
+    Route::post('suplier/storeSuplier', [SuplierController::class, 'storeSuplier']);
+    Route::post('suplier/updateSuplier', [SuplierController::class, 'updateSuplier']);
+    Route::post('suplier/deleteSuplier', [SuplierController::class, 'deleteSuplier']);
+
+    Route::get('pesan/getPesan', [PesanController::class, 'getPesan']);
+    Route::post('pesan/storePesan', [PesanController::class, 'storePesan']);
+    Route::post('pesan/updatePesan', [PesanController::class, 'updatePesan']);
+    Route::post('pesan/deletePesan', [PesanController::class, 'deletePesan']);
+
+    Route::get('saldo/getSaldo', [SaldoController::class, 'getSaldo']);
+    Route::post('saldo/storeSaldo', [SaldoController::class, 'storeSaldo']);
+    Route::post('saldo/updateSaldo', [SaldoController::class, 'updateSaldo']);
+    Route::post('saldo/deleteSaldo', [SaldoController::class, 'deleteSaldo']);
+
+    Route::get('mutasisaldo/getMutasiSaldo', [MutasiSaldoController::class, 'getMutasiSaldo']);
+    Route::post('mutasisaldo/storeMutasiSaldo', [MutasiSaldoController::class, 'storeMutasiSaldo']);
+    Route::post('mutasisaldo/updateMutasiSaldo', [MutasiSaldoController::class, 'updateMutasiSaldo']);
+    Route::post('mutasisaldo/deleteMutasiSaldo', [MutasiSaldoController::class, 'deleteMutasiSaldo']);
 });

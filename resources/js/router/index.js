@@ -89,6 +89,26 @@ const routes = [
                 name: 'pelanggan',
                 component: () => import('@/modules/pelanggan/views/PelangganView.vue')
             },
+            {
+                path: 'suplier',
+                name: 'suplier',
+                component: () => import('@/modules/suplier/views/SuplierView.vue')
+            },
+            {
+                path: 'pesan',
+                name: 'pesan',
+                component: () => import('@/modules/pesan/views/PesanView.vue')
+            },
+            {
+                path: 'saldo',
+                name: 'saldo',
+                component: () => import('@/modules/saldo/views/SaldoView.vue')
+            },
+            {
+                path: 'mutasisaldo',
+                name: 'mutasisaldo',
+                component: () => import('@/modules/mutasisaldo/views/MutasiSaldoView.vue')
+            },
         ]
     }
 ];

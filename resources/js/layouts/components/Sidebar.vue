@@ -110,7 +110,8 @@ const menuGroups = {
     keuangan: {
         header: 'Keuangan',
         menus: {
-            dashboard: { label: 'Dashboard', icon: 'grid', path: '/dashboard' },
+            saldo: { label: 'Saldo', icon: 'info', path: '/saldo' },
+            mutasisaldo: { label: 'Mutasi Saldo', icon: 'info', path: '/mutasisaldo' },
         }
     },
     transaksi: {
