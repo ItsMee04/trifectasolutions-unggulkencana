@@ -24,5 +24,9 @@ export const nampanprodukService = {
     async deleteNampanProduk(payload) {
         const response = await apiClient.post('/nampanproduk/deleteNampanProduk', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
+    },
+    async getProdukInNampanByJenis(payload) {
+        const response = await apiClient.post('/nampanproduk/getProdukInNampanByJenis', payload);
+        return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     }
 }

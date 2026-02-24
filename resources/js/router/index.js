@@ -109,6 +109,11 @@ const routes = [
                 name: 'mutasisaldo',
                 component: () => import('@/modules/mutasisaldo/views/MutasiSaldoView.vue')
             },
+            {
+                path: 'pos',
+                name: 'pos',
+                component: () => import('@/modules/pos/views/PointOfSaleView.vue')
+            },
         ]
     }
 ];

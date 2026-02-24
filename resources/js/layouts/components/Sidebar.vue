@@ -117,6 +117,7 @@ const menuGroups = {
     transaksi: {
         header: 'Transaksi',
         menus: {
+            pos: { label: 'POS', icon: 'hard-drive', path: '/pos' },
             usermanagement: {
                 label: 'User Management',
                 icon: 'users',

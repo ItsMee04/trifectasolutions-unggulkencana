@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
+use App\Models\Master\Nampan;
 use App\Models\Master\NampanProduk;
 use App\Models\Master\Produk;
 use Carbon\Carbon;
@@ -241,5 +242,51 @@ class NampanProdukController extends Controller
                 'message' => 'Gagal menghapus produk: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getProdukInNampanByJenis(Request $request)
+    {
+        $jenisId = $request->get('jenis');
+
+        // Query utama dari NampanProduk
+        $query = NampanProduk::with([
+            'nampan',
+            'produk.karat',
+            'produk.jeniskarat',
+            'produk.harga'
+        ])->where('status', 1);
+
+        // Filter berdasarkan Jenis Produk (Anting, Cincin, dll) jika bukan 'all'
+        if ($jenisId && $jenisId !== 'all') {
+            $query->whereHas('nampan', function ($q) use ($jenisId) {
+                $q->where('jenisproduk_id', $jenisId);
+            });
+        }
+
+        $results = $query->get();
+
+        // Transformasi data agar sesuai dengan SELECT query Anda
+        $data = $results->map(function ($item) {
+            $produk = $item->produk;
+            $nampan = $item->nampan;
+
+            return [
+                'nampan'      => $nampan->nampan ?? '-',
+                'kodeproduk'  => $produk->kodeproduk ?? '-',
+                'nama'        => $produk->nama ?? '-',
+                'berat'       => $produk->berat ?? 0,
+                'karat'       => $produk->karat->karat ?? '-',
+                'jeniskarat'  => $produk->jeniskarat->jenis ?? '-',
+                'lingkar'     => $produk->lingkar ?? '-',
+                'panjang'     => $produk->panjang ?? '-',
+                'harga'       => $produk->harga->harga ?? 0,
+                'image'       => $produk->image ?? 'default.png',
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data'   => $data
+        ]);
     }
 }
