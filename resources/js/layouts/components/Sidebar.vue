@@ -118,6 +118,7 @@ const menuGroups = {
         header: 'Transaksi',
         menus: {
             pos: { label: 'POS', icon: 'hard-drive', path: '/pos' },
+            offtake: { label: 'Offtake', icon: 'pocket', path: '/offtake' },
             usermanagement: {
                 label: 'User Management',
                 icon: 'users',

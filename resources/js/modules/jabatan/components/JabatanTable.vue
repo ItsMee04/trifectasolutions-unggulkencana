@@ -55,21 +55,6 @@
                                         INACTIVE
                                     </span>
                                 </td>
-                                <!-- <td>
-                                    <div class="hstack gap-2 fs-15 justify-content-center">
-                                        <a href="javascript:void(0);"
-                                            class="btn btn-icon btn-sm btn-soft-info rounded-pill"
-                                            @click.prevent="handleEdit(item)">
-                                            <i data-feather="edit" class="feather-edit"></i>
-                                        </a>
-
-                                        <a href="javascript:void(0);"
-                                            class="btn btn-icon btn-sm btn-soft-danger rounded-pill"
-                                            @click.prevent="handleDelete(item)">
-                                            <i data-feather="trash-2" class="feather-trash-2"></i>
-                                        </a>
-                                    </div>
-                                </td> -->
                                 <td class="action-table-data justify-content-center">
                                     <div class="edit-delete-action">
                                         <a class="me-2 p-2" @click.prevent="handleEdit(item)">

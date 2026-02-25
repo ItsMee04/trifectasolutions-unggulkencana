@@ -15,7 +15,7 @@ class NampanProdukController extends Controller
 {
     public function getNampanProduk()
     {
-        $data = NampanProduk::with(['nampan', 'produk', 'users'])->where('status', 1)->get();
+        $data = NampanProduk::with(['nampan', 'produk', 'produk.karat', 'produk.harga', 'users'])->where('status', 1)->get();
 
         if ($data->isEmpty()) {
             return response()->json([

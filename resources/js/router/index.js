@@ -114,6 +114,11 @@ const routes = [
                 name: 'pos',
                 component: () => import('@/modules/pos/views/PointOfSaleView.vue')
             },
+            {
+                path: 'offtake',
+                name: 'offtake',
+                component: () => import('@/modules/offtake/views/OfftakeView.vue')
+            },
         ]
     }
 ];

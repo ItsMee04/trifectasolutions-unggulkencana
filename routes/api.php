@@ -19,6 +19,7 @@ use App\Http\Controllers\Master\ProdukController;
 use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\SuplierController;
 use App\Http\Controllers\Master\UserController;
+use App\Http\Controllers\Transaksi\OfftakeController;
 use App\Http\Controllers\Transaksi\TransaksiController;
 use Illuminate\Support\Facades\Route;
 
@@ -100,6 +101,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('nampan/updateNampan', [NampanController::class, 'updateNampan']);
     Route::post('nampan/deleteNampan', [NampanController::class, 'deleteNampan']);
 
+    Route::get('nampanproduk/getNampanProduk', [NampanProdukController::class, 'getNampanProduk']);
     Route::post('nampanproduk/getNampanProdukByNampan', [NampanProdukController::class, 'getNampanProdukByNampan']);
     Route::post('nampanproduk/getProdukByJenisNampan', [NampanProdukController::class, 'getProdukByJenisNampan']);
     Route::post('nampanproduk/storeNampanProduk', [NampanProdukController::class, 'storeNampanProduk']);
@@ -139,6 +141,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('transaksi/batalTransaksiDetail', [TransaksiController::class, 'batalTransaksiDetail']);
     Route::post('transaksi/paymentTransaksi', [TransaksiController::class, 'paymentTransaksi']);
     Route::get('/transaksi/{id}/getsignedurlnota', [TransaksiController::class, 'getSignedNotaUrl']);
+
+    Route::get('offtake/getKodeTransaksi', [OfftakeController::class, 'getKodeTransaksi']);
+    Route::post('offtake/storeProdukToOfftakeDetail', [OfftakeController::class, 'storeProdukToOfftakeDetail']);
+    Route::get('offtake/getOfftakeDetail', [OfftakeController::class, 'getOfftakeDetail']);
+    Route::post('offtake/batalOfftakeDetail', [OfftakeController::class, 'batalOfftakeDetail']);
+    Route::post('offtake/paymentOfftake', [OfftakeController::class, 'paymentOfftake']);
 });
 
 Route::get('/transaksi/{kode}/cetaknotatransaksi', [TransaksiController::class, 'PrintNotaTransaksi'])->name('produk.cetak_notatransaksi');

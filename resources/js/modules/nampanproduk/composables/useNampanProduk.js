@@ -435,7 +435,7 @@ export function useNampanProduk() {
                 String(item.nama ?? '').toLowerCase().includes(query)
             );
 
-            return filtered.slice(start, start + itemsPerPageNampanProduk);
+            return filtered.slice(start, start + itemsPerPageProduk);
         }),
         isLoading,
         isLoadingNampanProduk,
