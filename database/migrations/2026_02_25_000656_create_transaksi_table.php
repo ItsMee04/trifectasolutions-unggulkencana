@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('transaksi', function (Blueprint $table) {
             $table->id();
-            $table->string('kode', 100);
-            $table->unsignedBigInteger('pelanggan_id');
-            $table->unsignedBigInteger('diskon_id');
+            $table->string('kode', 100)->unique();
+            $table->unsignedBigInteger('pelanggan_id')->nullable();
+            $table->unsignedBigInteger('diskon_id')->nullable();
             $table->integer('total')->unsigned()->nullable()->default(0);
             $table->string('terbilang', 100)->nullable();
             $table->date('tanggal')->nullable();

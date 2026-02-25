@@ -8,14 +8,16 @@ import { jenisprodukService } from '../../../modules/jenisproduk/services/jenisp
 import { nampanprodukService } from '../../nampanproduk/services/nampanprodukService'
 import { pelangganService } from '../../../modules/pelanggan/services/pelangganService'
 import { diskonService } from '../../../modules/diskon/services/diskonService'
-// import { hargaService } from '../../../modules/harga/services/hargaService'
+import { transaksiService } from '../../../modules/transaksi/services/transaksiService'
 
 const jenisprodukList = ref([]);
 const selectedJenisProduk = ref('all');
 const produk = ref([]);
 const PelangganList = ref([]);
 const DiskonList = ref([]);
+const TransaksiID = ref('');
 const selectedDiskon = ref(null);
+const TransaksiDetail = ref([]);
 const isLoading = ref(false);
 const isLoadingProduk = ref(false);
 const searchProdukQuery = ref('');
@@ -33,19 +35,16 @@ const formPOS = reactive({
 export function usePOS() {
 
     const fetchJenisProduk = async () => {
-        isLoading.value = true; // Sesuai aturan: tampilkan Memuat data...
+        isLoading.value = true;
         try {
             const response = await jenisprodukService.getJenisProduk();
-
-            // Map data dengan tetap mempertahankan property 'jenis'
             const mappedData = response.data.map(item => ({
                 id: item.id,
-                jenis: item.jenis, // Tetap gunakan 'jenis' agar terbaca di {{ cat.jenis }}
-                value: item.id,    // Tetap ada untuk standar Multiselect jika dibutuhkan
-                label: item.jenis  // Tetap ada untuk standar Multiselect jika dibutuhkan
+                jenis: item.jenis,
+                value: item.id,
+                label: item.jenis
             }));
 
-            // Tambahkan pilihan "Semua" di posisi paling awal
             jenisprodukList.value = [
                 { id: 'all', jenis: 'SEMUA', value: 'all', label: 'SEMUA' },
                 ...mappedData
@@ -63,7 +62,6 @@ export function usePOS() {
             const payload = {
                 jenis: jenisId,
             }
-            // Kirim jenisId ke service (untuk n.jenisproduk_id = $request->jenis)
             const response = await nampanprodukService.getProdukInNampanByJenis(payload);
             produk.value = response.data || [];
         } catch (error) {
@@ -75,319 +73,182 @@ export function usePOS() {
     };
 
     const handlePilihProduk = async (kodeproduk) => {
-        console.log('Produk dipilih:', kodeproduk);
+        // 1. Validasi awal: Pastikan Kode Transaksi sudah siap
+        if (!TransaksiID.value || TransaksiID.value.includes("Memuat")) {
+            toast.error("Tunggu kode transaksi selesai dimuat");
+            return;
+        }
 
-        // Contoh: Cari data detail produk berdasarkan kode
+        // 2. Cari detail produk dari state produk local (hasil fetch produk)
         const detailProduk = produk.value.find(p => p.kodeproduk === kodeproduk);
 
         if (detailProduk) {
-            // Lakukan sesuatu, misalnya masukkan ke keranjang/cart
-            toast.success(`Produk ${detailProduk.nama} dipilih`);
+            isLoading.value = true; // Aktifkan loading state jika ada
+
+            try {
+                // 3. Susun Payload dengan menggabungkan detailProduk + Kode Transaksi
+                const payload = {
+                    ...detailProduk,
+                    kode: TransaksiID.value // Menambahkan kode TR-xxxx
+                };
+
+                // 4. Kirim ke Service Backend
+                const response = await transaksiService.storeProdukToTransaksiDetail(payload);
+
+                if (response.data.status) {
+                    toast.success(response.data.message || `Produk ${detailProduk.nama} berhasil ditambahkan`);
+
+                    // 5. Next Step: Panggil fungsi fetch data keranjang untuk update UI tabel
+                    // await fetchCartDetails();
+                }
+
+                await fetchTransaksiDetail()
+            } catch (error) {
+                // 6. Handling Error (Misal: produk sudah ada atau server error)
+                const errorMsg = error.response?.data?.message || "Gagal menambahkan produk ke keranjang";
+                toast.error(errorMsg);
+                console.error("Error Store Detail:", error);
+            } finally {
+                isLoading.value = false;
+            }
+        } else {
+            toast.error("Data produk tidak ditemukan");
+        }
+    };
+
+    const fetchKodeTransaksi = async () => {
+        TransaksiID.value = "Memuat data...";
+        try {
+            const response = await transaksiService.getKodeTransaksi();
+
+            // LOGIC SYNC:
+            // Jika di keranjang sudah ada barang, gunakan kode dari barang tersebut
+            if (TransaksiDetail.value.length > 0) {
+                TransaksiID.value = TransaksiDetail.value[0].kode;
+            } else {
+                // Jika keranjang kosong, baru gunakan kode baru dari backend
+                TransaksiID.value = response.kode;
+            }
+        } catch (error) {
+            TransaksiID.value = "ERR-GENERATE";
         }
     };
 
     const fetchPelanggan = async () => {
         try {
             const response = await pelangganService.getPelanggan();
-            // Map data agar formatnya { value: id, label: 'nama' } sesuai standar Multiselect
             PelangganList.value = response.data.map(PelangganList => ({
                 value: PelangganList.id,
-                label: PelangganList.nama // Sesuaikan field 'role' dengan nama kolom di tabel roles Anda
+                label: PelangganList.nama
             }));
         } catch (error) {
-            console.error("Gagal memuat Pelanggan:", error);
+            toast.error("Gagal memuat Pelanggan:", error);
         }
     };
 
     const fetchDiskon = async () => {
         try {
             const response = await diskonService.getDiskon();
-            // Map data agar formatnya { value: id, label: 'nama' } sesuai standar Multiselect
             DiskonList.value = response.data.map(DiskonList => ({
                 value: DiskonList.id,
                 label: DiskonList.diskon,
                 nilai: DiskonList.nilai
             }));
         } catch (error) {
-            console.error("Gagal memuat Diskon:", error);
+            toast.error("Gagal memuat Diskon:", error);
         }
     };
 
-    // Computed ini sekarang membaca ke selectedDiskon, bukan formPOS.diskon
     const selectedDiskonNilai = computed(() => {
         return selectedDiskon.value ? selectedDiskon.value.nilai : 0;
     });
 
-    // const fetchKarat = async () => {
-    //     try {
-    //         const response = await karatService.getKarat();
-    //         karatList.value = response.data.map(karatList => ({
-    //             value: karatList.id,
-    //             label: karatList.karat,
-    //         }));
-    //     } catch (error) {
-    //         console.log("Gagal memuat Karat", error)
-    //     }
-    // };
+    const fetchTransaksiDetail = async () => {
+        isLoading.value = true;
+        try {
+            const response = await transaksiService.getTransaksiDetail();
+            TransaksiDetail.value = Array.isArray(response) ? response : (response.data || []);
+        } catch (error) {
+            TransaksiDetail.value = [];
+        } finally {
+            isLoading.value = false;
+        }
+    }
 
-    // // Tambahkan allJenisKarat dan logic fetch-nya
-    // const fetchJenisKarat = async () => {
-    //     try {
-    //         const response = await jeniskaratService.getJenisKarat();
-    //         allJenisKarat.value = response.data;
-    //     } catch (error) {
-    //         console.error("Gagal memuat Jenis Karat:", error);
-    //     }
-    // };
+    // 2. Fungsi Hapus Item dari Keranjang
+    const handleDelete = async (id) => {
+        const confirm = await Swal.fire({
+            title: 'Hapus Item?',
+            text: "Produk akan dikeluarkan dari daftar order.",
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Ya, Hapus'
+        });
 
-    // // LOGIKA FILTER BERTINGKAT (Computed)
-    // const filteredJenisKaratList = computed(() => {
-    //     if (!formProduk.karat || !formProduk.karat.value) return [];
+        if (confirm.isConfirmed) {
+            isLoading.value = true;
+            try {
+                const payload = {
+                    id: id
+                }
+                // Pastikan Anda sudah membuat deleteTransaksiDetail di transaksiService
+                await transaksiService.batalTransaksiDetail(payload);
+                toast.success("Produk berhasil dihapus");
+                await fetchTransaksiDetail();
+            } catch (error) {
+                toast.error("Gagal menghapus produk");
+            } finally {
+                isLoading.value = false;
+            }
+        }
+    };
 
-    //     return allJenisKarat.value
-    //         .filter(item => item.karat_id === formProduk.karat.value)
-    //         .map(item => ({
-    //             value: item.id,
-    //             label: item.jenis
-    //         }));
-    // });
+    // Di dalam usePOS.js
+    const paymentTransaksi = async (grandTotal) => {
+        if (!formPOS.pelanggan) {
+            toast.error("Pilih pelanggan terlebih dahulu");
+            return;
+        }
 
-    // Reset Jenis Karat jika Karat diubah
-    // const handleKaratChange = () => {
-    //     formProduk.jeniskarat = null;
-    //     formProduk.harga = null; // Reset harga juga karena kombinasi berubah
-    // };
+        isLoading.value = true;
+        try {
+            const payload = {
+                kode: TransaksiID.value,
+                pelanggan: formPOS.pelanggan.value,
+                diskon: selectedDiskon.value ? selectedDiskon.value.value : null,
+                total: grandTotal
+            };
 
-    // const fetchHargaOtomatis = async () => {
-    //     if (formProduk.karat?.value && formProduk.jeniskarat?.value) {
-    //         try {
-    //             const response = await hargaService.getHarga();
-    //             const dataHarga = Array.isArray(response) ? response : response.data;
+            const response = await transaksiService.paymentTransaksi(payload);
 
-    //             // Cari data harga yang cocok
-    //             const found = dataHarga.find(h =>
-    //                 h.karat_id === formProduk.karat.value &&
-    //                 h.jeniskarat_id === formProduk.jeniskarat.value
-    //             );
+            if (response.status) {
+                // 1. Tampilkan Modal Sukses menggunakan Bootstrap Instance
+                const modalElement = document.getElementById('paymentModal');
+                const modalInstance = new bootstrap.Modal(modalElement);
+                modalInstance.show();
+            }
+        } catch (error) {
+            console.log(error)
+            toast.error(error.response?.data?.message || "Gagal memproses pembayaran");
+        } finally {
+            isLoading.value = false;
+        }
+    };
 
-    //             if (found) {
-    //                 formProduk.harga_id = found.id; // ID untuk database
-    //                 formProduk.harga_display = found.harga; // Nominal untuk UI
-    //             } else {
-    //                 formProduk.harga_id = null;
-    //                 formProduk.harga_display = 'Harga belum diatur';
-    //             }
-    //         } catch (error) {
-    //             console.error("Gagal mengambil harga:", error);
-    //         }
-    //     }
-    // };
+    const handleNextOrder = async () => {
+        // Reset semua state untuk transaksi baru
+        formPOS.pelanggan = null;
+        selectedDiskon.value = null;
+        TransaksiDetail.value = [];
 
-    // // Gunakan watch untuk memantau perubahan pada jeniskarat
-    // watch(() => formProduk.jeniskarat, (newVal) => {
-    //     if (newVal) {
-    //         fetchHargaOtomatis();
-    //     }
-    // });
+        await fetchKodeTransaksi();
+        await fetchProduk();
+        toast.info("Siap untuk transaksi baru");
+    };
 
-    // const validateForm = () => {
-    //     errors.value = {};
-    //     if (!formProduk.nama || formProduk.nama.trim() === '') {
-    //         errors.value.nama = 'Nama tidak boleh kosong.';
-    //     }
-
-    //     if (!formProduk.berat || String(formProduk.berat).trim() === '') {
-    //         errors.value.berat = 'Berat tidak boleh kosong.';
-    //     } else {
-    //         // Regex untuk memastikan hanya angka dan titik, bukan koma
-    //         const beratRegex = /^\d+(\.\d+)?$/;
-
-    //         if (String(formProduk.berat).includes(',')) {
-    //             errors.value.berat = 'Gunakan titik (.) sebagai pemisah desimal, bukan koma.';
-    //         } else if (!beratRegex.test(formProduk.berat)) {
-    //             errors.value.berat = 'Format berat tidak valid (contoh: 10.5).';
-    //         }
-    //     }
-
-    //     if (!formProduk.karat || formProduk.karat === null) {
-    //         errors.value.karat = 'Karat wajib dipilih.';
-    //     } else if (Array.isArray(formProduk.karat) && formProduk.karat.length === 0) {
-    //         errors.value.karat = 'Pilih satu karat.';
-    //     }
-
-    //     if (!formProduk.jeniskarat || formProduk.jeniskarat === null) {
-    //         errors.value.jeniskarat = 'Jenis Karat wajib dipilih.';
-    //     } else if (Array.isArray(formProduk.jeniskarat) && formProduk.jeniskarat.length === 0) {
-    //         errors.value.jeniskarat = 'Pilih satu jenis karat.';
-    //     }
-
-    //     return Object.keys(errors.value).length === 0;
-    // };
-
-    // // Helper untuk reset form agar DRY (Don't Repeat Yourself)
-    // const resetForm = () => {
-    //     formProduk.id = null;
-    //     formProduk.nama = '';
-    //     formProduk.berat = '';
-    //     formProduk.jenisproduk = null;
-    //     formProduk.karat = null;
-    //     formProduk.jeniskarat = null;
-    //     formProduk.harga = '';
-    //     formProduk.lingkar = '';
-    //     formProduk.panjang = '';
-    //     formProduk.keterangan = '';
-    //     formProduk.image = null;
-    //     currentImagePreview.value = null; // Reset preview
-    //     errors.value = {};
-    // };
-
-    // const handleFileChange = (e) => {
-    //     const file = e.target.files[0]; // Mengambil file asli dari input
-    //     if (file) {
-    //         // 1. Simpan file asli ke dalam form (ini yang akan dikirim ke DB)
-    //         formProduk.image = file;
-
-    //         // 2. Buat URL sementara untuk pratinjau (Preview)
-    //         if (currentImagePreview.value && currentImagePreview.value.startsWith('blob:')) {
-    //             URL.revokeObjectURL(currentImagePreview.value);
-    //         }
-    //         currentImagePreview.value = URL.createObjectURL(file);
-    //     }
-    // };
-
-    // const handleCreate = () => {
-    //     isEdit.value = false;
-    //     resetForm();
-    //     const modal = new bootstrap.Modal(document.getElementById('produkModal'));
-    //     modal.show();
-    // };
-
-    // const handleEdit = (item) => {
-    //     isEdit.value = true;
-    //     resetForm();
-
-    //     formProduk.id = item.id;
-    //     formProduk.nama = item.nama;
-    //     formProduk.berat = item.berat;
-    //     formProduk.lingkar = item.lingkar;
-    //     formProduk.panjang = item.panjang;
-    //     formProduk.keterangan = item.keterangan;
-    //     formProduk.harga_id = item.harga_id;
-    //     formProduk.harga_display = item.harga?.harga || item.harga;
-
-    //     // Set Dropdown Jenis Produk
-    //     const sj = jenisprodukList.value.find(j => j.value === item.jenisproduk_id);
-    //     if (sj) formProduk.jenisproduk = sj;
-
-    //     // Set Dropdown Karat
-    //     const sk = karatList.value.find(k => k.value === item.karat_id);
-    //     if (sk) formProduk.karat = sk;
-
-    //     // Set Dropdown Jenis Karat (Cari dari master data)
-    //     const sjk = allJenisKarat.value.find(jk => jk.id === item.jeniskarat_id);
-    //     if (sjk) {
-    //         formProduk.jeniskarat = { value: sjk.id, label: sjk.jenis };
-    //     }
-
-    //     // Preview Image
-    //     if (item.image) {
-    //         currentImagePreview.value = `${STORAGE_URL}/images/produk/${item.image}`;
-    //     }
-
-    //     const modal = new bootstrap.Modal(document.getElementById('produkModal'));
-    //     modal.show();
-    // };
-
-    // const submitProduk = async () => {
-    //     if (!validateForm()) return false;
-
-    //     isLoading.value = true;
-    //     try {
-    //         // Gunakan FormData untuk membungkus File
-    //         const payload = new FormData();
-
-    //         // Masukkan data teks
-    //         payload.append('id', formProduk.id || '');
-    //         payload.append('nama', formProduk.nama);
-    //         payload.append('berat', formProduk.berat || 0.0);
-    //         payload.append('harga', formProduk.harga_id || '');
-    //         payload.append('lingkar', formProduk.lingkar || 0);
-    //         payload.append('panjang', formProduk.panjang || 0);
-    //         payload.append('keterangan', formProduk.keterangan || '');
-
-    //         const jenisprodukId = formProduk.jenisproduk?.value || '';
-    //         payload.append('jenisproduk', jenisprodukId);
-
-    //         const karatId = formProduk.karat?.value || '';
-    //         payload.append('karat', karatId);
-
-    //         const jeniskaratId = formProduk.jeniskarat?.value || '';
-    //         payload.append('jeniskarat', jeniskaratId);
-
-    //         // LOGIKA PENTING:
-    //         // Cek apakah formProduk.image berisi File (hasil dari handleFileChange)
-    //         if (formProduk.image instanceof File) {
-    //             payload.append('image', formProduk.image);
-    //         }
-
-    //         let response;
-    //         if (isEdit.value) {
-    //             // Jika Edit, tetap gunakan POST karena FormData tidak stabil di PUT pada beberapa server
-    //             response = await produkService.updateProduk(payload);
-    //         } else {
-    //             response = await produkService.storeProduk(payload);
-    //         }
-
-    //         toast.success('Data berhasil disimpan');
-    //         await fetchProduk();
-
-    //         // Tutup modal
-    //         const modalElement = document.getElementById('produkModal');
-    //         const modal = bootstrap.Modal.getInstance(modalElement);
-    //         if (modal) modal.hide();
-
-    //     } catch (error) {
-    //         console.error("Error saat submit:", error);
-    //         if (error.response?.status === 422) {
-    //             errors.value = error.response.data.errors || {};
-    //         } else {
-    //             toast.error('Gagal menyimpan data ke server.');
-    //         }
-    //     } finally {
-    //         isLoading.value = false;
-    //     }
-    // };
-
-    // const handleDelete = async (item) => {
-    //     const result = await Swal.fire({
-    //         title: 'Apakah Anda yakin?',
-    //         text: `Data Produk "${item.kodeproduk}" yang dihapus tidak dapat dikembalikan!`,
-    //         showCancelButton: true,
-    //         confirmButtonColor: '#3085d6',
-    //         cancelButtonColor: '#092139',
-    //         confirmButtonText: 'Ya, hapus!',
-    //         cancelButtonText: 'Batal',
-    //         reverseButtons: true
-    //     });
-
-    //     if (result.isConfirmed) {
-    //         try {
-    //             const payload = {
-    //                 id: item.id,
-    //             };
-    //             await produkService.deleteProduk(payload);
-    //             toast.success('Data Produk berhasil dihapus.');
-    //             fetchProduk();
-    //         } catch (error) {
-    //             console.log('Gagal menghapus data Produk:', error);
-    //             toast.error(error.response?.message || 'Gagal menghapus data.');
-    //         }
-    //     }
-    // };
-
-    // const handleRefresh = async () => {
-    //     await fetchProduk();
-    // }
+    const handleRefresh = async () => {
+        await fetchProduk();
+    }
 
     const totalPagesProduk = computed(() => {
         const query = String(searchProdukQuery.value || '').toLowerCase();
@@ -398,20 +259,6 @@ export function usePOS() {
 
         return Math.ceil(filteredCount / itemsPerPageProduk) || 1;
     });
-
-    // const totalPages = computed(() => {
-    //     const filteredCount = produk.value.filter(item =>
-    //         (item.nama || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    //         (item.berat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    //         (item.jenisproduk?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    //         (item.karat?.karat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    //         (item.jeniskarat?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    //         (item.lingkar || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    //         (item.panjang || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    //         (item.keterangan || '').toLowerCase().includes(searchQuery.value.toLowerCase())
-    //     ).length;
-    //     return Math.ceil(filteredCount / itemsPerPage) || 1;
-    // });
 
     const displayedPagesProduk = computed(() => {
         const total = totalPagesProduk.value;
@@ -430,46 +277,26 @@ export function usePOS() {
         return pages;
     });
 
-    // const displayedPages = computed(() => {
-    //     const total = totalPages.value;
-    //     const current = currentPage.value;
-    //     const maxVisible = 5;
-
-    //     let start = Math.max(current - Math.floor(maxVisible / 2), 1);
-    //     let end = start + maxVisible - 1;
-
-    //     if (end > total) {
-    //         end = total;
-    //         start = Math.max(end - maxVisible + 1, 1);
-    //     }
-
-    //     const pages = [];
-    //     for (let i = start; i <= end; i++) {
-    //         pages.push(i);
-    //     }
-    //     return pages;
-    // });
-
     return {
         jenisprodukList,
         selectedJenisProduk,
         produk,
+        TransaksiID,
         PelangganList,
         DiskonList,
         selectedDiskon,
         selectedDiskonNilai,
+        TransaksiDetail,
         isLoading,
-        // searchQuery,
-        // currentPage,
-        // itemsPerPage,
-        // isEdit,
         errors,
         formPOS,
         // resetForm,
         fetchJenisProduk,
         fetchProduk,
+        fetchKodeTransaksi,
         fetchPelanggan,
         fetchDiskon,
+        fetchTransaksiDetail,
         totalPagesProduk,
         itemsPerPageProduk,
         displayedPagesProduk,
@@ -494,38 +321,10 @@ export function usePOS() {
 
             return filtered.slice(start, start + itemsPerPageProduk);
         }),
-        // filteredProduk: computed(() => {
-        //     return produk.value.filter(item =>
-        //         (item.nama || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.berat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.jenisproduk?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.karat?.karat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.jeniskarat?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.lingkar || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.panjang || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.keterangan || '').toLowerCase().includes(searchQuery.value.toLowerCase())
-        //     ).slice((currentPage.value - 1) * itemsPerPage, currentPage.value * itemsPerPage);
-        // }),
-        // paginatedProduk: computed(() => {
-        //     const start = (currentPage.value - 1) * itemsPerPage;
-        //     return (produk.value.filter(item =>
-        //         (item.nama || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.berat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.jenisproduk?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.karat?.karat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.jeniskarat?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.lingkar || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.panjang || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        //         (item.keterangan || '').toLowerCase().includes(searchQuery.value.toLowerCase())
-        //     )).slice(start, start + itemsPerPage);
-        // }),
         handlePilihProduk,
-        // handleCreate,
-        // handleEdit,
-        // submitProduk,
-        // handleDelete,
-        // handleRefresh,
-        // currentImagePreview,
-        // handleFileChange
+        handleRefresh,
+        handleNextOrder,
+        paymentTransaksi,
+        handleDelete,
     };
 }

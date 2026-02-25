@@ -13,7 +13,7 @@ class TransaksiDetail extends Model
 {
     use HasFactory;
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
-    protected $table = 'transaksi';
+    protected $table = 'transaksidetail';
     protected $fillable = ['kode', 'produk_id', 'hargajual',  'berat',  'karat',  'lingkar',  'panjang', 'total', 'terbilang', 'oleh', 'status'];
 
     /**

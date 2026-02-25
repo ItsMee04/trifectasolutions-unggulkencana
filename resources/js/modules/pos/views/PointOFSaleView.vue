@@ -7,16 +7,12 @@
         </div>
     </div>
 
-    <!-- <PesanModal /> -->
+    <PointOfSalesPaymentSuccess />
 </template>
 <script setup>
 import { onMounted } from 'vue';
-// import { usePesan } from '../composables/usePesan';
 import PointOfSaleProdukList from '../components/PointOfSaleProdukList.vue';
 import PointOfSaleKasirList from '../components/PointOfSaleKasirList.vue';
+import PointOfSalesPaymentSuccess from '../components/PointOfSalesPaymentSuccess.vue'
 
-// const { fetchPesan, handleRefresh, handleCreate } = usePesan();
-// onMounted(() => {
-//     fetchPesan();
-// });
 </script>

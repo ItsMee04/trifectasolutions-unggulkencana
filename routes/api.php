@@ -19,6 +19,7 @@ use App\Http\Controllers\Master\ProdukController;
 use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\SuplierController;
 use App\Http\Controllers\Master\UserController;
+use App\Http\Controllers\Transaksi\TransaksiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -131,4 +132,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('mutasisaldo/storeMutasiSaldo', [MutasiSaldoController::class, 'storeMutasiSaldo']);
     Route::post('mutasisaldo/updateMutasiSaldo', [MutasiSaldoController::class, 'updateMutasiSaldo']);
     Route::post('mutasisaldo/deleteMutasiSaldo', [MutasiSaldoController::class, 'deleteMutasiSaldo']);
+
+    Route::get('transaksi/getKodeTransaksi', [TransaksiController::class, 'getKodeTransaksi']);
+    Route::post('transaksi/storeProdukToTransaksiDetail', [TransaksiController::class, 'storeProdukToTransaksiDetail']);
+    Route::get('transaksi/getTransaksiDetail', [TransaksiController::class, 'getTransaksiDetail']);
+    Route::post('transaksi/batalTransaksiDetail', [TransaksiController::class, 'batalTransaksiDetail']);
+    Route::post('transaksi/paymentTransaksi', [TransaksiController::class, 'paymentTransaksi']);
 });
