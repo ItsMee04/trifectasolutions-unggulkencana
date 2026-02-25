@@ -248,29 +248,15 @@ export function usePOS() {
         toast.info("Siap untuk transaksi baru");
     };
 
+    // Di View (Parent) handlePrint
     const handlePrint = async () => {
-        // Validasi apakah kode transaksi tersedia
         const kode = lastCompletedTransactionId.value;
-
-        if (!kode) {
-            toast.error('Kode transaksi tidak ditemukan');
-            return;
-        }
+        if (!kode) return;
 
         try {
-            console.log("Mencetak nota untuk:", kode);
-
-            // Memanggil service untuk mendapatkan URL cetak
-            // Pastikan service menerima parameter kode transaksi
             const { url } = await transaksiService.getCetakNotaTransaksi(kode);
-
-            if (url) {
-                window.open(url, '_blank');
-            } else {
-                throw new Error("URL cetak tidak valid");
-            }
+            window.open(url, '_blank');
         } catch (e) {
-            console.error(e);
             toast.error('Gagal mencetak nota');
         }
     };

@@ -10,6 +10,7 @@ use App\Services\TransaksiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 
 class TransaksiController extends Controller
 {
@@ -303,6 +304,86 @@ class TransaksiController extends Controller
                 'status'  => false,
                 'message' => 'Gagal memproses pembayaran: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function getSignedNotaUrl(Request $request, $kode)
+    {
+        // Cari dulu datanya untuk memastikan ada
+        $transaksi = Transaksi::where('kode', $kode)->firstOrFail();
+
+        $route_name = 'produk.cetak_notatransaksi';
+        $expiration = now()->addMinutes(10);
+
+        $signedUrl = URL::temporarySignedRoute(
+            $route_name,
+            $expiration,
+            ['kode' => $transaksi->kode] // Kuncinya harus 'kode' sesuai dengan {kode} di Route
+        );
+
+        return response()->json(['url' => $signedUrl]);
+    }
+
+    public function PrintNotaTransaksi(Request $request, $kode)
+    {
+        if (!$request->hasValidSignature()) {
+            abort(401, 'Link kadaluarsa atau tidak valid.');
+        }
+
+        $transaksi = Transaksi::where('kode', $kode)->firstOrFail();
+
+        // Configuration
+        $jasper_file = resource_path('reports/CetakNotaTransaksi.jasper');
+        $db = config('database.connections.mysql');
+
+        // Parameters (Disederhanakan)
+        $parameters = [
+            'LOGO'   => public_path('assets/logo.jpg'),
+            'PRODUK' => public_path('storage/produk/'),
+            'TTD'    => public_path('ttd/'),
+            'KODETRANSAKSI_INPUT' => $transaksi->id, // Jasper biasanya butuh ID untuk query internal
+        ];
+
+        try {
+            $tempDir = storage_path('app/temp_reports');
+            if (!file_exists($tempDir)) mkdir($tempDir, 0755, true);
+
+            $outputName = 'nota-' . $transaksi->kode . '-' . time();
+            $outputPath = $tempDir . '/' . $outputName;
+
+            $jasper = new \PHPJasper\PHPJasper;
+            $jasper->process(
+                $jasper_file,
+                $outputPath,
+                [
+                    'format' => ['pdf'],
+                    'params' => $parameters,
+                    'db_connection' => [
+                        'driver' => 'mysql',
+                        'host' => $db['host'],
+                        'port' => $db['port'],
+                        'database' => $db['database'],
+                        'username' => $db['username'],
+                        'password' => $db['password'],
+                    ],
+                ]
+            )->execute();
+
+            $pdfPath = $outputPath . '.pdf';
+
+            if (!file_exists($pdfPath)) {
+                throw new \Exception("File PDF tidak terbentuk oleh Jasper.");
+            }
+
+            $pdfContent = file_get_contents($pdfPath);
+            unlink($pdfPath); // Hapus file temp setelah dibaca
+
+            return response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="NOTA-' . $transaksi->kode . '.pdf"',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }
