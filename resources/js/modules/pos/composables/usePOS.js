@@ -18,6 +18,7 @@ const DiskonList = ref([]);
 const TransaksiID = ref('');
 const selectedDiskon = ref(null);
 const TransaksiDetail = ref([]);
+const lastCompletedTransactionId = ref('');
 const isLoading = ref(false);
 const isLoadingProduk = ref(false);
 const searchProdukQuery = ref('');
@@ -222,6 +223,7 @@ export function usePOS() {
             const response = await transaksiService.paymentTransaksi(payload);
 
             if (response.status) {
+                lastCompletedTransactionId.value = TransaksiID.value;
                 // 1. Tampilkan Modal Sukses menggunakan Bootstrap Instance
                 const modalElement = document.getElementById('paymentModal');
                 const modalInstance = new bootstrap.Modal(modalElement);
@@ -244,6 +246,33 @@ export function usePOS() {
         await fetchKodeTransaksi();
         await fetchProduk();
         toast.info("Siap untuk transaksi baru");
+    };
+
+    const handlePrint = async () => {
+        // Validasi apakah kode transaksi tersedia
+        const kode = lastCompletedTransactionId.value;
+
+        if (!kode) {
+            toast.error('Kode transaksi tidak ditemukan');
+            return;
+        }
+
+        try {
+            console.log("Mencetak nota untuk:", kode);
+
+            // Memanggil service untuk mendapatkan URL cetak
+            // Pastikan service menerima parameter kode transaksi
+            const { url } = await transaksiService.getCetakNotaTransaksi(kode);
+
+            if (url) {
+                window.open(url, '_blank');
+            } else {
+                throw new Error("URL cetak tidak valid");
+            }
+        } catch (e) {
+            console.error(e);
+            toast.error('Gagal mencetak nota');
+        }
     };
 
     const handleRefresh = async () => {
@@ -290,7 +319,7 @@ export function usePOS() {
         isLoading,
         errors,
         formPOS,
-        // resetForm,
+        lastCompletedTransactionId,
         fetchJenisProduk,
         fetchProduk,
         fetchKodeTransaksi,
@@ -326,5 +355,6 @@ export function usePOS() {
         handleNextOrder,
         paymentTransaksi,
         handleDelete,
+        handlePrint,
     };
 }

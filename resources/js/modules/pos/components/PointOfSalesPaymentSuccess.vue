@@ -13,6 +13,9 @@
                         <h4>Pembayaran Berhasil</h4>
                         <p class="mb-0">Apakah Anda ingin mencetak struk untuk pesanan ini?</p>
                         <div class="modal-footer d-sm-flex justify-content-between p-0 mt-4 border-0">
+                            <button type="button" class="btn btn-primary flex-fill me-2" @click="handlePrint">
+                                Cetak Nota Transaksi <i data-feather="printer" class="feather-16 ms-1"></i>
+                            </button>
                             <button type="button" class="btn btn-secondary flex-fill" @click="handleNextOrder"
                                 data-bs-dismiss="modal">
                                 Order Berikutnya <i data-feather="arrow-right-circle" class="feather-16 ms-1"></i>
@@ -28,5 +31,6 @@
 import { usePOS } from '../composables/usePOS';
 const {
     handleNextOrder,
+    handlePrint,
 } = usePOS();
 </script>
