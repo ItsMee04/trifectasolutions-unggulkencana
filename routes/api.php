@@ -20,6 +20,7 @@ use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\SuplierController;
 use App\Http\Controllers\Master\UserController;
 use App\Http\Controllers\Transaksi\OfftakeController;
+use App\Http\Controllers\Transaksi\PembelianController;
 use App\Http\Controllers\Transaksi\TransaksiController;
 use Illuminate\Support\Facades\Route;
 
@@ -147,6 +148,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('offtake/getOfftakeDetail', [OfftakeController::class, 'getOfftakeDetail']);
     Route::post('offtake/batalOfftakeDetail', [OfftakeController::class, 'batalOfftakeDetail']);
     Route::post('offtake/paymentOfftake', [OfftakeController::class, 'paymentOfftake']);
+
+    Route::get('pembelian/getKodeTransaksi', [PembelianController::class, 'getKodeTransaksi']);
+    Route::post('pembelian/getTransaksiByKode', [PembelianController::class, 'getTransaksiByKode']);
+    Route::post('pembelian/storeProdukToPembelianDetail', [PembelianController::class, 'storeProdukToPembelianDetail']);
+    Route::get('pembelian/getPembelianDetail', [PembelianController::class, 'getPembelianDetail']);
+    Route::post('pembelian/updatePembelianDetail', [PembelianController::class, 'updatePembelianDetail']);
 });
 
 Route::get('/transaksi/{kode}/cetaknotatransaksi', [TransaksiController::class, 'PrintNotaTransaksi'])->name('produk.cetak_notatransaksi');

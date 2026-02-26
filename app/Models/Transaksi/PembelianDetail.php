@@ -73,4 +73,24 @@ class PembelianDetail extends Model
     {
         return $this->belongsTo(User::class, 'oleh', 'id');
     }
+
+    /**
+     * Get the transaksi that owns the PembelianDetail
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function transaksi(): BelongsTo
+    {
+        return $this->belongsTo(TransaksiDetail::class, 'kodetransaksi', 'kode');
+    }
+
+    /**
+     * Get the pembelian that owns the PembelianDetail
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function pembelian(): BelongsTo
+    {
+        return $this->belongsTo(Pembelian::class, 'kode', 'kode');
+    }
 }

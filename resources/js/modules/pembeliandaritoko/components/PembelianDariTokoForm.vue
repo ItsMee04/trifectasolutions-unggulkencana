@@ -1,5 +1,5 @@
 <template>
-    <div class="col-xl-8">
+    <div class="col-xl-6">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <div class="card-title mb-0"><b>TRANSAKSI DARI TOKO</b></div>
@@ -23,7 +23,7 @@
                         </div>
                     </div>
 
-                    <!-- <PembelianDariTokoTable /> -->
+                    <PembelianDariTokoTable />
 
                     <div class="mb-3">
                         <label for="keterangan" class="form-label">Keterangan / Catatan</label>
@@ -56,10 +56,10 @@ const {
     formDariToko,
     isLoading,
     errors,
+    fetchKodeTransaksi,
 } = usePembelianDariToko();
 
-// onMounted(() => {
-//     fetchSuplier();
-//     fetchKodeTransaksi();
-// });
+onMounted(() => {
+    fetchKodeTransaksi();
+});
 </script>

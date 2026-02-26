@@ -4,10 +4,12 @@ namespace App\Models\Transaksi;
 
 use App\Models\Master\Diskon;
 use App\Models\Master\Pelanggan;
+use App\Models\Transaksi\TransaksiDetail;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Transaksi extends Model
 {
@@ -44,5 +46,15 @@ class Transaksi extends Model
     public function oleh(): BelongsTo
     {
         return $this->belongsTo(User::class, 'oleh', 'id');
+    }
+
+    /**
+     * Get the transaksidetail associated with the Transaksi
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function transaksidetail(): HasOne
+    {
+        return $this->hasOne(TransaksiDetail::class, 'kode', 'kode');
     }
 }

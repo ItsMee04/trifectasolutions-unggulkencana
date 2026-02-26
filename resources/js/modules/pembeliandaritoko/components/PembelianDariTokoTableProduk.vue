@@ -1,5 +1,5 @@
 <template>
-    <div class="col-xl-4">
+    <div class="col-xl-6">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <div class="card-title mb-0"><b>PRODUK PELANGGAN</b></div>
@@ -14,30 +14,29 @@
                                 <th scope="col">NAMA</th>
                                 <th scope="col">BERAT</th>
                                 <th scope="col">HARGA</th>
-                                <th scope="col">TOTAL</th>
                                 <th scope="col" class="text-center">ACTIONS</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-if="isLoading">
-                                <td colspan="7" class="text-center">
+                            <tr v-if="isLoadingTransaksiPelanggan">
+                                <td colspan="6" class="text-center">
                                     <span class="spinner-border spinner-border-sm me-2 text-secondary" role="status"
                                         aria-hidden="true"></span>
                                     Memuat data...
                                 </td>
                             </tr>
-                            <tr v-else-if="paginatedPembelianDariToko.length === 0">
-                                <td colspan="7" class="text-center">Tidak ada data.</td>
+                            <tr v-else-if="paginatedTransaksiPelanggan.length === 0">
+                                <td colspan="6" class="text-center">Tidak ada data.</td>
                             </tr>
-                            <tr v-else v-for="(item, index) in paginatedPembelianDariToko" :key="item.id">
-                                <td scope="row">{{ (currentPagePembelianDariTokoProduk - 1) *
-                                    itemsPerPagePembelianDariTokoProduk + index + 1 }}
+                            <tr v-else v-for="(item, index) in paginatedTransaksiPelanggan" :key="item.id">
+                                <td scope="row">{{ (currentPageTransaksiPelanggan - 1) *
+                                    itemsPerPageTransaksiPelanggan + index + 1 }}
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div>
                                             <div class="lh-1">
-                                                <span>{{ item.produk?.kodeproduk }}</span>
+                                                <span>{{ item.transaksidetail?.produk?.kodeproduk }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -46,7 +45,7 @@
                                     <div class="d-flex align-items-center">
                                         <div>
                                             <div class="lh-1">
-                                                <span>{{ item.produk?.nama }}</span>
+                                                <span>{{ item.transaksidetail?.produk?.nama }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -55,7 +54,7 @@
                                     <div class="d-flex align-items-center">
                                         <div>
                                             <div class="lh-1">
-                                                <span>{{ item.berat }}</span>
+                                                <span>{{ item.transaksidetail?.berat }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -64,24 +63,15 @@
                                     <div class="d-flex align-items-center">
                                         <div>
                                             <div class="lh-1">
-                                                <span>{{ formatRupiah(item.hargajual) }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div>
-                                            <div class="lh-1">
-                                                <span>{{ formatRupiah(item.total) }}</span>
+                                                <span>{{ formatRupiah(item.transaksidetail?.hargajual) }}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="action-table-data justify-content-center">
                                     <div class="edit-delete-action">
-                                        <a class="confirm-text p-2" @click.prevent="handleDelete(item)">
-                                            <i data-feather="trash-2" class="feather-trash-2"></i>
+                                        <a class="confirm-text p-2" @click.prevent="handlePilihTransaksiPelanggan(item)">
+                                            <i data-feather="arrow-right" class="feather-trash-2"></i>
                                         </a>
                                     </div>
                                 </td>
@@ -90,44 +80,43 @@
                     </table>
                 </div>
 
-                <div v-if="filteredPembelianDariToko.length > 0"
+                <div v-if="filteredTransaksiPelanggan.length > 0"
                     class="d-flex justify-content-between align-items-center p-3">
                     <div class="text-muted small">
-                        Showing {{ (currentPagePembelianDariTokoProduk - 1) * itemsPerPagePembelianDariTokoProduk + 1 }}
+                        Showing {{ (currentPageTransaksiPelanggan - 1) * itemsPerPageTransaksiPelanggan + 1 }}
                         to
-                        {{ Math.min(currentPagePembelianDariTokoProduk * itemsPerPagePembelianDariTokoProduk,
-                            filteredPembelianDariToko.length) }} of
-                        {{ filteredPembelianDariToko.length }} entries
+                        {{ Math.min(currentPageTransaksiPelanggan * itemsPerPageTransaksiPelanggan,
+                            filteredTransaksiPelanggan.length) }} of
+                        {{ filteredTransaksiPelanggan.length }} entries
                     </div>
 
                     <ul class="pagination mb-0">
-                        <li class="page-item" :class="{ disabled: currentPagePembelianDariTokoProduk === 1 }">
-                            <a class="page-link" href="javascript:void(0);"
-                                @click="currentPagePembelianDariTokoProduk = 1">
+                        <li class="page-item" :class="{ disabled: currentPageTransaksiPelanggan === 1 }">
+                            <a class="page-link" href="javascript:void(0);" @click="currentPageTransaksiPelanggan = 1">
                                 <i class="fas fa-angle-double-left"></i>
                             </a>
                         </li>
-                        <li class="page-item" :class="{ disabled: currentPagePembelianDariTokoProduk === 1 }">
+                        <li class="page-item" :class="{ disabled: currentPageTransaksiPelanggan === 1 }">
                             <a class="page-link" href="javascript:void(0);"
-                                @click="currentPagePembelianDariTokoProduk > 1 ? currentPagePembelianDariTokoProduk-- : null">
+                                @click="currentPageTransaksiPelanggan > 1 ? currentPageTransaksiPelanggan-- : null">
                                 Previous
                             </a>
                         </li>
-                        <li v-for="page in displayedPagesPembelianDariTokoProduk" :key="page" class="page-item"
-                            :class="{ active: page === currentPagePembelianDariTokoProduk }">
+                        <li v-for="page in displayedPagesTransaksiPelanggan" :key="page" class="page-item"
+                            :class="{ active: page === currentPageTransaksiPelanggan }">
                             <a class="page-link" href="javascript:void(0);"
-                                @click="currentPagePembelianDariTokoProduk = page">{{ page }}</a>
+                                @click="currentPageTransaksiPelanggan = page">{{ page }}</a>
                         </li>
-                        <li class="page-item" :class="{ disabled: c === totalPagesPembelianDariTokoProduk }">
+                        <li class="page-item" :class="{ disabled: currentPageTransaksiPelanggan === totalPagesTransaksiPelanggan }">
                             <a class="page-link" href="javascript:void(0);"
-                                @click="currentPagePembelianDariTokoProduk < totalPagesPembelianDariTokoProduk && currentPagePembelianDariTokoProduk++">
+                                @click="currentPageTransaksiPelanggan < totalPagesTransaksiPelanggan && currentPageTransaksiPelanggan++">
                                 Next
                             </a>
                         </li>
                         <li class="page-item"
-                            :class="{ disabled: currentPagePembelianDariTokoProduk === totalPagesPembelianDariTokoProduk }">
+                            :class="{ disabled: currentPageTransaksiPelanggan === totalPagesTransaksiPelanggan }">
                             <a class="page-link" href="javascript:void(0);"
-                                @click="currentPagePembelianDariTokoProduk = totalPagesPembelianDariTokoProduk">
+                                @click="currentPageTransaksiPelanggan = totalPagesTransaksiPelanggan">
                                 <i class="fas fa-angle-double-right"></i>
                             </a>
                         </li>
@@ -139,18 +128,33 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { watch } from 'vue';
 import { usePembelianDariToko } from '../composables/usePembelianDariToko';
-import PembelianDariTokoTable from './PembelianDariTokoTable.vue';
+import { formatRupiah } from '../../../helper/formatRupiah'
+import { useFeather } from '../../../helper/feather'
 
 const {
     formDariToko,
-    isLoading,
-    errors,
+    isLoadingTransaksiPelanggan,
+    currentPageTransaksiPelanggan,
+    itemsPerPageTransaksiPelanggan,
+    filteredTransaksiPelanggan,
+    paginatedTransaksiPelanggan,
+    displayedPagesTransaksiPelanggan,
+    totalPagesTransaksiPelanggan,
+    handlePilihTransaksiPelanggan,
 } = usePembelianDariToko();
 
-// onMounted(() => {
-//     fetchSuplier();
-//     fetchKodeTransaksi();
-// });
+const { initFeather } = useFeather();
+
+
+// SOLUSI: Pantau perubahan data agar feather.replace() dijalankan ulang
+watch(paginatedTransaksiPelanggan, () => {
+    initFeather();
+}, { deep: true });
+
+// Pantau juga saat loading selesai
+watch(isLoadingTransaksiPelanggan, (status) => {
+    if (!status) initFeather();
+});
 </script>

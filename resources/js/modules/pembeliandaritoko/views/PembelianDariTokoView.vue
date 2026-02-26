@@ -15,7 +15,7 @@
                 </li>
             </ul>
             <div class="page-btn import">
-                <a href="#" class="btn btn-added color" @click="handleCariKodeTransaksi">
+                <a href="#" class="btn btn-added color" @click="handleCariTransaksiPelanggan">
                     <i data-feather="search" class="me-2"></i>Cari Kode Transaksi
                 </a>
             </div>
@@ -28,12 +28,15 @@
     </div>
 
     <PembelianDariTokoModalCari />
+    <PembelianDariTokoModalEdit />
+
 </template>
 <script setup>
 import { usePembelianDariToko } from '../composables/usePembelianDariToko';
 import PembelianDariTokoTableProduk from '../components/PembelianDariTokoTableProduk.vue';
 import PembelianDariTokoForm from '../components/PembelianDariTokoForm.vue';
 import PembelianDariTokoModalCari from '../components/PembelianDariTokoModalCari.vue';
+import PembelianDariTokoModalEdit from '../components/PembelianDariTokoModalEdit.vue';
 
-const { handleCariKodeTransaksi } = usePembelianDariToko();
+const { handleCariTransaksiPelanggan } = usePembelianDariToko();
 </script>

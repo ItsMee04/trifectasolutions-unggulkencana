@@ -43,10 +43,10 @@
 <script setup>
 import { usePembelianDariToko } from '../composables/usePembelianDariToko';
 
-const { isLoading, formDariToko, errors } = usePembelianDariToko();
+const { isLoading, formDariToko, errors, submitTransaksiPelanggan, } = usePembelianDariToko();
 
-// const handleSubmit = async () => {
-//     await submitJabatan();
-// };
+const handleSubmit = async () => {
+    await submitTransaksiPelanggan();
+};
 
 </script>

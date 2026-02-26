@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('pembeliandetail', function (Blueprint $table) {
             $table->id();
-            $table->string('kodetransaksi', 100)->nullable(); // relasi ke pembelian (kode, bukan id)
+            $table->string('kodetransaksi', 100)->nullable();
             $table->string('kode', 100); // relasi ke pembelian (kode, bukan id)
-            $table->unsignedBigInteger('produk_id')->nullable(); // bisa null kalau produk luar toko
+            $table->unsignedBigInteger('produk_id')->nullable();
             $table->unsignedBigInteger('hargabeli')->default(0);
             $table->decimal('berat', 8, 3)->nullable()->default(0.000);
             $table->unsignedBigInteger('karat')->nullable();
@@ -32,10 +32,9 @@ return new class extends Migration
             $table->timestamps();
 
             // Relasi
-            $table->foreign('kodepembelian')->references('kodepembelian')->on('pembelian')->cascadeOnDelete();
+            $table->foreign('kode')->references('kode')->on('pembelian')->cascadeOnDelete();
             $table->foreign('produk_id')->references('id')->on('produk')->nullOnDelete();
             $table->foreign('kondisi_id')->references('id')->on('kondisi')->nullOnDelete();
-            $table->foreign('jenisproduk_id')->references('id')->on('jenis_produk')->nullOnDelete();
             $table->foreign('oleh')->references('id')->on('users')->cascadeOnDelete();
         });
     }

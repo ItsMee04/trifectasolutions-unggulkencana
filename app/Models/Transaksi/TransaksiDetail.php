@@ -45,4 +45,14 @@ class TransaksiDetail extends Model
     {
         return $this->belongsTo(User::class, 'oleh', 'id');
     }
+
+    /**
+     * Get the transaksi that owns the TransaksiDetail
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function transaksi(): BelongsTo
+    {
+        return $this->belongsTo(Transaksi::class, 'kode', 'kode');
+    }
 }
