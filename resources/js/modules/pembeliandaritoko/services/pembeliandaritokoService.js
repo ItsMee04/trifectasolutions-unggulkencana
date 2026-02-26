@@ -26,11 +26,11 @@ export const pembeliandaritokoService = {
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
     async batalPembelianDetail(payload) {
-        const response = await apiClient.post('/offtake/batalOfftakeDetail', payload);
+        const response = await apiClient.post('/pembelian/batalPembelianDetail', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
     async paymentPembelian(payload) {
-        const response = await apiClient.post('/offtake/paymentOfftake', payload);
+        const response = await apiClient.post('/pembelian/paymentPembelian', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
     async getCetakNotaPembelian(kode) {

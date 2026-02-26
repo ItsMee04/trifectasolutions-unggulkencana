@@ -7,6 +7,7 @@ import { kondisiService } from '../../../modules/kondisi/services/kondisiService
 
 const isLoading = ref(false);
 const errors = ref({});
+const lastCompletedPembelianKode = ref('');
 
 const searchPembelianDariTokoProduk = ref('');
 const currentPagePembelianDariTokoProduk = ref(1);
@@ -267,6 +268,90 @@ export function usePembelianDariToko() {
         }
     }
 
+    const handleDelete = async (item) => {
+        const result = await Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: `Data produk "${item.produk?.nama}" yang dihapus tidak dapat dikembalikan!`,
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#092139',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const payload = {
+                    id: item.id,
+                };
+                await pembeliandaritokoService.batalPembelianDetail(payload);
+                toast.success('Data Pembelian berhasil dihapus.');
+                fetchPembelianDetail();
+            } catch (error) {
+                console.log('Gagal menghapus data Pembelian:', error);
+                toast.error(error.response?.message || 'Gagal menghapus data.');
+            }
+        }
+    };
+
+    const paymentPembelian = async () => {
+        // Validasi dasar
+        if (!formDariToko.pelanggan_id) {
+            toast.error("Data pelanggan belum lengkap.");
+            return;
+        }
+
+        isLoading.value = true;
+        try {
+            const payload = {
+                kode: formDariToko.kode,
+            };
+
+            const response = await pembeliandaritokoService.paymentPembelian(payload);
+
+            if (response.status) {
+                lastCompletedPembelianKode.value = formDariToko.kode;
+                // Reset form atau arahkan ke halaman cetak nota
+                const modalElement = document.getElementById('paymentCompleteModal');
+                if (modalElement) {
+                    const modalInstance = new bootstrap.Modal(modalElement);
+                    modalInstance.show();
+                } else {
+                    toast.success("Pembayaran Berhasil");
+                }
+            }
+        } catch (error) {
+            console.log(error)
+            toast.error(error.response?.data?.message || "Gagal memproses pembayaran");
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
+    const handleNextOrder = async () => {
+        // 1. Reset State Header/Parent
+        // Kita kosongkan pelanggan tapi kode transaksi akan diisi ulang oleh fetchKodeTransaksi
+        formDariToko.pelanggan = '';
+        formDariToko.pelanggan_id = null;
+        formDariToko.keterangan = '';
+
+        // 2. Kosongkan State Keranjang/Detail
+        pembeliandetail.value = [];
+
+        // 3. Reset State Form Modal Edit (jika ada)
+        formPembelianDetail.id = null;
+        formPembelianDetail.hargabeli = 0;
+        formPembelianDetail.kondisi_id = null;
+
+        // 4. Ambil Kode Transaksi Baru (PM-xxxx) dari Backend
+        // Karena status transaksi sebelumnya sudah 2 (Lunas),
+        // maka backend akan otomatis men-generate kode baru.
+        await fetchKodeTransaksi();
+
+        toast.info("Siap untuk transaksi pembelian baru");
+    };
+
     const totalPagesTransaksiPelanggan = computed(() => {
         const query = String(searchTransaksiPelanggan.value || '').toLowerCase();
 
@@ -404,10 +489,13 @@ export function usePembelianDariToko() {
         displayedPagesPembelianDetail,
         fetchPembelianDetail,
         handleEdit,
+        handleDelete,
         handleSubmitEdit,
         formPembelianDetail,
         kondisiList,
         fetchKondisi,
+        paymentPembelian,
+        handleNextOrder,
         paginatedPembelianDetail: computed(() => {
             const query = String(searchPembelianDetail.value || '').toLowerCase();
 

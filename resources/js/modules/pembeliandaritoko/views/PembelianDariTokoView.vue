@@ -29,6 +29,7 @@
 
     <PembelianDariTokoModalCari />
     <PembelianDariTokoModalEdit />
+    <PembelianPaymentCompleteModal />
 
 </template>
 <script setup>
@@ -37,6 +38,7 @@ import PembelianDariTokoTableProduk from '../components/PembelianDariTokoTablePr
 import PembelianDariTokoForm from '../components/PembelianDariTokoForm.vue';
 import PembelianDariTokoModalCari from '../components/PembelianDariTokoModalCari.vue';
 import PembelianDariTokoModalEdit from '../components/PembelianDariTokoModalEdit.vue';
+import PembelianPaymentCompleteModal from '../components/PembelianPaymentCompleteModal.vue';
 
 const { handleCariTransaksiPelanggan } = usePembelianDariToko();
 </script>

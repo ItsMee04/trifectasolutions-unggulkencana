@@ -166,7 +166,7 @@ class PembelianController extends Controller
                 'status'    => false,
                 'message'   => 'Data keranjang tidak ditemukan',
                 'data'      => []
-            ], 404);
+            ]);
         }
 
         return response()->json([
@@ -181,7 +181,7 @@ class PembelianController extends Controller
         $request->validate([
             'id'              => 'required|exists:pembeliandetail,id',
             'hargabeli'       => 'required|numeric|min:0',
-            'kondisi_id'      => 'nullable|exists:kondisi,id', // Sesuaikan nama tabel kondisi Anda
+            'kondisi_id'      => 'nullable|exists:kondisi,id',
             'jenis_hargabeli' => 'required|string',
             'keterangan'      => 'nullable|string'
         ]);
@@ -191,35 +191,202 @@ class PembelianController extends Controller
 
             $detail = PembelianDetail::findOrFail($request->id);
 
-            // 1. Update data dasar
+            // 1. Update data dasar detail
             $detail->hargabeli       = $request->hargabeli;
             $detail->kondisi_id      = $request->kondisi_id;
             $detail->jenis_hargabeli = $request->jenis_hargabeli;
             $detail->keterangan      = $request->keterangan;
 
-            // 2. Kalkulasi Total (Harga Beli * Berat)
-            // Pastikan berat diambil dari record detail atau request jika berubah
-            $total = $request->hargabeli * $detail->berat;
-            $detail->total = $total;
-
-            // 3. Generate Terbilang menggunakan Service Anda
-            // Asumsi service Anda mengembalikan string "Satu Juta..."
-            $detail->terbilang = $this->pembelianService->terbilang($total);
-
+            // 2. Kalkulasi Total Detail (Harga Beli * Berat)
+            $totalDetail = $request->hargabeli * $detail->berat;
+            $detail->total = $totalDetail;
+            $detail->terbilang = $this->pembelianService->terbilang($totalDetail);
             $detail->save();
+
+            // 3. Update Header (Tabel Pembelian)
+            // Hitung ulang semua total dari detail yang memiliki kode yang sama
+            $pembelian = Pembelian::where('kode', $detail->kode)->first();
+
+            if ($pembelian) {
+                $grandTotal = PembelianDetail::where('kode', $detail->kode)
+                    ->where('status', 1) // Pastikan hanya yang aktif
+                    ->sum('total');
+
+                $pembelian->total = $grandTotal;
+                // Update terbilang untuk total keseluruhan di nota
+                $pembelian->terbilang = $this->pembelianService->terbilang($grandTotal);
+                $pembelian->save();
+            }
 
             DB::commit();
 
             return response()->json([
                 'status'  => true,
-                'message' => 'Detail pembelian berhasil diperbarui',
-                'data'    => $detail
+                'message' => 'Detail dan Total Pembelian berhasil diperbarui',
+                'data'    => $detail,
+                'header'  => $pembelian // Kita kembalikan data header juga untuk update UI jika perlu
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'status'  => false,
                 'message' => 'Gagal memperbarui data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function batalPembelianDetail(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            // 1. Cari detail yang masih aktif (status 1)
+            $detail = PembelianDetail::where('id', $request->id)
+                ->where('status', 1)
+                ->firstOrFail();
+
+            $kodeTransaksi = $detail->kode;
+            $totalDibatalkan = $detail->total;
+
+            // 2. Ubah status menjadi 0 (Batal/History) bukannya dihapus
+            $detail->update([
+                'status' => 0,
+                'oleh'   => Auth::id() // Mencatat siapa yang membatalkan
+            ]);
+
+            // 3. Update Header Transaksi agar nominalnya berkurang
+            $transaksi = Pembelian::where('kode', $kodeTransaksi)->first();
+
+            if ($transaksi) {
+                // Hitung total baru hanya dari detail yang masih status 1
+                $newTotal = PembelianDetail::where('kode', $kodeTransaksi)
+                    ->where('status', 1)
+                    ->sum('total');
+
+                $transaksi->update([
+                    'total'     => $newTotal,
+                    'terbilang' => $this->pembelianService->terbilang($newTotal) . " rupiah",
+                    'status'    => 0,
+                ]);
+            }
+
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => 'Produk dibatalkan dari keranjang'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal membatalkan produk: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function paymentPembelian(Request $request)
+    {
+        $request->validate([
+            'kode'         => 'required', // Kode PM-xxxx
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // 1. Cari Saldo Aktif (Toko bayar pakai rekening ini)
+            $saldoAktif = DB::table('saldo')->where('status', 1)->first();
+            if (!$saldoAktif) {
+                throw new \Exception("Tidak ada rekening saldo aktif untuk melakukan pembayaran.");
+            }
+
+            // 2. Cari Header Pembelian
+            $pembelian = Pembelian::where('kode', $request->kode)->firstOrFail();
+
+            // 3. Ambil Semua Detail Pembelian (Bisa banyak produk dalam satu nota)
+            $details = PembelianDetail::where('kode', $request->kode)
+                ->where('status', 1)
+                ->get();
+
+            if ($details->isEmpty()) {
+                throw new \Exception("Tidak ada produk dalam keranjang pembelian.");
+            }
+
+            foreach ($details as $item) {
+                $produk = Produk::findOrFail($item->produk_id);
+
+                // LOGIKA KONDISI BARANG
+                if ($item->kondisi_id == 1) {
+                    // KONDISI BAIK: Produk kembali aktif di stok toko
+                    $produk->update([
+                        'status'    => 1, // Aktif kembali
+                        'hargabeli' => $item->hargabeli, // Update harga beli terakhir
+                    ]);
+
+                    // Opsional: Masukkan kembali ke Nampan default/awal jika ada logika nampan
+                    /*
+                DB::table('nampanproduk')->insert([
+                    'nampan_id' => 1, // Nampan default stok masuk
+                    'produk_id' => $produk->id,
+                    'jenis'     => 'MASUK',
+                    'tanggal'   => now(),
+                    'oleh'      => Auth::id(),
+                    'status'    => 1
+                ]);
+                */
+                } else {
+                    // KONDISI RUSAK/LAINNYA: Produk dinonaktifkan dari stok utama
+                    $produk->update(['status' => 0]);
+
+                    // --- HIGHLIGHT: INSERT KE TABEL PERBAIKAN (SOON) ---
+                    /*
+                DB::table('perbaikan')->insert([
+                    'produk_id'    => $produk->id,
+                    'pembelian_id' => $pembelian->id,
+                    'kondisi_id'   => $item->kondisi_id,
+                    'tanggal'      => now(),
+                    'status'       => 1, // Status: Menunggu Perbaikan
+                    'keterangan'   => "Beli dari pelanggan dalam kondisi rusak: " . $item->keterangan
+                ]);
+                */
+                }
+
+                // Update status detail menjadi lunas/selesai
+                $item->update(['status' => 2]);
+            }
+
+            // 4. Update Header Pembelian
+            $pembelian->update([
+                'keterangan'   => $request->keterangan,
+                'status'       => 2, // Lunas
+                'tanggal'      => now(),
+            ]);
+
+            // 5. INSERT MUTASI SALDO (Uang Toko KELUAR)
+            DB::table('mutasisaldo')->insert([
+                'saldo_id'   => $saldoAktif->id,
+                'tanggal'    => now()->format('Y-m-d'),
+                'keterangan' => "Pembelian produk (Buyback) Kode: " . $pembelian->kode,
+                'jenis'      => 'KELUAR', // Toko membayar ke pelanggan
+                'jumlah'     => $pembelian->total,
+                'oleh'       => Auth::id(),
+                'status'     => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // 6. Potong Total Saldo di Tabel Rekening
+            DB::table('saldo')->where('id', $saldoAktif->id)->decrement('total', $pembelian->total);
+
+            DB::commit();
+            return response()->json([
+                'status'  => true,
+                'message' => 'Transaksi Pembelian Berhasil. Saldo toko telah berkurang.'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => false,
+                'message' => 'Gagal bayar pembelian: ' . $e->getMessage()
             ], 500);
         }
     }

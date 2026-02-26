@@ -5,7 +5,7 @@
                 <div class="card-title mb-0"><b>TRANSAKSI DARI TOKO</b></div>
             </div>
             <div class="card-body">
-                <form @submit.prevent="paymentOfftake">
+                <form @submit.prevent="paymentPembelian">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="kode" class="form-label">Kode Transaksi</label>
@@ -56,6 +56,7 @@ const {
     formDariToko,
     isLoading,
     errors,
+    paymentPembelian,
     fetchKodeTransaksi,
 } = usePembelianDariToko();
 
