@@ -119,6 +119,11 @@ const routes = [
                 name: 'offtake',
                 component: () => import('@/modules/offtake/views/OfftakeView.vue')
             },
+            {
+                path: 'pembeliandaritoko',
+                name: 'pembeliandaritoko',
+                component: () => import('@/modules/pembeliandaritoko/views/PembelianDariTokoView.vue')
+            },
         ]
     }
 ];

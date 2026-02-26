@@ -23,7 +23,7 @@ return new class extends Migration
             $table->integer('total');
             $table->string('terbilang', 100);
             $table->unsignedBigInteger('oleh');
-            $table->integer('status');
+            $table->integer('status')->default(1);
             $table->timestamps();
 
             $table->foreign('kode')->references('kode')->on('offtake')->onDelete('cascade');

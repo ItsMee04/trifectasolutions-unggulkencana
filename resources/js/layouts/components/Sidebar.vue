@@ -119,14 +119,12 @@ const menuGroups = {
         menus: {
             pos: { label: 'POS', icon: 'hard-drive', path: '/pos' },
             offtake: { label: 'Offtake', icon: 'pocket', path: '/offtake' },
-            usermanagement: {
-                label: 'User Management',
-                icon: 'users',
+            pembelian: {
+                label: 'Pembelian',
+                icon: 'shopping-bag',
                 submenus: [
-                    { name: 'Jabatan', path: '/jabatan' },
-                    { name: 'Pegawai', path: '/pegawai' },
-                    { name: 'Role', path: '/role' },
-                    { name: 'User', path: '/users' },
+                    { name: 'Pembelian Dari Toko', path: '/pembeliandaritoko' },
+                    { name: 'Pembelian Luar Toko', path: '/pembelianluartoko' }
                 ]
             },
             product: {
