@@ -124,7 +124,7 @@ const menuGroups = {
                 icon: 'shopping-bag',
                 submenus: [
                     { name: 'Pembelian Dari Toko', path: '/pembeliandaritoko' },
-                    { name: 'Pembelian Luar Toko', path: '/pembelianluartoko' }
+                    { name: 'Pembelian Dari Luar Toko', path: '/pembeliandariluartoko' }
                 ]
             },
             product: {

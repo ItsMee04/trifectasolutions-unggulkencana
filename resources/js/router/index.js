@@ -124,6 +124,11 @@ const routes = [
                 name: 'pembeliandaritoko',
                 component: () => import('@/modules/pembeliandaritoko/views/PembelianDariTokoView.vue')
             },
+            {
+                path: 'pembeliandariluartoko',
+                name: 'pembeliandariluartoko',
+                component: () => import('@/modules/pembeliandariluartoko/views/PembelianDariLuarTokoView.vue')
+            },
         ]
     }
 ];
