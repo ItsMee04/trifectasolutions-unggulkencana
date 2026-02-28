@@ -15,7 +15,7 @@
                 </li>
             </ul>
             <div class="page-btn import">
-                <a href="#" class="btn btn-added color" @click="handleCreate">
+                <a href="#" class="btn btn-added color" @click="handleCreateProduk">
                     <i data-feather="plus-circle" class="me-2"></i>Tambah Produk
                 </a>
             </div>
@@ -26,10 +26,15 @@
         </div>
     </div>
 
-    <!-- <NampanModal /> -->
+    <PembelianDariLuarTokoModal />
 </template>
 <script setup>
 import { usePembelianDariLuarToko } from '../composables/usePembelianDariLuarToko';
 
 import PembelianDariLuarTokoForm from '../components/PembelianDariLuarTokoForm.vue';
+import PembelianDariLuarTokoModal from '../components/PembelianDariLuarTokoModal.vue';
+
+const {
+    handleCreateProduk,
+} = usePembelianDariLuarToko();
 </script>

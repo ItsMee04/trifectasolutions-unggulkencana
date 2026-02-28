@@ -95,9 +95,9 @@ import PelangganModal from '../../pelanggan/components/PelangganModal.vue'
 const {
     formDariLuarToko,
     isLoading,
-    isFetchingList,    // <--- Tambahkan ini
-    supplierOptions,   // <--- Tambahkan ini
-    pelangganOptions,  // <--- Tambahkan ini
+    isFetchingList,
+    supplierOptions,
+    pelangganOptions,
     errors,
     paymentPembelian,
     fetchKodeTransaksi,

@@ -24,6 +24,11 @@ const formDariLuarToko = reactive({
     keterangan: ''
 });
 
+const formProduk = reactive({
+    nama: '',
+    berat: ''
+});
+
 export function usePembelianDariLuarToko() {
 
     const { handleCreate: openSuplierModal } = useSuplier();
@@ -99,6 +104,13 @@ export function usePembelianDariLuarToko() {
         await fetchOptions('pelanggan');
     }
 
+    const handleCreateProduk = () => {
+        isEdit.value = false;
+        formProduk.nama = '';
+        const modal = new bootstrap.Modal(document.getElementById('produkModal'));
+        modal.show();
+    };
+
     watch(
         () => formDariLuarToko.sumber,
         (newType) => {
@@ -120,5 +132,11 @@ export function usePembelianDariLuarToko() {
         fetchKodeTransaksi,
         handleCreateSuplier,
         handleCreatePelanggan,
+
+
+        isEdit,
+        isLoading,
+        formProduk,
+        handleCreateProduk,
     };
 }
