@@ -36,8 +36,7 @@
                             <div v-if="formDariLuarToko.sumber === 'supplier'">
                                 <div class="add-newplus">
                                     <label class="form-label">Pilih Suplier</label>
-                                    <a href="javascript:void(0);" data-bs-toggle="modal"
-                                        data-bs-target="#add-units-category"><i data-feather="plus-circle"
+                                    <a @click="handleCreateSuplier"><i data-feather="plus-circle"
                                             class="plus-down-add"></i><span class="text-secondary">Tambah Suplier</span></a>
                                 </div>
                                 <Multiselect v-model="formDariLuarToko.selectedId" :options="supplierOptions"
@@ -48,8 +47,7 @@
                             <div v-if="formDariLuarToko.sumber === 'pelanggan'">
                                 <div class="add-newplus">
                                     <label class="form-label">Pilih Pelanggan</label>
-                                    <a href="javascript:void(0);" data-bs-toggle="modal"
-                                        data-bs-target="#add-units-category"><i data-feather="plus-circle"
+                                    <a @click="handleCreatePelanggan"><i data-feather="plus-circle"
                                             class="plus-down-add"></i><span class="text-secondary">Tambah Pelanggan</span></a>
                                 </div>
                                 <Multiselect v-model="formDariLuarToko.selectedId" :options="pelangganOptions"
@@ -79,14 +77,20 @@
             </div>
         </div>
     </div>
+
+    <SuplierModal />
+    <PelangganModal />
 </template>
 
 <script setup>
 import { onMounted } from 'vue';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.css';
+
 import { usePembelianDariLuarToko } from '../composables/usePembelianDariLuarToko';
 // import PembelianDariTokoTable from './PembelianDariTokoTable.vue';
+import SuplierModal from '../../suplier/components/SuplierModal.vue'
+import PelangganModal from '../../pelanggan/components/PelangganModal.vue'
 
 const {
     formDariLuarToko,
@@ -97,6 +101,8 @@ const {
     errors,
     paymentPembelian,
     fetchKodeTransaksi,
+    handleCreatePelanggan,
+    handleCreateSuplier,
 } = usePembelianDariLuarToko();
 
 onMounted(() => {

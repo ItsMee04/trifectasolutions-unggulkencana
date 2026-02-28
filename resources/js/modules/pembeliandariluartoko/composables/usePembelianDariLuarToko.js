@@ -1,4 +1,4 @@
-import { ref, computed, reactive, watch } from 'vue';
+import { ref, onMounted, onUnmounted, computed, reactive, watch } from 'vue';
 import toast from '../../../helper/toast';
 import Swal from 'sweetalert2';
 
@@ -6,6 +6,10 @@ import { pembeliandariluartokoService } from '../services/pembeliandariluartokoS
 import { suplierService } from '../../../modules/suplier/services/suplierService'
 import { pelangganService } from '../../../modules/pelanggan/services/pelangganService'
 
+import { useSuplier } from '../../suplier/composables/useSuplier';
+import { usePelanggan } from '../../pelanggan/composables/usePelanggan';
+
+const isEdit = ref (false);
 const isLoading = ref(false);
 const PembelianDariLuarToko = ref([]);
 const isFetchingList = ref(false);
@@ -21,6 +25,9 @@ const formDariLuarToko = reactive({
 });
 
 export function usePembelianDariLuarToko() {
+
+    const { handleCreate: openSuplierModal } = useSuplier();
+    const { handleCreate: openPelangganModal } = usePelanggan();
 
     const fetchKodeTransaksi = async () => {
         formDariLuarToko.kode = "Memuat data...";
@@ -65,6 +72,33 @@ export function usePembelianDariLuarToko() {
         }
     };
 
+    // LOGIC OTOMATIS: Tanpa ubah komponen lain
+    const handleModalClosed = (event) => {
+        // Jika modal yang ditutup adalah modal suplier atau pelanggan
+        // Kita trigger fetch ulang agar data terbaru masuk
+        fetchOptions(formDariLuarToko.sumber);
+    };
+
+    onMounted(() => {
+        // Listen ke event global 'hidden.bs.modal' milik Bootstrap
+        // Event ini terpicu otomatis setiap kali modal APAPUN ditutup
+        document.addEventListener('hidden.bs.modal', handleModalClosed);
+    });
+
+    onUnmounted(() => {
+        document.removeEventListener('hidden.bs.modal', handleModalClosed);
+    });
+
+    const handleCreateSuplier = async () => {
+        openSuplierModal();
+       await fetchOptions('supplier');
+    }
+
+    const handleCreatePelanggan = async () => {
+        openPelangganModal();
+        await fetchOptions('pelanggan');
+    }
+
     watch(
         () => formDariLuarToko.sumber,
         (newType) => {
@@ -84,5 +118,7 @@ export function usePembelianDariLuarToko() {
         pelangganOptions,
         formDariLuarToko,
         fetchKodeTransaksi,
+        handleCreateSuplier,
+        handleCreatePelanggan,
     };
 }
