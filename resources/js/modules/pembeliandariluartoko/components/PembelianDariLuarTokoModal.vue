@@ -16,7 +16,7 @@
                                 </button>
                             </div>
                             <div class="modal-body custom-modal-body">
-                                <form @submit.prevent="handleSubmit">
+                                <form @submit.prevent="handleSubmitProduk">
                                     <div class="mb-3">
                                         <label for="namaProduk" class="form-label">Nama</label>
                                         <input type="text" class="form-control" id="namaProduk"
@@ -41,8 +41,8 @@
                                                 <Multiselect v-model="formProduk.jenisproduk" :options="jenisprodukList"
                                                     :searchable="true" label="label" track-by="value"
                                                     placeholder="Pilih jenis produk" id="jenisProduk" />
-                                                <div class="invalid-feedback" v-if="errors.jenisproduk">{{
-                                                    errors.jenisproduk }}
+                                                <div class="invalid-feedback d-block" v-if="errors.jenisproduk">
+                                                    {{ errors.jenisproduk }}
                                                 </div>
                                             </div>
                                         </div>
@@ -73,10 +73,24 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="hargaProduk" class="form-label">Harga</label>
-                                        <input type="text" class="form-control" id="hargaProduk"
-                                            v-model="formProduk.harga_display" readonly>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="kondisi" class="form-label">Kondisi</label>
+                                            <Multiselect v-model="formProduk.kondisi" :options="kondisiList"
+                                                :searchable="true" label="label" track-by="value"
+                                                placeholder="Pilih kondisi" id="kondisi" />
+                                            <div class="invalid-feedback d-block" v-if="errors.kondisi">
+                                                {{ errors.kondisi }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="hargaProduk" class="form-label">Harga Beli</label>
+                                            <input type="text" class="form-control" id="lingkarProduk"
+                                                v-model="formProduk.hargabeli" placeholder="Masukkan harga beli"
+                                                :class="{ 'is-invalid': errors.hargabeli }">
+                                            <div class="invalid-feedback" v-if="errors.hargabeli">{{ errors.hargabeli }}
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-sm-6 col-12">
@@ -84,7 +98,7 @@
                                                 <label for="lingkarProduk" class="form-label">Lingkar</label>
                                                 <input type="text" class="form-control" id="lingkarProduk"
                                                     v-model="formProduk.lingkar" placeholder="Masukkan lingkar"
-                                                    :class="{ 'is-invalid': errors.berat }">
+                                                    :class="{ 'is-invalid': errors.lingkar }">
                                                 <div class="invalid-feedback" v-if="errors.lingkar">{{ errors.lingkar }}
                                                 </div>
                                             </div>
@@ -102,8 +116,8 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="keterangan" class="form-label">Keterangan</label>
-                                        <textarea v-model="formProduk.keterangan" class="form-control" rows="4" cols="4"
-                                            id="keterangan"></textarea>
+                                        <textarea v-model="formProduk.keteranganproduk" class="form-control" rows="4"
+                                            cols="4" id="keterangan"></textarea>
                                     </div>
                                     <div class="modal-footer-btn">
                                         <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
@@ -123,12 +137,32 @@
     </teleport>
 </template>
 <script setup>
+import { onMounted } from 'vue';
 import { usePembelianDariLuarToko } from '../composables/usePembelianDariLuarToko';
+import Multiselect from 'vue-multiselect';
+import 'vue-multiselect/dist/vue-multiselect.css';
 
-const { isLoading, formProduk, errors, isEdit, submitKondisi } = usePembelianDariLuarToko();
+const {
+    isLoading,
+    formProduk,
+    errors,
+    isEdit,
+    jenisprodukList,
+    karatList,
+    jeniskaratList,
+    kondisiList,
+    fetchJenisKarat,
+    fetchKarat,
+    fetchJenisProduk,
+    fetchKondisi,
+    handleKaratChange,
+    handleSubmitProduk,
+} = usePembelianDariLuarToko();
 
-const handleSubmit = async () => {
-    // await submitKondisi();
-};
-
+onMounted(() => {
+    fetchJenisProduk();
+    fetchKarat();
+    fetchJenisKarat();
+    fetchKondisi();
+})
 </script>

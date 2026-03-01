@@ -9,29 +9,31 @@ class PembelianService
 {
     public function generateKodeTransaksi()
     {
-        // 1. Ambil tanggal hari ini dalam format Ymd (contoh: 20251025)
+        // 1. Ambil tanggal hari ini (contoh: 20260301)
         $today = Carbon::now()->format('Ymd');
-        $prefix = 'PM-' . $today . '-';
+        $prefixToday = 'PM-' . $today . '-';
 
-        // 2. Cari transaksi terakhir yang kodenya mirip dengan prefix hari ini
-        // Ini penting agar nomor urut di-reset setiap hari
-        $lastRecord = Pembelian::where('kode', 'like', $prefix . '%')
-            ->orderBy('id', 'desc')
+        // 2. Ambil kode terakhir secara alfabetis (Global)
+        // Kita mencari kode yang berawalan 'TR-'
+        $lastRecord = Pembelian::where('kode', 'like', 'PM-%')
+            ->orderBy('kode', 'desc')
             ->first();
 
         if (!$lastRecord) {
-            // Jika belum ada transaksi hari ini, mulai dari 1
+            // Jika benar-benar data pertama
             $nextNumber = 1;
         } else {
-            // Mengambil angka urut dari bagian terakhir setelah dash (-) ketiga
-            // Contoh: TR-20251025-0000001 -> diambil 0000001 nya
+            // Pecah kode terakhir (contoh: TR-20260301-0000005)
             $segments = explode('-', $lastRecord->kode);
+
+            // Ambil bagian terakhir (0000005), lalu convert ke integer agar bisa dijumlah
             $lastNumber = (int) end($segments);
             $nextNumber = $lastNumber + 1;
         }
 
-        // 3. Format: TR-TANGGAL-angka 7 digit (contoh: TR-20251025-0000001)
-        return $prefix . str_pad($nextNumber, 7, '0', STR_PAD_LEFT);
+        // 3. Gabungkan prefix hari ini dengan urutan baru (tetap 7 digit)
+        // Hasilnya: TR-20260301-0000006
+        return $prefixToday . str_pad($nextNumber, 7, '0', STR_PAD_LEFT);
     }
 
     public function terbilang($angka)

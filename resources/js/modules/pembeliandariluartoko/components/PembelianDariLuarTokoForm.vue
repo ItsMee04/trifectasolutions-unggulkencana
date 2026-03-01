@@ -11,6 +11,8 @@
                         <input type="text" class="form-control" id="kode" v-model="formDariLuarToko.kode" readonly>
                     </div>
 
+                    <PembelianDariLuarTokoTable />
+
                     <div class="mb-3">
                         <label class="form-label d-block">Pembelian Dari</label>
                         <div class="d-flex align-items-center gap-4">
@@ -88,7 +90,7 @@ import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.css';
 
 import { usePembelianDariLuarToko } from '../composables/usePembelianDariLuarToko';
-// import PembelianDariTokoTable from './PembelianDariTokoTable.vue';
+import PembelianDariLuarTokoTable from './PembelianDariLuarTokoTable.vue';
 import SuplierModal from '../../suplier/components/SuplierModal.vue'
 import PelangganModal from '../../pelanggan/components/PelangganModal.vue'
 

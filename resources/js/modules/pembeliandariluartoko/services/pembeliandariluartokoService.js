@@ -18,7 +18,7 @@ export const pembeliandariluartokoService = {
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
     async getPembelianDetail() {
-        const response = await apiClient.get('/pembelianluar/getPembelianDetail');
+        const response = await apiClient.get('/pembelianluar/getPembelianDetailDariLuar');
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
     async updatePembelianDetail(payload) {

@@ -302,7 +302,7 @@ class PembelianController extends Controller
             // 2. Cari Header Pembelian
             $pembelian = Pembelian::where('kode', $request->kode)->firstOrFail();
 
-            // 3. Ambil Semua Detail Pembelian (Bisa banyak produk dalam satu nota)
+            // 3. Ambil Semua Detail Pembelian
             $details = PembelianDetail::where('kode', $request->kode)
                 ->where('status', 1)
                 ->get();
@@ -314,41 +314,35 @@ class PembelianController extends Controller
             foreach ($details as $item) {
                 $produk = Produk::findOrFail($item->produk_id);
 
-                // LOGIKA KONDISI BARANG
+                // --- LOGIKA PERBAIKAN & PENCUCIAN ---
+                // Tentukan keterangan berdasarkan kondisi_id
                 if ($item->kondisi_id == 1) {
-                    // KONDISI BAIK: Produk kembali aktif di stok toko
-                    $produk->update([
-                        'status'    => 1, // Aktif kembali
-                        'hargabeli' => $item->hargabeli, // Update harga beli terakhir
-                    ]);
-
-                    // Opsional: Masukkan kembali ke Nampan default/awal jika ada logika nampan
-                    /*
-                DB::table('nampanproduk')->insert([
-                    'nampan_id' => 1, // Nampan default stok masuk
-                    'produk_id' => $produk->id,
-                    'jenis'     => 'MASUK',
-                    'tanggal'   => now(),
-                    'oleh'      => Auth::id(),
-                    'status'    => 1
-                ]);
-                */
+                    // KONDISI BAIK: Masuk perbaikan dengan catatan Pencucian
+                    $keteranganPerbaikan = "PENCUCIAN: Barang masuk dari pembelian " . $pembelian->kode;
                 } else {
-                    // KONDISI RUSAK/LAINNYA: Produk dinonaktifkan dari stok utama
-                    $produk->update(['status' => 0]);
-
-                    // --- HIGHLIGHT: INSERT KE TABEL PERBAIKAN (SOON) ---
-                    /*
-                DB::table('perbaikan')->insert([
-                    'produk_id'    => $produk->id,
-                    'pembelian_id' => $pembelian->id,
-                    'kondisi_id'   => $item->kondisi_id,
-                    'tanggal'      => now(),
-                    'status'       => 1, // Status: Menunggu Perbaikan
-                    'keterangan'   => "Beli dari pelanggan dalam kondisi rusak: " . $item->keterangan
-                ]);
-                */
+                    // KONDISI RUSAK: Masuk perbaikan dengan catatan Dilebur
+                    $keteranganPerbaikan = "DILEBUR: Barang masuk dari pembelian " . $pembelian->kode . ". Catatan: " . ($item->keterangan ?? 'Rusak');
                 }
+
+                // Update Master Produk ke Status 2 (Dalam Perbaikan/Karantina)
+                $produk->update([
+                    'status'    => 2,
+                    'hargabeli' => $item->hargabeli,
+                ]);
+
+                // // INSERT KE TABEL PERBAIKAN
+                // DB::table('perbaikan')->insert([
+                //     'kode'          => 'PBK-' . now()->format('Ymd') . '-' . str_pad($produk->id, 5, '0', STR_PAD_LEFT),
+                //     'produk_id'     => $produk->id,
+                //     'kondisi_id'    => $item->kondisi_id,
+                //     'keterangan'    => $keteranganPerbaikan,
+                //     'tanggalmasuk'  => now(),
+                //     'tanggalkeluar' => null,
+                //     'oleh'          => Auth::id(),
+                //     'status'        => 1, // Status: Proses
+                //     'created_at'    => now(),
+                //     'updated_at'    => now(),
+                // ]);
 
                 // Update status detail menjadi lunas/selesai
                 $item->update(['status' => 2]);
@@ -356,7 +350,7 @@ class PembelianController extends Controller
 
             // 4. Update Header Pembelian
             $pembelian->update([
-                'keterangan'   => $request->keterangan,
+                'keterangan'   => $request->keterangan ?? $pembelian->keterangan,
                 'status'       => 2, // Lunas
                 'tanggal'      => now(),
             ]);
@@ -366,7 +360,7 @@ class PembelianController extends Controller
                 'saldo_id'   => $saldoAktif->id,
                 'tanggal'    => now()->format('Y-m-d'),
                 'keterangan' => "Pembelian produk (Buyback) Kode: " . $pembelian->kode,
-                'jenis'      => 'KELUAR', // Toko membayar ke pelanggan
+                'jenis'      => 'KELUAR',
                 'jumlah'     => $pembelian->total,
                 'oleh'       => Auth::id(),
                 'status'     => 1,
@@ -380,7 +374,7 @@ class PembelianController extends Controller
             DB::commit();
             return response()->json([
                 'status'  => true,
-                'message' => 'Transaksi Pembelian Berhasil. Saldo toko telah berkurang.'
+                'message' => 'Transaksi Pembelian Berhasil. Produk otomatis masuk ke daftar Perbaikan/Pencucian.'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -389,5 +383,27 @@ class PembelianController extends Controller
                 'message' => 'Gagal bayar pembelian: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getPembelianDetailDariLuar(Request $request)
+    {
+        $data = PembelianDetail::with(['produk', 'transaksi', 'produk.karat', 'pembelian.pelanggan'])
+            ->where('jenis', 'DARILUAR')
+            ->where('status', 1)
+            ->get();
+
+        if ($data->isEmpty()) {
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Data keranjang tidak ditemukan',
+                'data'      => []
+            ]);
+        }
+
+        return response()->json([
+            'status'    => true,
+            'message'   => 'Data keranjang berhasil diambil',
+            'data'      => $data
+        ], 200);
     }
 }

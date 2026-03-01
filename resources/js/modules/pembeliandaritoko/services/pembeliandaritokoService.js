@@ -17,8 +17,8 @@ export const pembeliandaritokoService = {
         const response = await apiClient.get('/pembelian/getOfftake');
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
-    async getPembelianDetail() {
-        const response = await apiClient.get('/pembelian/getPembelianDetail');
+    async getPembelianDetailDariLuar() {
+        const response = await apiClient.get('/pembelian/getPembelianDetailDariLuar');
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
     async updatePembelianDetail(payload) {
