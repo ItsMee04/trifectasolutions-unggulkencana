@@ -105,9 +105,11 @@ const {
     fetchKodeTransaksi,
     handleCreatePelanggan,
     handleCreateSuplier,
+    fetchOptions,
 } = usePembelianDariLuarToko();
 
 onMounted(() => {
     fetchKodeTransaksi();
+    fetchOptions();
 });
 </script>
