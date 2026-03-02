@@ -8,18 +8,23 @@ use App\Models\Transaksi\Pembelian;
 use App\Models\Transaksi\PembelianDetail;
 use App\Models\Transaksi\Transaksi;
 use App\Services\PembelianService;
+use App\Services\ProductService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Milon\Barcode\DNS1D;
 
 class PembelianController extends Controller
 {
     protected $pembelianService;
+    protected $productService;
 
     // Inject service melalui constructor
-    public function __construct(PembelianService $pembelianService)
+    public function __construct(PembelianService $pembelianService, ProductService $productService)
     {
         $this->pembelianService = $pembelianService;
+        $this->productService = $productService;
     }
 
     public function getKodeTransaksi()
@@ -159,7 +164,10 @@ class PembelianController extends Controller
 
     public function getPembelianDetail()
     {
-        $data = PembelianDetail::with(['produk', 'transaksi', 'produk.karat', 'pembelian.pelanggan'])->where('status', 1)->get();
+        $data = PembelianDetail::with(['produk', 'transaksi', 'produk.karat', 'pembelian.pelanggan'])
+            ->where('jenis', 'DARITOKO')
+            ->where('status', 1)
+            ->get();
 
         if ($data->isEmpty()) {
             return response()->json([
@@ -388,7 +396,7 @@ class PembelianController extends Controller
     public function getPembelianDetailDariLuar(Request $request)
     {
         $data = PembelianDetail::with(['produk', 'transaksi', 'produk.karat', 'pembelian.pelanggan'])
-            ->where('jenis', 'DARILUAR')
+            ->where('jenis', 'LUARTOKO')
             ->where('status', 1)
             ->get();
 
@@ -405,5 +413,111 @@ class PembelianController extends Controller
             'message'   => 'Data keranjang berhasil diambil',
             'data'      => $data
         ], 200);
+    }
+
+    public function storeProdukToPembelianDetailDariLuar(Request $request)
+    {
+        $request->validate([
+            'nama'          => 'required',
+            'berat'         => ['required', 'regex:/^\d+\.\d{1,}$/'],
+            'jenisproduk'   => 'required|exists:jenisproduk,id',
+            'karat'         => 'required|exists:karat,id',
+            'jeniskarat'    => 'required|exists:jeniskarat,id',
+            'lingkar'       => 'nullable|integer',
+            'panjang'       => 'nullable|integer',
+            'hargabeli'     => 'required|integer',
+            'keterangan'    => 'nullable|string',
+            'kode'          => 'required',
+        ]);
+
+        $exists = PembelianDetail::where('kode', $request->kode)->exists();
+
+        if ($exists) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Gagal: Transaksi ini sudah memiliki barang. Hanya diperbolehkan 1 barang per transaksi.'
+            ], 400);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // 1. Generate Kode & Barcode
+            $kodeproduk = $this->productService->generateUniqueCode();
+
+            $barcodeGenerator = new \Milon\Barcode\DNS1D();
+            $barcodeBase64 = $barcodeGenerator->getBarcodeJPG($kodeproduk, 'C128', 1.2, 20);
+            $barcodeData = base64_decode($barcodeBase64);
+            $barcodePath = 'images/barcode/' . $kodeproduk . '.jpg';
+
+            // Simpan Barcode ke Storage
+            Storage::disk('public')->put($barcodePath, $barcodeData);
+
+            // 2. Simpan ke Master Produk
+            $produk = Produk::create([
+                'kodeproduk'      => $kodeproduk,
+                'nama'            => strtoupper($request->nama),
+                'berat'           => $request->berat,
+                'jenisproduk_id'  => $request->jenisproduk,
+                'karat_id'        => $request->karat,
+                'jeniskarat_id'   => $request->jeniskarat,
+                'lingkar'         => $request->lingkar ?? 0,
+                'panjang'         => $request->panjang ?? 0,
+                'harga_id'        => $request->hargajual,
+                'hargabeli'       => $request->hargabeli,
+                'keterangan'      => strtoupper($request->keterangan),
+                'status'          => 0,
+            ]);
+
+            // 3. Ambil atau Buat Header Pembelian (Total tetap 0 sampai Payment)
+            $pembelian = Pembelian::firstOrCreate(
+                ['kode' => $request->kode],
+                [
+                    'tanggal'   => now(),
+                    'jenis'     => 'LUARTOKO',
+                    'total'     => 0,
+                    'terbilang' => 'nol rupiah',
+                    'oleh'      => Auth::id(),
+                    'status'    => 1, // Status draft/proses
+                ]
+            );
+
+            // 4. Insert ke PembelianDetail
+            $detail = new PembelianDetail();
+            $detail->kode       = $pembelian->kode;
+            $detail->produk_id  = $produk->id;
+            $detail->hargabeli  = $request->hargabeli;
+            $detail->berat      = $produk->berat;
+            // Gunakan ->karat (atau field nama pada tabel karat)
+            $detail->karat      = $produk->karat->karat ?? null;
+            $detail->lingkar    = $produk->lingkar;
+            $detail->panjang    = $produk->panjang;
+            $detail->kondisi_id = $produk->kondisi_id;
+            $detail->jenis      = 'LUARTOKO';
+            $detail->oleh       = Auth::id();
+            $detail->status     = 1;
+            $detail->save();
+
+            // SELESAI: Commit transaksi agar tersimpan permanen
+            DB::commit();
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Produk berhasil didaftarkan ke detail pembelian.',
+                'data'    => $detail
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Hapus file barcode jika gagal agar storage tidak "sampah"
+            if (isset($barcodePath)) {
+                Storage::disk('public')->delete($barcodePath);
+            }
+
+            return response()->json([
+                'status'  => false,
+                'message' => 'Gagal menyimpan data: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

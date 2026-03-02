@@ -336,15 +336,17 @@ export function useProduk() {
     }
 
     const totalPages = computed(() => {
+        const query = searchQuery.value.toLowerCase();
         const filteredCount = produk.value.filter(item =>
-            (item.nama || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            (item.berat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            (item.jenisproduk?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            (item.karat?.karat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            (item.jeniskarat?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            (item.lingkar || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            (item.panjang || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-            (item.keterangan || '').toLowerCase().includes(searchQuery.value.toLowerCase())
+            String(item.kodeproduk || '').toLowerCase().includes(query) ||
+            String(item.nama || '').toLowerCase().includes(query) ||
+            String(item.berat || '').toLowerCase().includes(query) || // Tambah String()
+            String(item.jenisproduk?.jenis || '').toLowerCase().includes(query) ||
+            String(item.karat?.karat || '').toLowerCase().includes(query) ||
+            String(item.jeniskarat?.jenis || '').toLowerCase().includes(query) ||
+            String(item.lingkar || '').toLowerCase().includes(query) || // Tambah String()
+            String(item.panjang || '').toLowerCase().includes(query) || // Tambah String()
+            String(item.keterangan || '').toLowerCase().includes(query)
         ).length;
         return Math.ceil(filteredCount / itemsPerPage) || 1;
     });
@@ -392,27 +394,29 @@ export function useProduk() {
         displayedPages,
         filteredProduk: computed(() => {
             return produk.value.filter(item =>
-                (item.nama || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.berat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.jenisproduk?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.karat?.karat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.jeniskarat?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.lingkar || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.panjang || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.keterangan || '').toLowerCase().includes(searchQuery.value.toLowerCase())
+                String(item.kodeproduk || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.nama || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.berat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.jenisproduk?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.karat?.karat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.jeniskarat?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.lingkar || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.panjang || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.keterangan || '').toLowerCase().includes(searchQuery.value.toLowerCase())
             ).slice((currentPage.value - 1) * itemsPerPage, currentPage.value * itemsPerPage);
         }),
         paginatedProduk: computed(() => {
             const start = (currentPage.value - 1) * itemsPerPage;
             return (produk.value.filter(item =>
-                (item.nama || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.berat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.jenisproduk?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.karat?.karat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.jeniskarat?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.lingkar || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.panjang || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                (item.keterangan || '').toLowerCase().includes(searchQuery.value.toLowerCase())
+                 String(item.kodeproduk || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.nama || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.berat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.jenisproduk?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.karat?.karat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.jeniskarat?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.lingkar || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.panjang || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                String(item.keterangan || '').toLowerCase().includes(searchQuery.value.toLowerCase())
             )).slice(start, start + itemsPerPage);
         }),
         handleCreate,

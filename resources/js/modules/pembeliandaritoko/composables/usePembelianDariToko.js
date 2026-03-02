@@ -263,6 +263,7 @@ export function usePembelianDariToko() {
 
         } catch (err) {
             // ... (Error handling)
+            toast.error(err)
         } finally {
             isLoadingPembelianDetail.value = false;
         }

@@ -9,6 +9,7 @@ import { kondisiService } from '../../kondisi/services/kondisiService'
 import { jenisprodukService } from '../../jenisproduk/services/jenisprodukService';
 import { jeniskaratService } from '../../jeniskarat/services/jeniskaratService';
 import { karatService } from '../../karat/services/karatService';
+import { hargaService } from '../../harga/services/hargaService';
 
 import { useSuplier } from '../../suplier/composables/useSuplier';
 import { usePelanggan } from '../../pelanggan/composables/usePelanggan';
@@ -49,6 +50,7 @@ const formProduk = reactive({
     jenisproduk: null,
     karat: null,
     kondisi: null,
+    hargajual: null,
     hargabeli: '',
     jeniskarat: null,
     lingkar: '',
@@ -77,20 +79,15 @@ export function usePembelianDariLuarToko() {
 
     // REVISI UTAMA: Fungsi Fetch dengan Guard Clause
     const fetchOptions = async (type = formDariLuarToko.sumber, force = false) => {
-        if (!type) return;
+        if (!type || isFetchingList.value) return;
 
-        // 1. Cegah request jika sedang berjalan
-        if (isFetchingList.value) return;
-
-        // 2. Caching: Cegah request jika data sudah ada, kecuali dipaksa (force)
+        // Caching logic: Jika tidak dipaksa (force) dan data sudah ada, jangan hit API
         if (!force) {
             if (type === 'supplier' && supplierOptions.value.length > 0) return;
             if (type === 'pelanggan' && pelangganOptions.value.length > 0) return;
         }
 
         isFetchingList.value = true;
-        // formDariLuarToko.selectedId = null; // Opsional: hapus jika ingin mempertahankan pilihan saat pindah tab
-
         try {
             if (type === 'supplier') {
                 const response = await suplierService.getSuplier();
@@ -98,7 +95,7 @@ export function usePembelianDariLuarToko() {
                     value: item.id,
                     label: item.nama
                 }));
-            } else if (type === 'pelanggan') { // Gunakan else if agar lebih eksplisit
+            } else {
                 const response = await pelangganService.getPelanggan();
                 pelangganOptions.value = response.data.map(item => ({
                     value: item.id,
@@ -108,10 +105,10 @@ export function usePembelianDariLuarToko() {
         } catch (error) {
             console.error("Gagal ambil list:", error);
         } finally {
-            // Gunakan durasi yang sangat singkat saja untuk transisi "Memuat data..."
+            // Berikan sedikit delay agar tidak terjadi spam klik/trigger
             setTimeout(() => {
                 isFetchingList.value = false;
-            }, 50);
+            }, 500);
         }
     };
 
@@ -194,7 +191,72 @@ export function usePembelianDariLuarToko() {
 
     const handleKaratChange = () => {
         formProduk.jeniskarat = null;
+        formProduk.hargajual = null;
     };
+
+    const fetchHargaOtomatis = async () => {
+        if (formProduk.karat?.value && formProduk.jeniskarat?.value) {
+            try {
+                const response = await hargaService.getHarga();
+                const dataHarga = Array.isArray(response) ? response : response.data;
+
+                // Cari data harga yang cocok
+                const found = dataHarga.find(h =>
+                    h.karat_id === formProduk.karat.value &&
+                    h.jeniskarat_id === formProduk.jeniskarat.value
+                );
+
+                if (found) {
+                    formProduk.harga_id = found.id; // ID untuk database
+                    formProduk.harga_display = found.harga; // Nominal untuk UI
+                } else {
+                    formProduk.harga_id = null;
+                    formProduk.harga_display = 'Harga belum diatur';
+                }
+            } catch (error) {
+                console.error("Gagal mengambil harga:", error);
+            }
+        }
+    };
+
+    let debounceTimer = null;
+    watch(
+        () => formDariLuarToko.sumber,
+        (newType) => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                if (newType) {
+                    // Saat pindah tipe (supplier <-> pelanggan), reset ID terpilih agar tidak crash
+                    formDariLuarToko.selectedId = null;
+                    fetchOptions(newType);
+                }
+            }, 300); // Tunggu 300ms
+        },
+        { immediate: false }
+    );
+
+    // 1. Tambahkan variabel penampung timer di atas (di luar return)
+    let hargaDebounceTimer = null;
+
+    // 2. Kembalikan Watcher Harga dengan proteksi Debounce
+    watch(
+        () => [formProduk.karat, formProduk.jeniskarat], // Pantau keduanya sekaligus
+        ([newKarat, newJenis]) => {
+            // Bersihkan timer sebelumnya
+            clearTimeout(hargaDebounceTimer);
+
+            // Hanya jalankan jika keduanya sudah dipilih
+            if (newKarat?.value && newJenis?.value) {
+                hargaDebounceTimer = setTimeout(() => {
+                    fetchHargaOtomatis();
+                }, 300); // Tunggu 300ms (mencegah double hit API)
+            } else {
+                formProduk.harga_id = null;
+                formProduk.harga_display = '';
+            }
+        },
+        { deep: true }
+    );
 
     // REVISI: Matikan immediate agar tidak bentrok dengan onMounted di View
     watch(
@@ -259,19 +321,49 @@ export function usePembelianDariLuarToko() {
 
     const handleSubmitProduk = async () => {
         if (!validateForm()) return false;
-        const payload = {
-            nama: formProduk.nama,
-            berat: formProduk.berat,
-            jenisproduk: formProduk.jenisproduk.value,
-            karat: formProduk.karat.value,
-            jeniskarat: formProduk.jeniskarat.value,
-            kondisi: formProduk.kondisi.value,
-            hargabeli: formProduk.hargabeli,
-            lingkar: formProduk.lingkar,
-            panjang: formProduk.panjang,
-            keterangan: formProduk.keteranganproduk
+        isLoadingPembelianDetail.value = true;
+        try {
+            const payload = {
+                kode: formDariLuarToko.kode,
+                nama: formProduk.nama,
+                berat: formProduk.berat,
+                jenisproduk: formProduk.jenisproduk.value,
+                karat: formProduk.karat.value,
+                jeniskarat: formProduk.jeniskarat.value,
+                kondisi: formProduk.kondisi.value,
+                hargabeli: formProduk.hargabeli,
+                hargajual: formProduk.harga_id,
+                lingkar: formProduk.lingkar,
+                panjang: formProduk.panjang,
+                keterangan: formProduk.keteranganproduk
+            }
+
+            const response = await pembeliandariluartokoService.storeProdukToPembelianDetail(payload);
+
+            if (response.status) {
+                toast.success(response.message);
+
+                // Tutup Modal
+                const modalElement = document.getElementById('produkModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                if (modalInstance) modalInstance.hide();
+
+                // Refresh tabel agar total & terbilang terbaru muncul
+                await fetchPembelianDetail();
+            } else {
+                toast.error(response.message)
+            }
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || error.message || "Gagal menyimpan transaksi";
+            toast.error(errorMessage);
+
+            // Opsional: Jika ingin menampilkan error validasi field secara detail
+            if (error.response?.status === 400 && error.response.data.errors) {
+                errors.value = error.response.data.errors;
+            }
+        } finally {
+            isLoadingPembelianDetail.value = false;
         }
-        console.log(payload)
     }
 
     const fetchPembelianDetail = async () => {

@@ -111,10 +111,7 @@ const {
 } = usePembelianDariLuarToko();
 
 onMounted(async () => {
-    // Jalankan secara paralel untuk efisiensi
-    await Promise.all([
-        fetchKodeTransaksi(),
-        fetchOptions() // Sekarang otomatis memproses 'supplier' karena default state
-    ]);
+    await fetchKodeTransaksi();
+    await fetchOptions('supplier');
 });
 </script>

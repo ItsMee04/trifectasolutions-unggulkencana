@@ -10,7 +10,7 @@ export const pembeliandariluartokoService = {
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
     async storeProdukToPembelianDetail(payload) {
-        const response = await apiClient.post('/pembelianluar/storeProdukToPembelianDetail', payload);
+        const response = await apiClient.post('/pembelianluar/storeProdukToPembelianDetailDariLuar', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
     async getPembelian() {
