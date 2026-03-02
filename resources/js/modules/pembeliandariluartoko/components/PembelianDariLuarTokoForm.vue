@@ -39,7 +39,8 @@
                                 <div class="add-newplus">
                                     <label class="form-label">Pilih Suplier</label>
                                     <a @click="handleCreateSuplier"><i data-feather="plus-circle"
-                                            class="plus-down-add"></i><span class="text-secondary">Tambah Suplier</span></a>
+                                            class="plus-down-add"></i><span class="text-secondary">Tambah
+                                            Suplier</span></a>
                                 </div>
                                 <Multiselect v-model="formDariLuarToko.selectedId" :options="supplierOptions"
                                     :searchable="true" label="label" track-by="value" placeholder="Pilih suplier"
@@ -50,7 +51,8 @@
                                 <div class="add-newplus">
                                     <label class="form-label">Pilih Pelanggan</label>
                                     <a @click="handleCreatePelanggan"><i data-feather="plus-circle"
-                                            class="plus-down-add"></i><span class="text-secondary">Tambah Pelanggan</span></a>
+                                            class="plus-down-add"></i><span class="text-secondary">Tambah
+                                            Pelanggan</span></a>
                                 </div>
                                 <Multiselect v-model="formDariLuarToko.selectedId" :options="pelangganOptions"
                                     :searchable="true" label="label" track-by="value" placeholder="Pilih pelanggan"
@@ -108,8 +110,11 @@ const {
     fetchOptions,
 } = usePembelianDariLuarToko();
 
-onMounted(() => {
-    fetchKodeTransaksi();
-    fetchOptions();
+onMounted(async () => {
+    // Jalankan secara paralel untuk efisiensi
+    await Promise.all([
+        fetchKodeTransaksi(),
+        fetchOptions() // Sekarang otomatis memproses 'supplier' karena default state
+    ]);
 });
 </script>

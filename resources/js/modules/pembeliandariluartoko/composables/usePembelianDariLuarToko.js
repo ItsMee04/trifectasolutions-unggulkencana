@@ -76,20 +76,20 @@ export function usePembelianDariLuarToko() {
     };
 
     // REVISI UTAMA: Fungsi Fetch dengan Guard Clause
-    const fetchOptions = async (type, force = false) => {
+    const fetchOptions = async (type = formDariLuarToko.sumber, force = false) => {
         if (!type) return;
 
-        // 1. Cegah request jika sedang berjalan (Mencegah 3x panggil sekaligus)
+        // 1. Cegah request jika sedang berjalan
         if (isFetchingList.value) return;
 
-        // 2. Cegah request jika data sudah ada (Caching), kecuali dipaksa (force)
+        // 2. Caching: Cegah request jika data sudah ada, kecuali dipaksa (force)
         if (!force) {
             if (type === 'supplier' && supplierOptions.value.length > 0) return;
             if (type === 'pelanggan' && pelangganOptions.value.length > 0) return;
         }
 
         isFetchingList.value = true;
-        formDariLuarToko.selectedId = null;
+        // formDariLuarToko.selectedId = null; // Opsional: hapus jika ingin mempertahankan pilihan saat pindah tab
 
         try {
             if (type === 'supplier') {
@@ -98,7 +98,7 @@ export function usePembelianDariLuarToko() {
                     value: item.id,
                     label: item.nama
                 }));
-            } else {
+            } else if (type === 'pelanggan') { // Gunakan else if agar lebih eksplisit
                 const response = await pelangganService.getPelanggan();
                 pelangganOptions.value = response.data.map(item => ({
                     value: item.id,
@@ -108,10 +108,10 @@ export function usePembelianDariLuarToko() {
         } catch (error) {
             console.error("Gagal ambil list:", error);
         } finally {
-            // Beri sedikit delay pada flag loading agar tidak terjadi race condition
+            // Gunakan durasi yang sangat singkat saja untuk transisi "Memuat data..."
             setTimeout(() => {
                 isFetchingList.value = false;
-            }, 300);
+            }, 50);
         }
     };
 
