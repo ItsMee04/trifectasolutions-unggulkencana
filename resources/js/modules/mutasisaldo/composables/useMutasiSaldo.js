@@ -104,11 +104,11 @@ export function useMutasiSaldo() {
     const handleEdit = (item) => {
         isEdit.value = true;
         errors.value = {};
-        fetchMutasiSaldo.id = item.id;
+        formMutasiSaldo.id = item.id;
         // 2. Set Karat terlebih dahulu
         const selectedSaldo = saldoList.value.find(s => s.value === item.saldo_id);
         if (selectedSaldo) {
-            fetchMutasiSaldo.saldo = selectedSaldo;
+            formMutasiSaldo.saldo = selectedSaldo;
         }
         formMutasiSaldo.tanggal = item.tanggal;
         formMutasiSaldo.keterangan = item.keterangan;

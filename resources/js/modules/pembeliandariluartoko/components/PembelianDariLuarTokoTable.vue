@@ -153,8 +153,8 @@ const {
     totalPagesPembelianDetail,
     displayedPagesPembelianDetail,
     fetchPembelianDetail,
-    // handleEdit,
-    // handleDelete,
+    handleEdit,
+    handleDelete,
 } = usePembelianDariLuarToko();
 
 const { initFeather } = useFeather();

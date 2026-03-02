@@ -18,8 +18,8 @@ import { usePelanggan } from '../../pelanggan/composables/usePelanggan';
 const supplierOptions = ref([]);
 const pelangganOptions = ref([]);
 const isFetchingList = ref(false);
-
 const PembelianDariLuarToko = ref([]);
+const lastCompletedPembelianKode = ref('');
 
 // STATE MODAL & FORM
 const isEdit = ref(false);
@@ -29,6 +29,7 @@ const jenisprodukList = ref([]);
 const karatList = ref([]);
 const allJenisKarat = ref([]);
 const kondisiList = ref([]);
+const masterHarga = ref([]);
 
 // STATE TABEL
 const isLoadingPembelianDetail = ref(false);
@@ -139,9 +140,19 @@ export function usePembelianDariLuarToko() {
         // fetch sudah dihandle otomatis oleh handleModalClosed saat modal ditutup
     }
 
-    const handleCreateProduk = () => {
+    const handleCreateProduk = async () => {
         isEdit.value = false;
-        formProduk.nama = '';
+        resetFormProduk();
+
+        // Ambil data pendukung hanya saat modal mau tampil
+        await Promise.all([
+            fetchJenisProduk(),
+            fetchKarat(),
+            fetchJenisKarat(),
+            fetchKondisi(),
+            fetchMasterHarga() // Ambil list harga di sini
+        ]);
+
         const modal = new bootstrap.Modal(document.getElementById('produkModal'));
         modal.show();
     };
@@ -194,27 +205,34 @@ export function usePembelianDariLuarToko() {
         formProduk.hargajual = null;
     };
 
-    const fetchHargaOtomatis = async () => {
+    // Di dalam usePembelianDariLuarToko
+    const fetchMasterHarga = async () => {
+        // Jika data sudah ada, jangan ambil lagi
+        if (masterHarga.value.length > 0) return;
+
+        try {
+            const response = await hargaService.getHarga();
+            masterHarga.value = Array.isArray(response) ? response : response.data;
+        } catch (error) {
+            console.error("Gagal memuat master harga:", error);
+        }
+    };
+
+    // Ubah fetchHargaOtomatis menjadi pencarian LOKAL
+    const fetchHargaOtomatis = () => {
         if (formProduk.karat?.value && formProduk.jeniskarat?.value) {
-            try {
-                const response = await hargaService.getHarga();
-                const dataHarga = Array.isArray(response) ? response : response.data;
+            // Cari di variabel masterHarga (BUKAN panggil API)
+            const found = masterHarga.value.find(h =>
+                h.karat_id === formProduk.karat.value &&
+                h.jeniskarat_id === formProduk.jeniskarat.value
+            );
 
-                // Cari data harga yang cocok
-                const found = dataHarga.find(h =>
-                    h.karat_id === formProduk.karat.value &&
-                    h.jeniskarat_id === formProduk.jeniskarat.value
-                );
-
-                if (found) {
-                    formProduk.harga_id = found.id; // ID untuk database
-                    formProduk.harga_display = found.harga; // Nominal untuk UI
-                } else {
-                    formProduk.harga_id = null;
-                    formProduk.harga_display = 'Harga belum diatur';
-                }
-            } catch (error) {
-                console.error("Gagal mengambil harga:", error);
+            if (found) {
+                formProduk.harga_id = found.id;
+                formProduk.harga_display = found.harga;
+            } else {
+                formProduk.harga_id = null;
+                formProduk.harga_display = 'Harga belum diatur';
             }
         }
     };
@@ -240,20 +258,10 @@ export function usePembelianDariLuarToko() {
 
     // 2. Kembalikan Watcher Harga dengan proteksi Debounce
     watch(
-        () => [formProduk.karat, formProduk.jeniskarat], // Pantau keduanya sekaligus
-        ([newKarat, newJenis]) => {
-            // Bersihkan timer sebelumnya
-            clearTimeout(hargaDebounceTimer);
-
-            // Hanya jalankan jika keduanya sudah dipilih
-            if (newKarat?.value && newJenis?.value) {
-                hargaDebounceTimer = setTimeout(() => {
-                    fetchHargaOtomatis();
-                }, 300); // Tunggu 300ms (mencegah double hit API)
-            } else {
-                formProduk.harga_id = null;
-                formProduk.harga_display = '';
-            }
+        () => [formProduk.karat, formProduk.jeniskarat],
+        () => {
+            // Pencarian instan karena data sudah di memori
+            fetchHargaOtomatis();
         },
         { deep: true }
     );
@@ -319,6 +327,24 @@ export function usePembelianDariLuarToko() {
         return Object.keys(errors.value).length === 0;
     };
 
+    const resetFormProduk = () => {
+        // Reset semua field ke nilai awal
+        formProduk.nama = '';
+        formProduk.berat = '';
+        formProduk.jenisproduk = null;
+        formProduk.karat = null;
+        formProduk.jeniskarat = null;
+        formProduk.kondisi = null;
+        formProduk.hargabeli = '';
+        formProduk.harga_id = null;
+        formProduk.lingkar = '';
+        formProduk.panjang = '';
+        formProduk.keteranganproduk = '';
+
+        // Bersihkan error jika ada
+        errors.value = {};
+    };
+
     const handleSubmitProduk = async () => {
         if (!validateForm()) return false;
         isLoadingPembelianDetail.value = true;
@@ -338,7 +364,15 @@ export function usePembelianDariLuarToko() {
                 keterangan: formProduk.keteranganproduk
             }
 
-            const response = await pembeliandariluartokoService.storeProdukToPembelianDetail(payload);
+            let response;
+            if (isEdit.value) {
+                // Mode Edit: Kirim ID dan Payload
+                payload.id = formProduk.id;
+                response = await pembeliandariluartokoService.updatePembelianDetail(payload);
+            } else {
+                // Mode Tambah: Kirim Payload saja
+                response = await pembeliandariluartokoService.storeProdukToPembelianDetail(payload);
+            }
 
             if (response.status) {
                 toast.success(response.message);
@@ -347,6 +381,9 @@ export function usePembelianDariLuarToko() {
                 const modalElement = document.getElementById('produkModal');
                 const modalInstance = bootstrap.Modal.getInstance(modalElement);
                 if (modalInstance) modalInstance.hide();
+
+                // 2. RESET FORM DI SINI
+                resetFormProduk();
 
                 // Refresh tabel agar total & terbilang terbaru muncul
                 await fetchPembelianDetail();
@@ -377,6 +414,141 @@ export function usePembelianDariLuarToko() {
             isLoadingPembelianDetail.value = false;
         }
     }
+
+    const handleEdit = async (item) => {
+        isEdit.value = true;
+        errors.value = {};
+
+        // Ambil data produk dari item
+        const produk = item.produk;
+
+        // Data teks/angka biasa
+        formProduk.id = item.id;
+        formProduk.nama = produk.nama;
+        formProduk.berat = produk.berat;
+        formProduk.hargabeli = item.hargabeli;
+        formProduk.lingkar = produk.lingkar;
+        formProduk.panjang = produk.panjang;
+        formProduk.keteranganproduk = produk.keterangan;
+        formProduk.harga_id = produk.harga_id;
+
+        // --- PERBAIKAN MULTISELECT ---
+
+        // 1. Jenis Produk
+        // Cari di jenisprodukList berdasarkan id yang ada di produk
+        const foundJenis = jenisprodukList.value.find(jp => jp.value === produk.jenisproduk_id);
+        formProduk.jenisproduk = foundJenis ? foundJenis : null;
+
+        // 2. Karat
+        const foundKarat = karatList.value.find(k => k.value === produk.karat_id);
+        formProduk.karat = foundKarat ? foundKarat : null;
+
+        // 3. Jenis Karat
+        // Karena Jenis Karat bergantung pada Karat, kita pastikan allJenisKarat sudah terisi
+        const foundJenisKarat = allJenisKarat.value
+            .filter(jk => jk.karat_id === produk.karat_id)
+            .find(jk => jk.id === produk.jeniskarat_id);
+
+        formProduk.jeniskarat = foundJenisKarat ? { value: foundJenisKarat.id, label: foundJenisKarat.jenis } : null;
+
+        // 4. Kondisi
+        const foundKondisi = kondisiList.value.find(kon => kon.value === item.kondisi_id);
+        formProduk.kondisi = foundKondisi ? foundKondisi : null;
+
+        // Tampilkan Modal
+        const modal = new bootstrap.Modal(document.getElementById('produkModal'));
+        modal.show();
+    };
+
+    const handleDelete = async (item) => {
+        const result = await Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: `Data produk "${item.produk?.nama}" yang dihapus tidak dapat dikembalikan!`,
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#092139',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const payload = {
+                    id: item.id,
+                };
+                await pembeliandariluartokoService.batalPembelianDetail(payload);
+                toast.success('Data Pembelian berhasil dihapus.');
+                fetchPembelianDetail();
+                fetchKodeTransaksi();
+            } catch (error) {
+                console.log('Gagal menghapus data Pembelian:', error);
+                toast.error(error.response?.message || 'Gagal menghapus data.');
+            }
+        }
+    };
+
+    const paymentPembelian = async () => {
+        // 1. Validasi: Pastikan ID Supplier/Pelanggan sudah dipilih
+        if (!formDariLuarToko.selectedId) {
+            const tipe = formDariLuarToko.sumber === 'supplier' ? "Suplier" : "Pelanggan";
+            toast.error(`Silakan pilih ${tipe} terlebih dahulu sebelum bayar.`);
+            return;
+        }
+
+        // 2. Validasi: Pastikan ada barang di tabel (keranjang)
+        if (pembeliandetail.value.length === 0) {
+            toast.error("Keranjang masih kosong. Tambahkan produk terlebih dahulu.");
+            return;
+        }
+
+        isLoading.value = true;
+        try {
+            // --- PERBAIKAN DI SINI ---
+            // Kita ekstrak ID-nya saja. Jika terpilih objek, ambil .value-nya.
+            const actualId = formDariLuarToko.selectedId?.value || formDariLuarToko.selectedId;
+
+            // 3. Siapkan Payload untuk Backend
+            const payload = {
+                kode: formDariLuarToko.kode,
+                sumber: formDariLuarToko.sumber,
+                selectedId: actualId, // Sekarang bernilai integer (misal: 1)
+                keterangan: formDariLuarToko.keterangan
+            };
+            // -------------------------
+
+            const response = await pembeliandariluartokoService.paymentPembelian(payload);
+
+            if (response.status) {
+                toast.success("Transaksi Berhasil Disimpan!");
+
+                // 4. Reset Form & Refresh State
+                formDariLuarToko.selectedId = null;
+                formDariLuarToko.keterangan = '';
+
+                // Generate Kode Baru & Bersihkan Tabel
+                await fetchKodeTransaksi();
+                await fetchPembelianDetail();
+
+                // 5. Trigger Modal Selesai
+                const modalElement = document.getElementById('paymentCompleteModal');
+                if (modalElement) {
+                    const modalInstance = new bootstrap.Modal(modalElement);
+                    modalInstance.show();
+                }
+            }
+        } catch (error) {
+            console.error("Payment Error:", error);
+            toast.error(error.response?.data?.message || "Gagal memproses pembayaran");
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
+    const handleNextOrder = async () => {
+        await fetchKodeTransaksi();
+        toast.info("Siap untuk transaksi pembelian baru");
+    };
 
     const totalPagesPembelianDetail = computed(() => {
         const query = String(searchPembelianDetail.value || '').toLowerCase();
@@ -435,6 +607,10 @@ export function usePembelianDariLuarToko() {
         totalPagesPembelianDetail,
         displayedPagesPembelianDetail,
         fetchPembelianDetail,
+        handleEdit,
+        handleDelete,
+        paymentPembelian,
+        handleNextOrder,
         paginatedPembelianDetail: computed(() => {
             const query = String(searchPembelianDetail.value || '').toLowerCase();
             const filtered = (pembeliandetail.value || []).filter(item =>

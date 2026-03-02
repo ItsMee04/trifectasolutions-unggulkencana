@@ -27,12 +27,14 @@
     </div>
 
     <PembelianDariLuarTokoModal />
+    <PembelianPaymentCompleteModal />
 </template>
 <script setup>
 import { usePembelianDariLuarToko } from '../composables/usePembelianDariLuarToko';
 
 import PembelianDariLuarTokoForm from '../components/PembelianDariLuarTokoForm.vue';
 import PembelianDariLuarTokoModal from '../components/PembelianDariLuarTokoModal.vue';
+import PembelianPaymentCompleteModal from '../components/PembelianPaymentCompleteModal.vue';
 
 const {
     handleCreateProduk,
