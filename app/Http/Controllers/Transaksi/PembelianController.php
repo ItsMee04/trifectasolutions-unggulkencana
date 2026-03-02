@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Master\Produk;
 use App\Models\Transaksi\Pembelian;
 use App\Models\Transaksi\PembelianDetail;
+use App\Models\Transaksi\Perbaikan;
 use App\Models\Transaksi\Transaksi;
 use App\Services\PembelianService;
+use App\Services\PerbaikanService;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,12 +21,18 @@ class PembelianController extends Controller
 {
     protected $pembelianService;
     protected $productService;
+    protected $perbaikanService;
 
     // Inject service melalui constructor
-    public function __construct(PembelianService $pembelianService, ProductService $productService)
+    public function __construct(
+        PembelianService $pembelianService,
+        ProductService $productService,
+        PerbaikanService $perbaikanService
+        )
     {
         $this->pembelianService = $pembelianService;
         $this->productService = $productService;
+        $this->perbaikanService = $perbaikanService;
     }
 
     public function getKodeTransaksi()
@@ -338,19 +346,15 @@ class PembelianController extends Controller
                     'hargabeli' => $item->hargabeli,
                 ]);
 
-                // // INSERT KE TABEL PERBAIKAN
-                // DB::table('perbaikan')->insert([
-                //     'kode'          => 'PBK-' . now()->format('Ymd') . '-' . str_pad($produk->id, 5, '0', STR_PAD_LEFT),
-                //     'produk_id'     => $produk->id,
-                //     'kondisi_id'    => $item->kondisi_id,
-                //     'keterangan'    => $keteranganPerbaikan,
-                //     'tanggalmasuk'  => now(),
-                //     'tanggalkeluar' => null,
-                //     'oleh'          => Auth::id(),
-                //     'status'        => 1, // Status: Proses
-                //     'created_at'    => now(),
-                //     'updated_at'    => now(),
-                // ]);
+                Perbaikan::create([
+                    'kode'          => $this->perbaikanService->generateKodeTransaksi(),
+                    'produk_id'     => $produk->id,
+                    'kondisi_id'    => $item->kondisi_id,
+                    'keterangan'    => $keteranganPerbaikan,
+                    'tanggalmasuk'  => now(),
+                    'oleh'          => Auth::id(),
+                    'status'        => 1,
+                ]);
 
                 // Update status detail menjadi lunas/selesai
                 $item->update(['status' => 2]);
@@ -706,20 +710,15 @@ class PembelianController extends Controller
                     'hargabeli' => $item->hargabeli,
                 ]);
 
-                // OPTIONAL: Jika tabel perbaikan ingin diaktifkan, buka comment di bawah
-                /*
-            DB::table('perbaikan')->insert([
-                'kode'          => 'PBK-' . now()->format('Ymd') . '-' . str_pad($produk->id, 5, '0', STR_PAD_LEFT),
-                'produk_id'     => $produk->id,
-                'kondisi_id'    => $item->kondisi_id,
-                'keterangan'    => $keteranganPerbaikan,
-                'tanggalmasuk'  => now(),
-                'oleh'          => Auth::id(),
-                'status'        => 1,
-                'created_at'    => now(),
-                'updated_at'    => now(),
-            ]);
-            */
+                Perbaikan::create([
+                    'kode'          => $this->perbaikanService->generateKodeTransaksi(),
+                    'produk_id'     => $produk->id,
+                    'kondisi_id'    => $item->kondisi_id,
+                    'keterangan'    => $keteranganPerbaikan,
+                    'tanggalmasuk'  => now(),
+                    'oleh'          => Auth::id(),
+                    'status'        => 1,
+                ]);
 
                 // Update status detail menjadi lunas/selesai (Status 2)
                 $item->update(['status' => 2]);

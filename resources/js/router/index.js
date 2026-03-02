@@ -129,6 +129,11 @@ const routes = [
                 name: 'pembeliandariluartoko',
                 component: () => import('@/modules/pembeliandariluartoko/views/PembelianDariLuarTokoView.vue')
             },
+            {
+                path: 'perbaikan',
+                name: 'perbaikan',
+                component: () => import('@/modules/pembeliandariluartoko/views/PembelianDariLuarTokoView.vue')
+            },
         ]
     }
 ];

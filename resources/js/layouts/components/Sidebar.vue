@@ -127,40 +127,20 @@ const menuGroups = {
                     { name: 'Pembelian Dari Luar Toko', path: '/pembeliandariluartoko' }
                 ]
             },
-            product: {
-                label: 'Produk',
-                icon: 'archive',
-                submenus: [
-                    { name: 'Kondisi', path: '/kondisi' },
-                    { name: 'Karat', path: '/karat' },
-                    { name: 'Jenis Karat', path: '/jeniskarat' },
-                    { name: 'Harga', path: '/harga' },
-                    { name: 'Diskon', path: '/diskon' },
-                    { name: 'Jenis Produk', path: '/jenisproduk' },
-                    { name: 'Produk', path: '/produk' },
-                ]
-            },
+            perbaikan: { label: 'Perbaikan', icon: 'repeat', path: '/perbaikan' },
         }
     },
     sales: {
         header: 'Sales',
         menus: {
-            dashboard: { label: 'Dashboard', icon: 'grid', path: '/dashboard' },
+            transaksipenjualan: { label: 'Transaksi Pejualan', icon: 'arrow-left-circle', path: '/transaksipenjualan' },
+            transaksipembelian: { label: 'Transaksi Pembelian', icon: 'arrow-right-circle', path: '/transaksipembelian' },
+            transaksiofftake: { label: 'Transaksi Offtake', icon: 'arrow-up-circle', path: '/transaksiofftake' },
         }
     },
     Laporan: {
         header: 'Laporan',
         menus: {
-            usermanagement: {
-                label: 'User Management',
-                icon: 'users',
-                submenus: [
-                    { name: 'Jabatan', path: '/jabatan' },
-                    { name: 'Pegawai', path: '/pegawai' },
-                    { name: 'Role', path: '/role' },
-                    { name: 'User', path: '/user' },
-                ]
-            },
             product: {
                 label: 'Produk',
                 icon: 'archive',
