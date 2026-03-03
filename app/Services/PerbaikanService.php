@@ -15,7 +15,7 @@ class PerbaikanService
 
         // 2. Ambil kode terakhir secara alfabetis (Global)
         // Kita mencari kode yang berawalan 'TR-'
-        $lastRecord = Perbaikan::where('kode', 'like', 'TR-%')
+        $lastRecord = Perbaikan::where('kode', 'like', 'PB-%')
             ->orderBy('kode', 'desc')
             ->first();
 

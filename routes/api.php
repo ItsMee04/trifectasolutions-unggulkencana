@@ -21,6 +21,7 @@ use App\Http\Controllers\Master\SuplierController;
 use App\Http\Controllers\Master\UserController;
 use App\Http\Controllers\Transaksi\OfftakeController;
 use App\Http\Controllers\Transaksi\PembelianController;
+use App\Http\Controllers\Transaksi\PerbaikanController;
 use App\Http\Controllers\Transaksi\TransaksiController;
 use Illuminate\Support\Facades\Route;
 
@@ -162,6 +163,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('pembelianluar/updatePembelianDetailDariLuar', [PembelianController::class, 'updatePembelianDetailDariLuar']);
     Route::post('pembelianluar/batalPembelianDetailDariLuar', [PembelianController::class, 'batalPembelianDetailDariLuar']);
     Route::post('pembelianluar/paymentPembelianDariLuar', [PembelianController::class, 'paymentPembelianDariLuar']);
+
+    Route::get('perbaikan/getPerbaikan',[PerbaikanController::class, 'getPerbaikan']);
+    Route::post('perbaikan/finalPerbaikan',[PerbaikanController::class, 'finalPerbaikan']);
+    Route::post('perbaikan/batalPerbaikan',[PerbaikanController::class, 'batalPerbaikan']);
 });
 
 Route::get('/transaksi/{kode}/cetaknotatransaksi', [TransaksiController::class, 'PrintNotaTransaksi'])->name('produk.cetak_notatransaksi');

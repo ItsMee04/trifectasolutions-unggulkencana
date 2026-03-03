@@ -74,12 +74,9 @@
                                         </div>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="hargaProduk" class="form-label">Harga Beli</label>
+                                        <label for="hargaProduk" class="form-label">Harga Jual</label>
                                         <input type="text" class="form-control" id="hargaProduk"
-                                                    v-model="formProduk.hargabeli" placeholder="Masukkan harga beli"
-                                                    :class="{ 'is-invalid': errors.hargabeli }">
-                                                <div class="invalid-feedback" v-if="errors.hargabeli">{{ errors.hargabeli }}
-                                                </div>
+                                            v-model="formProduk.harga_display" readonly>
                                     </div>
                                     <div class="row">
                                         <div class="col-sm-6 col-12">
@@ -105,7 +102,8 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="keterangan" class="form-label">Keterangan</label>
-                                        <textarea v-model="formProduk.keterangan" class="form-control" rows="4" cols="4" id="keterangan"></textarea>
+                                        <textarea v-model="formProduk.keterangan" class="form-control" rows="4" cols="4"
+                                            id="keterangan"></textarea>
                                     </div>
                                     <div class="add-choosen">
                                         <div class="mb-3">

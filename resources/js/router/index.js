@@ -132,7 +132,7 @@ const routes = [
             {
                 path: 'perbaikan',
                 name: 'perbaikan',
-                component: () => import('@/modules/pembeliandariluartoko/views/PembelianDariLuarTokoView.vue')
+                component: () => import('@/modules/perbaikan/views/PerbaikanView.vue')
             },
         ]
     }
