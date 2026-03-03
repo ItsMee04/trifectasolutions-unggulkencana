@@ -134,6 +134,11 @@ const routes = [
                 name: 'perbaikan',
                 component: () => import('@/modules/perbaikan/views/PerbaikanView.vue')
             },
+            {
+                path: 'transaksipenjualan',
+                name: 'transaksipenjualan',
+                component: () => import('@/modules/transaksi/views/PenjualanView.vue')
+            },
         ]
     }
 ];

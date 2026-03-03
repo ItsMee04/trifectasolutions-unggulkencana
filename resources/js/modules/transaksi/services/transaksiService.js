@@ -24,5 +24,13 @@ export const transaksiService = {
     async getCetakNotaTransaksi(kode) {
         const response = await apiClient.get(`/transaksi/${kode}/getsignedurlnota`);
         return response.data;
-    }
+    },
+    async getTransaksiPenjualan() {
+        const response = await apiClient.get(`/transaksipenjualan/getTransaksiPenjualan`);
+        return response.data;
+    },
+    async batalTransaksi(payload) {
+        const response = await apiClient.post('/transaksipenjualan/batalTransaksi', payload);
+        return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
+    },
 }

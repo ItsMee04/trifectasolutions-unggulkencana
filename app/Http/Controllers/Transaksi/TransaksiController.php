@@ -386,4 +386,28 @@ class TransaksiController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function getTransaksiPenjualan()
+    {
+        $data = Transaksi::with(['transaksidetail', 'transaksidetail.produk', 'pelanggan', 'diskon', 'oleh'])->where('status', '!=', 0)->get();
+
+        if($data->isEmpty()) {
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Data transaksi tidak ditemukan',
+                'data'      => []
+            ], 400);
+        }
+
+        return response()->json([
+            'status'    => true,
+            'messaage'  => 'Data transaksi berhasil ditemukan',
+            'data'      => $data,
+        ], 200);
+    }
+
+    public function batalTransaksi(Request $request)
+    {
+
+    }
 }
