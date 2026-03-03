@@ -144,6 +144,11 @@ const routes = [
                 name: 'transaksipembelian',
                 component: () => import('@/modules/transaksi/views/PembelianView.vue')
             },
+            {
+                path: 'transaksiofftake',
+                name: 'transaksiofftake',
+                component: () => import('@/modules/transaksi/views/OfftakeView.vue')
+            },
         ]
     }
 ];

@@ -3,10 +3,12 @@
 namespace App\Models\Transaksi;
 
 use App\Models\Master\Suplier;
+use App\Models\Transaksi\OfftakeDetail;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Offtake extends Model
 {
@@ -43,5 +45,15 @@ class Offtake extends Model
     public function oleh(): BelongsTo
     {
         return $this->belongsTo(User::class, 'oleh', 'id');
+    }
+
+    /**
+     * Get all of the offtakedetail for the Offtake
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function offtakedetail(): HasMany
+    {
+        return $this->hasMany(OfftakeDetail::class, 'kode', 'kode');
     }
 }

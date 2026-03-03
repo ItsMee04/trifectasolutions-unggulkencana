@@ -173,6 +173,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('transaksipembelian/getTransaksiPembelian', [PembelianController::class, 'getTransaksiPembelian']);
     Route::post('transaksipembelian/batalTransaksi', [PembelianController::class, 'batalTransaksi']);
+
+    Route::get('transaksiofftake/getTransaksiOfftake', [OfftakeController::class, 'getTransaksiOfftake']);
+    Route::post('transaksiofftake/batalTransaksi', [OfftakeController::class, 'batalTransaksi']);
 });
 
 Route::get('/transaksi/{kode}/cetaknotatransaksi', [TransaksiController::class, 'PrintNotaTransaksi'])->name('produk.cetak_notatransaksi');

@@ -319,4 +319,95 @@ class OfftakeController extends Controller
             ], 500);
         }
     }
+
+    public function getTransaksiOfftake()
+    {
+        $data = Offtake::with(['offtakedetail', 'offtakedetail.produk', 'offtakedetail.produk.karat', 'suplier', 'oleh'])->where('status', '!=', 0)->get();
+
+        if ($data->isEmpty()) {
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Data transaksi tidak ditemukan',
+                'data'      => []
+            ], 400);
+        }
+
+        return response()->json([
+            'status'    => true,
+            'messaage'  => 'Data transaksi berhasil ditemukan',
+            'data'      => $data,
+        ], 200);
+    }
+
+    public function batalTransaksi(Request $request)
+    {
+        $request->validate([
+            'kode' => 'required', // Kode OF-xxxx
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // 1. Cari Header Offtake
+            $offtake = Offtake::where('kode', $request->kode)->firstOrFail();
+
+            // Validasi: Hanya transaksi status Selesai/Lunas (2) yang bisa dibatalkan
+            if ($offtake->status != 2) {
+                throw new \Exception("Transaksi tidak dapat dibatalkan karena status bukan 'Lunas'.");
+            }
+
+            // 2. Ambil Saldo Aktif untuk penyesuaian (Karena dana batal diterima)
+            $saldoAktif = DB::table('saldo')->where('status', 1)->first();
+            if (!$saldoAktif) {
+                throw new \Exception("Rekening saldo aktif tidak ditemukan untuk penyesuaian dana.");
+            }
+
+            // 3. Proses Detail Produk
+            $details = OfftakeDetail::where('kode', $request->kode)->get();
+
+            foreach ($details as $detail) {
+                $produk = Produk::find($detail->produk_id);
+
+                if ($produk) {
+                    // Kembalikan status produk ke 1 (Tersedia kembali di Toko)
+                    // Sebelumnya saat payment statusnya 3 (Offtake)
+                    $produk->update(['status' => 1]);
+                }
+
+                // Update status detail menjadi Batal (3)
+                $detail->update(['status' => 0]);
+            }
+
+            // 4. HAPUS MUTASI SALDO (Uang Masuk yang dibatalkan)
+            // Kita hapus record 'MASUK' yang mereferensi kode offtake ini
+            DB::table('mutasisaldo')
+                ->where('keterangan', 'like', '%' . $offtake->kode . '%')
+                ->where('jenis', 'MASUK')
+                ->delete();
+
+            // 5. KURANGI SALDO UTAMA (Decrement)
+            // Karena uang yang masuk saat payment harus ditiadakan dari total saldo
+            DB::table('saldo')
+                ->where('id', $saldoAktif->id)
+                ->decrement('total', $offtake->hargatotal);
+
+            // 6. Update Header Offtake
+            $offtake->update([
+                'status' => 0, // 3 = Batal
+                'keterangan' => "PEMBATALAN OFFTAKE: " . ($request->keterangan ?? $offtake->keterangan),
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'status'  => true,
+                'message' => 'Pembatalan Offtake Berhasil. Dana telah ditarik dari saldo dan produk kembali tersedia di stok.'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => false,
+                'message' => 'Gagal membatalkan offtake: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
