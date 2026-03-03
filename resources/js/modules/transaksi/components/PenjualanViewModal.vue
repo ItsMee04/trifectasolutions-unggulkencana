@@ -136,8 +136,7 @@
                                                             <li class="border-bottom">
                                                                 <h4 class="border-end">Diskon</h4>
                                                                 <h5 class="text-secondary">
-                                                                    ({{ selectedTransaction?.diskon?.diskon }}%) -
-                                                                    {{ formatRupiah(selectedTransaction?.diskon) }}
+                                                                    ({{ selectedTransaction?.diskon?.nilai }}%)
                                                                 </h5>
                                                             </li>
                                                             <li class="border-bottom">

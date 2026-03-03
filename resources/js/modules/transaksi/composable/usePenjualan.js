@@ -73,7 +73,7 @@ export function usePenjualan() {
             try {
                 // 📦 Siapkan Payload
                 const payload = {
-                    id: item.id,
+                    kode: item.kode,
                 };
                 // Mengirim payload id sesuai kebutuhan service Anda
                 await transaksiService.batalTransaksi(payload);
@@ -81,7 +81,7 @@ export function usePenjualan() {
                 toast.success('Transaksi berhasil dibatal.');
 
                 // Memanggil fetchKarat agar tabel terupdate otomatis tanpa reload
-                await fetchHarga();
+                await fetchPenjualan();
             } catch (error) {
                 console.error('Gagal membatalkan transaksi:', error);
                 toast.error('Gagal membatalkan transaksi.');

@@ -391,7 +391,7 @@ class TransaksiController extends Controller
     {
         $data = Transaksi::with(['transaksidetail', 'transaksidetail.produk', 'pelanggan', 'diskon', 'oleh'])->where('status', '!=', 0)->get();
 
-        if($data->isEmpty()) {
+        if ($data->isEmpty()) {
             return response()->json([
                 'status'    => false,
                 'message'   => 'Data transaksi tidak ditemukan',
@@ -408,6 +408,69 @@ class TransaksiController extends Controller
 
     public function batalTransaksi(Request $request)
     {
+        $request->validate([
+            'kode'   => 'required|exists:transaksi,kode',
+        ]);
 
+        try {
+            DB::beginTransaction();
+
+            // 1. Ambil data transaksi beserta detailnya
+            $transaksi = Transaksi::where('kode', $request->kode)->firstOrFail();
+
+            // Proteksi agar tidak membatalkan transaksi yang sudah batal
+            if ($transaksi->status == 0) {
+                throw new \Exception("Transaksi ini sudah dibatalkan sebelumnya.");
+            }
+
+            $detail = TransaksiDetail::where('kode', $request->kode)->first();
+            if (!$detail) {
+                throw new \Exception("Detail transaksi tidak ditemukan.");
+            }
+
+            // 2. ROLLBACK PRODUK
+            // Kembalikan status produk menjadi 1 (Tersedia)
+            // User nanti harus memasukkan produk ini ke nampan secara manual melalui menu nampan.
+            $produk = Produk::findOrFail($detail->produk_id);
+            $produk->update(['status' => 1]);
+
+            // 3. ROLLBACK MUTASI SALDO
+            // Cari mutasi MASUK yang memiliki referensi kode transaksi ini
+            $mutasi = DB::table('mutasisaldo')
+                ->where('keterangan', 'like', '%' . $transaksi->kode . '%')
+                ->where('jenis', 'MASUK')
+                ->first();
+
+            if ($mutasi) {
+                // Kurangi saldo di tabel utama agar sinkron
+                DB::table('saldo')
+                    ->where('id', $mutasi->saldo_id)
+                    ->decrement('total', $mutasi->jumlah);
+
+                // Hapus record mutasi saldo tersebut
+                DB::table('mutasisaldo')->where('id', $mutasi->id)->delete();
+            }
+
+            // 5. UPDATE STATUS TRANSAKSI & DETAIL
+            // Kita gunakan status 0 sebagai tanda transaksi ini CANCEL/VOID
+            $transaksi->update([
+                'status'           => 0,
+            ]);
+
+            $detail->update(['status' => 0]);
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => true,
+                'message' => "Transaksi {$request->kode} berhasil dibatalkan."
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => false,
+                'message' => 'Gagal membatalkan transaksi: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
