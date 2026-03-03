@@ -3,7 +3,7 @@
         <div class="page-header">
             <div class="add-item d-flex">
                 <div class="page-title">
-                    <h4>Halaman Transaksi Penjualan</h4>
+                    <h4>Halaman Transaksi Pembelian</h4>
                     <h6>Kelola Transaksi Anda</h6>
                 </div>
             </div>
@@ -17,20 +17,20 @@
         </div>
 
         <div class="row">
-            <PenjualanTable />
+            <PembelianTable />
         </div>
     </div>
 
-    <PenjualanViewModal />
+    <PembelianViewModal />
 </template>
 <script setup>
 import { onMounted } from 'vue';
-import { usePenjualan } from '../composable/usePenjualan';
-import PenjualanTable from '../components/PenjualanTable.vue';
-import PenjualanViewModal from '../components/PenjualanViewModal.vue';
+import { usePembelian } from '../composable/usePembelian';
+import PembelianTable from '../components/PembelianTable.vue';
+import PembelianViewModal from '../components/PembelianViewModal.vue';
 
-const { fetchPenjualan, handleRefresh } = usePenjualan();
+const { fetchPembelian, handleRefresh } = usePembelian();
 onMounted(() => {
-    fetchPenjualan();
+    fetchPembelian();
 });
 </script>

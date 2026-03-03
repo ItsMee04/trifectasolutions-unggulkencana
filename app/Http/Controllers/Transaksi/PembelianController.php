@@ -28,8 +28,7 @@ class PembelianController extends Controller
         PembelianService $pembelianService,
         ProductService $productService,
         PerbaikanService $perbaikanService
-        )
-    {
+    ) {
         $this->pembelianService = $pembelianService;
         $this->productService = $productService;
         $this->perbaikanService = $perbaikanService;
@@ -772,6 +771,106 @@ class PembelianController extends Controller
             return response()->json([
                 'status'  => false,
                 'message' => 'Gagal proses pembayaran: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getTransaksiPembelian()
+    {
+        $data = Pembelian::with(['pembeliandetail', 'pembeliandetail.produk', 'suplier', 'pelanggan', 'pembeliandetail.kondisi', 'oleh'])->where('status', '!=', 0)->get();
+
+        if ($data->isEmpty()) {
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Data transaksi tidak ditemukan',
+                'data'      => []
+            ], 400);
+        }
+
+        return response()->json([
+            'status'    => true,
+            'messaage'  => 'Data transaksi berhasil ditemukan',
+            'data'      => $data,
+        ], 200);
+    }
+
+    public function batalTransaksi(Request $request)
+    {
+        $request->validate([
+            'kode' => 'required', // Kode PM-xxxx
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // 1. Cari Header Pembelian
+            $pembelian = Pembelian::where('kode', $request->kode)->firstOrFail();
+
+            // Validasi: Hanya status Lunas (2) yang bisa dibatalkan
+            if ($pembelian->status != 2) {
+                throw new \Exception("Transaksi tidak dapat dibatalkan karena status bukan 'Lunas'.");
+            }
+
+            // 2. Ambil Detail Pembelian
+            $details = PembelianDetail::where('kode', $request->kode)->get();
+
+            foreach ($details as $item) {
+                $produk = Produk::find($item->produk_id);
+
+                if ($produk) {
+                    /**
+                     * UPDATE STATUS PRODUK:
+                     * Jika suplier_id atau pelanggan_id ADA (Luar Toko) -> Status 0
+                     * Jika KEDUANYA NULL (Dari Toko) -> Status 2
+                     */
+                    if ($pembelian->suplier_id || $pembelian->pelanggan_id) {
+                        $produk->update(['status' => 0]);
+                    } else {
+                        $produk->update(['status' => 2]);
+                    }
+                }
+
+                // 3. MENGHAPUS DATA PERBAIKAN yang otomatis terbuat
+                // Berdasarkan produk_id dan mention kode pembelian di kolom keterangan
+                DB::table('perbaikan')
+                    ->where('produk_id', $item->produk_id)
+                    ->where('keterangan', 'like', '%' . $pembelian->kode . '%')
+                    ->delete();
+
+                // Kembalikan status detail ke Batal (3)
+                $item->update(['status' => 3]);
+            }
+
+            // 4. MENGHAPUS MUTASI SALDO TERKAIT
+            // Kita hapus baris mutasi 'KELUAR' yang mencatat pembelian kode ini
+            DB::table('mutasisaldo')
+                ->where('keterangan', 'like', '%' . $pembelian->kode . '%')
+                ->where('jenis', 'KELUAR')
+                ->delete();
+
+            // 5. MENGEMBALIKAN SALDO (Increment total saldo di tabel rekening)
+            // Kita cari saldo yang sebelumnya terpotong (biasanya yang status aktif)
+            $saldoAktif = DB::table('saldo')->where('status', 1)->first();
+            if ($saldoAktif) {
+                DB::table('saldo')->where('id', $saldoAktif->id)->increment('total', $pembelian->total);
+            }
+
+            // 6. UPDATE STATUS TRANSAKSI PEMBELIAN MENJADI "BATAL"
+            $pembelian->update([
+                'status' => 0, // 3 = Batal
+                'keterangan' => "TRANSAKSI DIBATALKAN: " . $pembelian->keterangan,
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'status'  => true,
+                'message' => 'Pembatalan Berhasil.'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => false,
+                'message' => 'Gagal membatalkan transaksi: ' . $e->getMessage()
             ], 500);
         }
     }

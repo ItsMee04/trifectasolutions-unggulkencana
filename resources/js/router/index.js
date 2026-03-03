@@ -139,6 +139,11 @@ const routes = [
                 name: 'transaksipenjualan',
                 component: () => import('@/modules/transaksi/views/PenjualanView.vue')
             },
+            {
+                path: 'transaksipembelian',
+                name: 'transaksipembelian',
+                component: () => import('@/modules/transaksi/views/PembelianView.vue')
+            },
         ]
     }
 ];
