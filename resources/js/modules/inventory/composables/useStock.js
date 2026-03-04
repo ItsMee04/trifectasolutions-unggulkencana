@@ -17,6 +17,8 @@ const searchNampanProduk = ref('');
 const currentPageNampanProduk = ref(1);
 const itemsPerPageNampanProduk = 10;
 
+const rekapstok = ref([]);
+
 const formPeriode = reactive({
     periode: ''
 });
@@ -42,10 +44,42 @@ const fetchNampanProduk = async () => {
     }
 }
 
+const fetchRekapStok = async () => {
+    if (!selectedPeriodeStokID.value) return;
+
+    isLoadingNampanProduk.value = true;
+    try {
+        const payload = {
+            periode: selectedPeriodeStokID.value
+        }
+        const response = await stockService.getRekapStokByPeriode(payload);
+
+        // PERBAIKAN DI SINI:
+        // Cek apakah response memiliki properti 'rekap' (sesuai JSON yang Anda kirim)
+        if (response && response.rekap) {
+            rekapstok.value = response.rekap;
+        }
+        // Jika response dibungkus data oleh axios: response.data.rekap
+        else if (response.data && response.data.rekap) {
+            rekapstok.value = response.data.rekap;
+        }
+        // Fallback jika response langsung berupa array
+        else {
+            rekapstok.value = Array.isArray(response) ? response : [];
+        }
+    } catch (error) {
+        rekapstok.value = [];
+    } finally {
+        // Memberikan jeda sedikit agar transisi "Memuat data..." terlihat halus
+        isLoadingNampanProduk.value = false;
+    }
+}
+
 watch(selectedPeriodeStokID, (newId) => {
     if (newId) {
         currentPageNampanProduk.value = 1; // Reset halaman PRODUK saja ke 1
         fetchNampanProduk();
+        fetchRekapStok();
     }
 })
 
@@ -116,13 +150,45 @@ export function useStock() {
     const handlePilihPeriodeStok = (item) => {
         // 1. Jalankan fungsi untuk mengubah state
         selectPeriodeStok(item.id);
-
-        // 2. Log variabel penampungnya (state reaktifnya), bukan fungsinya
-        console.log("ID yang dipilih:", selectedPeriodeStokID.value);
     }
 
     const handleRefresh = async () => {
         await fetchPeriodeStok();
+    }
+
+    const handleFinalisasiPeriode = async (item) => {
+        const result = await Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: `Periode "${item.kode}" akan di final ?`,
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#092139',
+            confirmButtonText: 'Ya, final!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true // Opsional: menukar posisi tombol Batal & Hapus
+        });
+
+        if (result.isConfirmed) {
+            isLoadingPeriodeStok.value = true; // Set loading agar UI tetap konsisten [cite: 2025-10-25]
+            try {
+                // 📦 Siapkan Payload
+                const payload = {
+                    id: item.id,
+                };
+                // Mengirim payload id sesuai kebutuhan service Anda
+                await stockService.finalPeriodeStok(payload);
+
+                toast.success('Periode Stok berhasil difinal.');
+
+                // Memanggil fetchDiskon agar tabel terupdate otomatis tanpa reload
+                await fetchPeriodeStok();
+            } catch (error) {
+                console.error('Gagal memfinal periode stok:', error);
+                toast.error('Gagal memfinal periode stok.');
+            } finally {
+                isLoadingPeriodeStok.value = false;
+            }
+        }
     }
 
     const totalPagesPeriodeStok = computed(() => {
@@ -212,6 +278,7 @@ export function useStock() {
         selectPeriodeStok,
         selectedPeriodeStokData,
         handlePilihPeriodeStok,
+        handleFinalisasiPeriode,
         filteredPeriodeStok: computed(() => {
             const query = String(searchPeriodeStok.value || '').toLowerCase();
             return (PeriodeStok.value || []).filter(item =>
@@ -239,6 +306,7 @@ export function useStock() {
         totalPagesNampanProduk,
         displayedPagesNampanProduk,
         fetchNampanProduk,
+        rekapstok,
         filteredNampanProduk: computed(() => {
             const query = String(searchNampanProduk.value || '').toLowerCase();
             return (nampanproduk.value || []).filter(item =>

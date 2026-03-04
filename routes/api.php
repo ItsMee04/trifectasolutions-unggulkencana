@@ -181,6 +181,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('inventory/getPeriodeStok', [StokController::class, 'getPeriodeStok']);
     Route::post('inventory/storePeriodeStok', [StokController::class, 'storePeriodeStok']);
     Route::post('inventory/getNampanProdukByPeriodeStok', [StokController::class, 'getNampanProdukByPeriodeStok']);
+    Route::post('inventory/getRekapStokByPeriode', [StokController::class, 'getRekapStokByPeriode']);
+    Route::post('inventory/finalPeriodeStok', [StokController::class, 'finalPeriodeStok']);
 });
 
 Route::get('/transaksi/{kode}/cetaknotatransaksi', [TransaksiController::class, 'PrintNotaTransaksi'])->name('produk.cetak_notatransaksi');

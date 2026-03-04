@@ -27,9 +27,9 @@
                     :class="{ 'bg-light shadow-sm active-nampan': item.id === selectedPeriodeStokID }">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center">
-                            <div :class="item.total > 0 ? 'bg-soft-warning' : 'bg-soft-success'"
+                            <div :class="item.status === 2 ? 'bg-soft-success' : 'bg-soft-warning'"
                                 class="p-2 rounded me-3">
-                                <i data-feather="calendar" :class="item.total > 0 ? 'text-warning' : 'text-success'"
+                                <i data-feather="calendar" :class="item.status === 2 ? 'text-success' : 'text-warning'"
                                     style="width: 18px;"></i>
                             </div>
                             <div>
@@ -37,7 +37,19 @@
                                 <small class="text-muted">Kode: {{ item.kode || '-' }}</small>
                             </div>
                         </div>
-                        <i data-feather="chevron-right" class="text-warning" style="width: 16px;"></i>
+
+                        <div class="d-flex align-items-center">
+                            <button v-if="item.status === 1" @click.stop="handleFinalisasiPeriode(item)"
+                                class="btn-final-action">
+                                <i data-feather="lock" class="me-1" style="width: 11px;"></i>
+                                Final
+                            </button>
+
+                            <div v-else class="badge-final-status">
+                                <i data-feather="check-circle" class="me-1" style="width: 11px;"></i>
+                                Final
+                            </div>
+                        </div>
                     </div>
                 </a>
             </div>
@@ -127,7 +139,8 @@ const {
     paginatedPeriodeStok,
     fetchPeriodeStok,
     handleCreatePeriode,
-    handlePilihPeriodeStok
+    handlePilihPeriodeStok,
+    handleFinalisasiPeriode
 } = useStock();
 
 const { initFeather } = useFeather();
@@ -148,5 +161,41 @@ onMounted(() => {
     background-image: none !important;
     padding-right: calc(1.5em + 0.75rem) !important;
     /* Kembalikan padding normal */
+}
+/* Tombol Aksi Final */
+.btn-final-action {
+    background-color: #ffffff;
+    color: #ffc107;
+    border: 1px solid #ffc107;
+    border-radius: 50px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.btn-final-action:hover {
+    background-color: #ffc107;
+    color: #ffffff;
+}
+
+/* Badge Status Final (Static) */
+.badge-final-status {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+    border: 1px solid rgba(25, 135, 84, 0.2);
+    border-radius: 50px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+/* Perbaikan visual agar teks periode tidak terpotong */
+.active-nampan {
+    border-left: 3px solid #ffc107 !important;
 }
 </style>
