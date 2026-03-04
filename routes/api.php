@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Authentication\AuthController;
+use App\Http\Controllers\Inventori\StokController;
 use App\Http\Controllers\Keuangan\MutasiSaldoController;
 use App\Http\Controllers\Keuangan\SaldoController;
 use App\Http\Controllers\Master\DiskonController;
@@ -176,6 +177,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('transaksiofftake/getTransaksiOfftake', [OfftakeController::class, 'getTransaksiOfftake']);
     Route::post('transaksiofftake/batalTransaksi', [OfftakeController::class, 'batalTransaksi']);
+
+    Route::get('inventory/getPeriodeStok', [StokController::class, 'getPeriodeStok']);
+    Route::post('inventory/storePeriodeStok', [StokController::class, 'storePeriodeStok']);
+    Route::post('inventory/getNampanProdukByPeriodeStok', [StokController::class, 'getNampanProdukByPeriodeStok']);
 });
 
 Route::get('/transaksi/{kode}/cetaknotatransaksi', [TransaksiController::class, 'PrintNotaTransaksi'])->name('produk.cetak_notatransaksi');

@@ -14,34 +14,25 @@
           </a>
         </li>
       </ul>
-      <!-- <div class="page-btn import">
-        <a href="#" class="btn btn-added color" @click="handleCreate">
-          <i data-feather="plus-circle" class="me-2"></i>Tambah Produk
-        </a>
-      </div> -->
     </div>
 
     <div class="row align-items-start">
       <div class="col-lg-4 col-xl-3">
-        <!-- <NampanList /> -->
+        <PeriodeList />
       </div>
 
       <div class="col-lg-8 col-xl-9">
-        <!-- <NampanProdukTable /> -->
+        <ProdukList />
       </div>
     </div>
   </div>
-  <!-- <NampanProdukModal />
-<NampanProdukPindah /> -->
 </template>
 
 <script setup>
-// import { computed } from 'vue';
-// import { useNampanProduk } from '../composables/useNampanProduk'
-// import NampanList from '../components/NampanList.vue';
-// import NampanProdukTable from '../components/NampanProdukTable.vue';
-// import NampanProdukModal from '../components/NampanProdukModal.vue';
-// import NampanProdukPindah from '../components/NampanProdukPindah.vue';
+import { computed } from 'vue';
+import { useStock } from '../composables/useStock'
+import PeriodeList from '../components/PeriodeList.vue';
+import ProdukList from '../components/ProdukList.vue';
 
-// const { handleCreate, handleRefresh } = useNampanProduk();
+const { handleRefresh } = useStock();
 </script>
