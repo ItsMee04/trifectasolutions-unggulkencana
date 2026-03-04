@@ -141,18 +141,15 @@ const menuGroups = {
     Laporan: {
         header: 'Laporan',
         menus: {
-            product: {
-                label: 'Produk',
-                icon: 'archive',
-                submenus: [
-                    { name: 'Kondisi', path: '/kondisi' },
-                    { name: 'Karat', path: '/karat' },
-                    { name: 'Jenis Karat', path: '/jeniskarat' },
-                    { name: 'Harga', path: '/harga' },
-                    { name: 'Diskon', path: '/diskon' },
-                    { name: 'Jenis Produk', path: '/jenisproduk' },
-                    { name: 'Produk', path: '/produk' },
-                ]
+            iventory: {
+                label: 'Inventori',
+                icon: 'server',
+                path: '/inventori'
+            },
+            laporantransaksi: {
+                label: 'Laporan Transaksi',
+                icon: 'book',
+                path: '/laporan'
             },
         }
     },

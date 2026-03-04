@@ -149,6 +149,11 @@ const routes = [
                 name: 'transaksiofftake',
                 component: () => import('@/modules/transaksi/views/OfftakeView.vue')
             },
+            {
+                path: 'inventori',
+                name: 'inventori',
+                component: () => import('@/modules/inventory/views/StockView.vue')
+            },
         ]
     }
 ];

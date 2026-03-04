@@ -87,6 +87,8 @@
                                                         <tr>
                                                             <th>KODE PRODUK</th>
                                                             <th>NAMA PRODUK</th>
+                                                            <th>BERAT</th>
+                                                            <th>KARAT</th>
                                                             <th>HARGA</th>
                                                             <th>TOTAL</th>
                                                         </tr>
@@ -102,15 +104,40 @@
 
                                                         <tr
                                                             v-else-if="selectedTransaction && selectedTransaction.transaksidetail">
-                                                            <td>{{
-                                                                selectedTransaction.transaksidetail.produk?.kodeproduk
-                                                                || '-' }}</td>
-                                                            <td>{{ selectedTransaction.transaksidetail.produk?.nama ||
-                                                                '-' }}</td>
-                                                            <td>{{
-                                                                formatRupiah(selectedTransaction.transaksidetail.hargajual)
-                                                            }}</td>
-                                                            <td>{{ formatRupiah(selectedTransaction.total) }}</td>
+                                                            <td>
+                                                                {{
+                                                                    selectedTransaction.transaksidetail.produk?.kodeproduk
+                                                                    || '-'
+                                                                }}
+                                                            </td>
+                                                            <td>
+                                                                {{
+                                                                    selectedTransaction.transaksidetail.produk?.nama ||
+                                                                    '-'
+                                                                }}
+                                                            </td>
+                                                            <td>
+                                                                {{
+                                                                    selectedTransaction.transaksidetail.berat ||
+                                                                    '-'
+                                                                }}
+                                                            </td>
+                                                            <td>
+                                                                {{
+                                                                    selectedTransaction.transaksidetail.karat ||
+                                                                    '-'
+                                                                }}
+                                                            </td>
+                                                            <td>
+                                                                {{
+                                                                    formatRupiah(selectedTransaction.transaksidetail.hargajual)
+                                                                }}
+                                                            </td>
+                                                            <td>
+                                                                {{
+                                                                    formatRupiah(selectedTransaction.total)
+                                                                }}
+                                                            </td>
                                                         </tr>
 
                                                         <tr v-else>
@@ -129,7 +156,7 @@
                                                                 <h4 class="border-end">Sub Total</h4>
                                                                 <h5 class="text-danger">
                                                                     {{
-                                                                    formatRupiah(selectedTransaction?.transaksidetail?.total)
+                                                                        formatRupiah(selectedTransaction?.transaksidetail?.total)
                                                                     }}
                                                                 </h5>
                                                             </li>
