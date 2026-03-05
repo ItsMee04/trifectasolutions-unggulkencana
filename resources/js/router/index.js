@@ -154,6 +154,11 @@ const routes = [
                 name: 'inventori',
                 component: () => import('@/modules/inventory/views/StockView.vue')
             },
+            {
+                path: 'laporan',
+                name: 'laporan',
+                component: () => import('@/modules/report/views/LaporanView.vue')
+            },
         ]
     }
 ];
