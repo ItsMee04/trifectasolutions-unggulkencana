@@ -41,7 +41,12 @@ class StokController extends Controller
     public function storePeriodeStok(Request $request)
     {
         $request->validate([
-            'periode'   => 'required|date',
+            // Menambahkan rule unique:table,column
+            'periode' => 'required|date|unique:stokharian,periode',
+        ], [
+            // Opsional: Pesan kustom agar lebih user-friendly
+            'periode.required' => 'Periode tidak boleh kosong.',
+            'periode.unique' => 'Periode stok untuk tanggal ini sudah ada.',
         ]);
 
         DB::beginTransaction();

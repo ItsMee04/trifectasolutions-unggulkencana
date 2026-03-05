@@ -98,14 +98,24 @@ export function useStock() {
     }
 
     const validateForm = () => {
-        errors.value = {}; // Reset error
+        errors.value = {}; // Reset error sebelumnya
+
+        // Validasi field periode
         if (!formPeriode.periode || formPeriode.periode.trim() === '') {
-            toast.error("Tanggal tidak boleh kosong.")
+            // 1. Masukkan ke state errors agar pengecekan di bawah berhasil
+            errors.value.periode = ["Tanggal tidak boleh kosong."];
+
+            // 2. Beri peringatan toast
+            toast.error("Tanggal tidak boleh kosong.");
         }
+
+        // Jika errors.value kosong, return true (artinya valid)
+        // Jika ada isinya, return false (artinya tidak valid)
         return Object.keys(errors.value).length === 0;
     };
 
     const handleCreatePeriode = async () => {
+        // Jika validateForm return false, eksekusi berhenti di sini
         if (!validateForm()) return false;
 
         isLoadingPeriodeStok.value = true;
@@ -113,30 +123,26 @@ export function useStock() {
         try {
             const payload = {
                 periode: formPeriode.periode
-            }
+            };
 
             const response = await stockService.storePeriodeStok(payload);
             toast.success(response.message || 'Data berhasil disimpan');
 
+            // Reset form setelah sukses
+            formPeriode.periode = '';
             await fetchPeriodeStok();
-        } catch (error) {
-            if (error.response?.status === 422) {
-                // 1. Simpan error untuk ditampilkan di bawah input field
-                errors.value = error.response.data.errors;
 
-                // 2. ✨ TAMBAHKAN INI: Munculkan notify agar user tahu ada yang salah
-                const firstErrorMessage = error.response.data.message || 'Terjadi kesalahan validasi.';
-                toast.error(firstErrorMessage);
-            } else {
-                console.log(error)
-                // Untuk error server (500), koneksi, dsb.
-                toast.error(error.response?.message || 'Gagal menyimpan data.');
+        } catch (error) {
+            // Kita hanya perlu menangkap 422 untuk sinkronisasi UI/state errors
+            if (error.response?.status === 422) {
+                errors.value = error.response.data.errors;
+                // Pesan toast sudah ditangani secara global oleh API Client Interceptor
             }
             return false;
         } finally {
             isLoadingPeriodeStok.value = false;
         }
-    }
+    };
 
     const selectPeriodeStok = (id) => {
         selectedPeriodeStokID.value = id;

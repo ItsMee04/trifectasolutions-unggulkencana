@@ -35,8 +35,8 @@ apiClient.interceptors.response.use(
     (error) => {
         const authStore = useAuthStore();
         const status = error.response ? error.response.status : null;
+        const responseData = error.response ? error.response.data : null;
 
-        // 1. Tangani Token Kadaluarsa / Unauthorized
         if (status === 401) {
             toast.warning("Sesi Anda telah berakhir. Silakan login kembali.");
             authStore.logout();
@@ -45,17 +45,28 @@ apiClient.interceptors.response.use(
             }
         }
 
-        // 2. Tangani Error Validasi (422) secara global (opsional)
+        // 2. Tangani Error Validasi (422) secara dinamis
         else if (status === 422) {
-            toast.error("Data yang Anda masukkan tidak valid.");
+            // Cek apakah ada pesan spesifik dari Laravel (errors.periode[0])
+            // Jika tidak ada, gunakan message umum, jika tidak ada juga baru hardcoded string
+            const validationErrors = responseData?.errors;
+            let errorMessage = responseData?.message || "Data yang Anda masukkan tidak valid.";
+
+            if (validationErrors) {
+                // Mengambil pesan error pertama yang ditemukan dari objek errors
+                const firstKey = Object.keys(validationErrors)[0];
+                errorMessage = validationErrors[firstKey][0];
+            }
+
+            toast.error(errorMessage);
         }
 
-        // 3. Tangani Server Error (500)
         else if (status === 500) {
-            toast.error("Terjadi kesalahan pada server. Coba lagi nanti.");
+            // Menampilkan pesan error asli dari server jika ada (untuk memudahkan debugging)
+            const msg = responseData?.message || "Terjadi kesalahan pada server.";
+            toast.error(msg);
         }
 
-        // 4. Tangani Network Error (Server mati/Internet mati)
         else if (!status) {
             toast.error("Koneksi gagal. Periksa jaringan Anda.");
         }

@@ -106,7 +106,6 @@
                 <div class="col">
                     <input type="date" v-model="formPeriode.periode" :class="{ 'is-invalid': errors.periode }"
                         class="form-control form-control-sm border-light-subtle">
-                    <div class="invalid-feedback" v-if="errors.periode">{{ errors.periode }}</div>
                 </div>
                 <div class="col-auto">
                     <button @click="handleCreatePeriode" class="btn btn-sm btn-secondary"
