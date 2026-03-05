@@ -160,6 +160,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('pembelian/updatePembelianDetail', [PembelianController::class, 'updatePembelianDetail']);
     Route::post('pembelian/batalPembelianDetail', [PembelianController::class, 'batalPembelianDetail']);
     Route::post('pembelian/paymentPembelian', [PembelianController::class, 'paymentPembelian']);
+    Route::post('/pembelian/getSignedNotaPembelianUrl', [PembelianController::class, 'getSignedNotaPembelianUrl']);
 
     Route::get('pembelianluar/getPembelianDetailDariLuar', [PembelianController::class, 'getPembelianDetailDariLuar']);
     Route::post('pembelianluar/storeProdukToPembelianDetailDariLuar', [PembelianController::class, 'storeProdukToPembelianDetailDariLuar']);
@@ -191,6 +192,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 Route::get('/transaksi/CetakNotaPenjualan', [TransaksiController::class, 'CetakNotaPenjualan'])->name('produk.cetak_notapenjualan');
+Route::get('/pembelian/CetakNotaPembelian', [PembelianController::class, 'CetakNotaPembelian'])->name('produk.cetak_notapembelian');
 
 Route::get('/laporan/cetaklaporanpenjualan', [LaporanController::class, 'CetakLaporanPenjualan'])->name('produk.cetak_laporanpenjualan');
 Route::get('/laporan/cetaklaporanpembelian', [LaporanController::class, 'CetakLaporanPembelian'])->name('produk.cetak_laporanpembelian');

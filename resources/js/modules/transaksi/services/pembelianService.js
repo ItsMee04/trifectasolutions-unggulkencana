@@ -9,4 +9,8 @@ export const pembelianService = {
         const response = await apiClient.post('/transaksipembelian/batalTransaksi', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
+    async CetakNotaPembelian(payload) {
+        const response = await apiClient.post(`/pembelian/getSignedNotaPembelianUrl`, payload);
+        return response.data;
+    },
 }

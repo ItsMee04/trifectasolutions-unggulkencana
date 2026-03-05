@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 // use Milon\Barcode\DNS1D;
 
 class PembelianController extends Controller
@@ -398,7 +399,7 @@ class PembelianController extends Controller
 
     public function getPembelianDetailDariLuar(Request $request)
     {
-        $data = PembelianDetail::with(['produk', 'kodetransaksi' ,'produk.karat', 'pembelian.pelanggan'])
+        $data = PembelianDetail::with(['produk', 'kodetransaksi', 'produk.karat', 'pembelian.pelanggan'])
             ->where('jenis', 'LUARTOKO')
             ->where('status', 1)
             ->get();
@@ -872,6 +873,86 @@ class PembelianController extends Controller
                 'status'  => false,
                 'message' => 'Gagal membatalkan transaksi: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function getSignedNotaPembelianUrl(Request $request)
+    {
+        $route_name = 'produk.cetak_notapembelian';
+        $expiration = now()->addMinutes(10);
+
+        $signedUrl = URL::temporarySignedRoute(
+            $route_name,
+            $expiration,
+            [
+                'kode' => $request->kode,
+            ]
+        );
+
+        return response()->json(['url' => $signedUrl]);
+    }
+
+    public function CetakNotaPembelian(Request $request)
+    {
+        if (!$request->hasValidSignature()) {
+            abort(401, 'Link kadaluarsa atau tidak valid.');
+        }
+
+        $kode  = $request->query('kode');
+
+        // Configuration
+        $jasper_file = resource_path('reports/CetakNotaPembelian.jasper');
+        $db = config('database.connections.mysql');
+
+        // Parameters (Disederhanakan)
+        $parameters = [
+            'LOGO'                  => public_path('assets/report/LOGOTOKO.png'),
+            'LOGOTEXT'              => public_path('assets/report/LOGOTEXT.png'),
+            'PRODUK'                => public_path('storage/images/produk/'),
+            'TTD'                   => public_path('assets/ttd/'),
+            'KODETRANSAKSI_INPUT'   => $kode, // Jasper biasanya butuh ID untuk query internal
+        ];
+
+        try {
+            $tempDir = storage_path('app/temp_reports');
+            if (!file_exists($tempDir)) mkdir($tempDir, 0755, true);
+
+            $outputName = 'nota-' . $kode . '-' . time();
+            $outputPath = $tempDir . '/' . $outputName;
+
+            $jasper = new \PHPJasper\PHPJasper;
+            $jasper->process(
+                $jasper_file,
+                $outputPath,
+                [
+                    'format' => ['pdf'],
+                    'params' => $parameters,
+                    'db_connection' => [
+                        'driver' => 'mysql',
+                        'host' => $db['host'],
+                        'port' => $db['port'],
+                        'database' => $db['database'],
+                        'username' => $db['username'],
+                        'password' => $db['password'],
+                    ],
+                ]
+            )->execute();
+
+            $pdfPath = $outputPath . '.pdf';
+
+            if (!file_exists($pdfPath)) {
+                throw new \Exception("File PDF tidak terbentuk oleh Jasper.");
+            }
+
+            $pdfContent = file_get_contents($pdfPath);
+            unlink($pdfPath); // Hapus file temp setelah dibaca
+
+            return response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="NOTA-' . $kode . '.pdf"',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }
