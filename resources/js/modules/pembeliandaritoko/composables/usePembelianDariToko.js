@@ -207,7 +207,7 @@ export function usePembelianDariToko() {
         errors.value = {};
         formPembelianDetail.id = item.id
         formPembelianDetail.kodeproduk = item.produk?.kodeproduk;
-        formPembelianDetail.hargajual = item.transaksi?.hargajual;
+        formPembelianDetail.hargajual = item.kodetransaksi?.transaksidetail?.hargajual;
         const modal = new bootstrap.Modal(document.getElementById('pembeliandetaileditModal'));
         modal.show();
     }
@@ -242,9 +242,8 @@ export function usePembelianDariToko() {
             const payload = {
                 id: formPembelianDetail.id,
                 hargabeli: formPembelianDetail.hargabeli,
-                kondisi_id: formPembelianDetail.kondisi.valid,
+                kondisi_id: formPembelianDetail.kondisi.value,
                 jenis_hargabeli: formPembelianDetail.jenis_hargabeli,
-                keterangan: formPembelianDetail.keterangan
             };
 
             const response = await pembeliandaritokoService.updatePembelianDetail(payload);
@@ -259,6 +258,7 @@ export function usePembelianDariToko() {
 
                 // Refresh tabel agar total & terbilang terbaru muncul
                 await fetchPembelianDetail();
+                await fetchKodeTransaksi();
             }
 
         } catch (err) {

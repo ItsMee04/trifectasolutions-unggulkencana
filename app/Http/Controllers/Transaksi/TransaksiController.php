@@ -307,48 +307,48 @@ class TransaksiController extends Controller
         }
     }
 
-    public function getSignedNotaUrl(Request $request, $kode)
+    public function getSignedNotaPenjualanUrl(Request $request)
     {
-        // Cari dulu datanya untuk memastikan ada
-        $transaksi = Transaksi::where('kode', $kode)->firstOrFail();
-
-        $route_name = 'produk.cetak_notatransaksi';
+        $route_name = 'produk.cetak_notapenjualan';
         $expiration = now()->addMinutes(10);
 
         $signedUrl = URL::temporarySignedRoute(
             $route_name,
             $expiration,
-            ['kode' => $transaksi->kode] // Kuncinya harus 'kode' sesuai dengan {kode} di Route
+            [
+                'kode' => $request->kode,
+            ]
         );
 
         return response()->json(['url' => $signedUrl]);
     }
 
-    public function PrintNotaTransaksi(Request $request, $kode)
+    public function CetakNotaPenjualan(Request $request)
     {
         if (!$request->hasValidSignature()) {
             abort(401, 'Link kadaluarsa atau tidak valid.');
         }
 
-        $transaksi = Transaksi::where('kode', $kode)->firstOrFail();
+       $kode  = $request->query('kode');
 
         // Configuration
-        $jasper_file = resource_path('reports/CetakNotaTransaksi.jasper');
+        $jasper_file = resource_path('reports/CetakNotaPenjualan.jasper');
         $db = config('database.connections.mysql');
 
         // Parameters (Disederhanakan)
         $parameters = [
-            'LOGO'   => public_path('assets/logo.jpg'),
-            'PRODUK' => public_path('storage/produk/'),
-            'TTD'    => public_path('ttd/'),
-            'KODETRANSAKSI_INPUT' => $transaksi->id, // Jasper biasanya butuh ID untuk query internal
+            'LOGO'                  => public_path('assets/report/LOGOTOKO.png'),
+            'LOGOTEXT'              => public_path('assets/report/LOGOTEXT.png'),
+            'PRODUK'                => public_path('storage/images/produk/'),
+            'TTD'                   => public_path('assets/ttd/'),
+            'KODETRANSAKSI_INPUT'   => $kode, // Jasper biasanya butuh ID untuk query internal
         ];
 
         try {
             $tempDir = storage_path('app/temp_reports');
             if (!file_exists($tempDir)) mkdir($tempDir, 0755, true);
 
-            $outputName = 'nota-' . $transaksi->kode . '-' . time();
+            $outputName = 'nota-' . $kode . '-' . time();
             $outputPath = $tempDir . '/' . $outputName;
 
             $jasper = new \PHPJasper\PHPJasper;
@@ -380,7 +380,7 @@ class TransaksiController extends Controller
 
             return response($pdfContent, 200, [
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="NOTA-' . $transaksi->kode . '.pdf"',
+                'Content-Disposition' => 'inline; filename="NOTA-' . $kode . '.pdf"',
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

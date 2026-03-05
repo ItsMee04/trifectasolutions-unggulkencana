@@ -4,6 +4,8 @@ use App\Http\Controllers\Authentication\AuthController;
 use App\Http\Controllers\Inventori\StokController;
 use App\Http\Controllers\Keuangan\MutasiSaldoController;
 use App\Http\Controllers\Keuangan\SaldoController;
+use App\Http\Controllers\Laporan\CompailReportController;
+use App\Http\Controllers\Laporan\LaporanController;
 use App\Http\Controllers\Master\DiskonController;
 use App\Http\Controllers\Master\HargaController;
 use App\Http\Controllers\Master\JabatanController;
@@ -143,7 +145,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('transaksi/getTransaksiDetail', [TransaksiController::class, 'getTransaksiDetail']);
     Route::post('transaksi/batalTransaksiDetail', [TransaksiController::class, 'batalTransaksiDetail']);
     Route::post('transaksi/paymentTransaksi', [TransaksiController::class, 'paymentTransaksi']);
-    Route::get('/transaksi/{id}/getsignedurlnota', [TransaksiController::class, 'getSignedNotaUrl']);
+    Route::post('/transaksi/getSignedNotaPenjualanUrl', [TransaksiController::class, 'getSignedNotaPenjualanUrl']);
 
     Route::get('offtake/getKodeTransaksi', [OfftakeController::class, 'getKodeTransaksi']);
     Route::post('offtake/storeProdukToOfftakeDetail', [OfftakeController::class, 'storeProdukToOfftakeDetail']);
@@ -183,6 +185,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('inventory/getNampanProdukByPeriodeStok', [StokController::class, 'getNampanProdukByPeriodeStok']);
     Route::post('inventory/getRekapStokByPeriode', [StokController::class, 'getRekapStokByPeriode']);
     Route::post('inventory/finalPeriodeStok', [StokController::class, 'finalPeriodeStok']);
+
+    Route::post('laporan/getsignedurl-cetaklaporanpenjualan',[LaporanController::class, 'getSignedCetakLaporanPenjualanUrl']);
+    Route::post('laporan/getsignedurl-cetaklaporanpembelian',[LaporanController::class, 'getSignedCetakLaporanPembelianUrl']);
 });
 
-Route::get('/transaksi/{kode}/cetaknotatransaksi', [TransaksiController::class, 'PrintNotaTransaksi'])->name('produk.cetak_notatransaksi');
+Route::get('/transaksi/CetakNotaPenjualan', [TransaksiController::class, 'CetakNotaPenjualan'])->name('produk.cetak_notapenjualan');
+
+Route::get('/laporan/cetaklaporanpenjualan', [LaporanController::class, 'CetakLaporanPenjualan'])->name('produk.cetak_laporanpenjualan');
+Route::get('/laporan/cetaklaporanpembelian', [LaporanController::class, 'CetakLaporanPembelian'])->name('produk.cetak_laporanpembelian');
+
+Route::post('laporan/CompileReports',[CompailReportController::class, 'CompileReports']);

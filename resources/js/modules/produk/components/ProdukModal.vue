@@ -135,36 +135,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="add-choosen">
-                                        <div class="mb-3">
-                                            <label for="imagePegawai" class="form-label">Image</label>
-                                            <div class="image-upload">
-                                                <input type="file" name="image" id="imagePegawai"
-                                                    @change="handleFileChange" accept="image/*">
-                                                <div class="image-uploads">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                        class="plus-down-add me-0">
-                                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                                        <polyline points="17 8 12 3 7 8"></polyline>
-                                                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                                                    </svg>
-                                                    <h4>UPLOAD IMAGE</h4>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="phone-img mt-3"
-                                            style="width: 150px; height: 150px; overflow: hidden; border-radius: 8px; border: 2px dashed #ccc; position: relative; background: #f9f9f9;">
-                                            <img v-if="currentImagePreview" :src="currentImagePreview"
-                                                alt="previewImage"
-                                                style="width: 100%; height: 100%; display: block; object-fit: cover;">
-                                            <div v-else
-                                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; text-align: center; color: #888; font-size: 14px; padding: 10px;">
-                                                <span class="text-center">Pratinjau Gambar</span>
-                                            </div>
-                                        </div>
-                                    </div>
                                     <div class="modal-footer-btn">
                                         <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
                                             CANCEL

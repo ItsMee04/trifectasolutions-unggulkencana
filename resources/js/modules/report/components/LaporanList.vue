@@ -1,7 +1,7 @@
 <template>
     <div class="row g-3">
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm bg-soft-info h-100" @click="pilih('penjualan')"
+            <div class="card border-0 shadow-sm bg-soft-info h-100" @click="cetakLaporanPenjualan"
                 style="cursor: pointer; transition: 0.3s;">
                 <div class="card-body p-3 d-flex align-items-center">
                     <div class="bg-white p-2 rounded me-3 shadow-sm">
@@ -16,7 +16,7 @@
         </div>
 
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm bg-soft-info h-100" @click="pilih('stok')" style="cursor: pointer;">
+            <div class="card border-0 shadow-sm bg-soft-info h-100" @click="cetakLaporanPembelian" style="cursor: pointer;">
                 <div class="card-body p-3 d-flex align-items-center">
                     <div class="bg-white p-2 rounded me-3 shadow-sm">
                         <i data-feather="box" class="text-info" style="width: 20px;"></i>
@@ -87,7 +87,18 @@
     </div>
 </template>
 <script setup>
-</script>
-<style lang="">
+import { onMounted } from 'vue';
+import { useFeather } from '../../../helper/feather'
+import { useLaporan } from '../composables/useLaporan';
 
-</style>
+const { initFeather } = useFeather();
+
+const {
+    cetakLaporanPenjualan,
+    cetakLaporanPembelian,
+} = useLaporan();
+
+onMounted(() => {
+    initFeather();
+});
+</script>

@@ -253,11 +253,15 @@ export function usePOS() {
         const kode = lastCompletedTransactionId.value;
         if (!kode) return;
 
+        const payload = {
+            kode: kode,
+        };
+
         try {
-            const { url } = await transaksiService.getCetakNotaTransaksi(kode);
-            window.open(url, '_blank');
+            const { url } = await transaksiService.CetakNotaPenjulan(payload)
+            window.open(url, '_blank')
         } catch (e) {
-            toast.error('Gagal mencetak nota');
+            toast.error('Gagal mencetak nota penjualan')
         }
     };
 

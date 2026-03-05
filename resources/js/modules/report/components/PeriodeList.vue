@@ -16,7 +16,7 @@
                             <span class="input-group-text bg-light border-end-0">
                                 <i data-feather="calendar" style="width: 14px;"></i>
                             </span>
-                            <input type="date" class="form-control border-start-0">
+                            <input type="date" v-model="formLaporan.tanggaldari"  class="form-control border-start-0">
                         </div>
                         <div class="invalid-feedback d-block" style="font-size: 11px; min-height: 15px;">
                         </div>
@@ -27,7 +27,7 @@
                             <span class="input-group-text bg-light border-end-0">
                                 <i data-feather="calendar" style="width: 14px;"></i>
                             </span>
-                            <input type="date" class="form-control border-start-0">
+                            <input type="date" v-model="formLaporan.tanggalsampai" class="form-control border-start-0">
                         </div>
                         <div class="invalid-feedback d-block" style="font-size: 11px; min-height: 15px;">
                         </div>
@@ -38,4 +38,17 @@
     </div>
 </template>
 <script setup>
+import { onMounted } from 'vue';
+import { useFeather } from '../../../helper/feather'
+import { useLaporan } from '../composables/useLaporan';
+
+const {
+    formLaporan,
+} = useLaporan();
+
+const { initFeather } = useFeather();
+
+onMounted(() => {
+    initFeather();
+});
 </script>

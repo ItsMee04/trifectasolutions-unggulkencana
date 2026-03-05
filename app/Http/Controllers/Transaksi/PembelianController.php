@@ -171,7 +171,7 @@ class PembelianController extends Controller
 
     public function getPembelianDetail()
     {
-        $data = PembelianDetail::with(['produk', 'transaksi', 'produk.karat', 'pembelian.pelanggan'])
+        $data = PembelianDetail::with(['produk', 'kodetransaksi', 'kodetransaksi.transaksidetail', 'produk.karat', 'produk.harga', 'pembelian.pelanggan'])
             ->where('jenis', 'DARITOKO')
             ->where('status', 1)
             ->get();
@@ -398,7 +398,7 @@ class PembelianController extends Controller
 
     public function getPembelianDetailDariLuar(Request $request)
     {
-        $data = PembelianDetail::with(['produk', 'transaksi', 'produk.karat', 'pembelian.pelanggan'])
+        $data = PembelianDetail::with(['produk', 'kodetransaksi' ,'produk.karat', 'pembelian.pelanggan'])
             ->where('jenis', 'LUARTOKO')
             ->where('status', 1)
             ->get();

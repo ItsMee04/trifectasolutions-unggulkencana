@@ -40,8 +40,7 @@ export function usePenjualan() {
     };
 
     // Contoh jika item adalah response dari API yang berbentuk array
-    const handlePrintNota = () => {
-        // Pastikan selectedTransaction ada isinya sebelum mengambil kode
+    const handlePrintNota = async () => {
         if (!selectedTransaction.value) {
             console.error("Tidak ada transaksi yang dipilih untuk dicetak");
             return;
@@ -51,9 +50,13 @@ export function usePenjualan() {
             kode: selectedTransaction.value.kode,
         };
 
-        console.log("Mencetak nota untuk kode:", payload.kode);
-
-        // Lanjutkan ke logika cetak (misal window.print() atau hit API)
+        try {
+            const { url } = await transaksiService.CetakNotaPenjulan(payload)
+            window.open(url, '_blank')
+        } catch (e) {
+            console.log(e)
+            toast.error('Gagal mencetak nota penjualan')
+        }
     };
 
     const handleBatalTransaksi = async (item) => {
