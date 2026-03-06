@@ -330,6 +330,29 @@ export function usePembelianDariToko() {
         }
     };
 
+    const handlePrintNota = async () => {
+        // Cek apakah kode tersedia
+        if (!lastCompletedPembelianKode.value) {
+            toast.error("Tidak ada transaksi yang ditemukan untuk dicetak");
+            return;
+        }
+
+        const payload = {
+            kode: lastCompletedPembelianKode.value, // Langsung ambil nilainya
+        };
+
+        try {
+            // Memanggil service cetak
+            const response = await pembeliandaritokoService.CetakNotaPembelian(payload);
+            if (response.url) {
+                window.open(response.url, '_blank');
+            }
+        } catch (e) {
+            console.error(e);
+            toast.error('Gagal mencetak nota pembelian');
+        }
+    };
+
     const handleNextOrder = async () => {
         // 1. Reset State Header/Parent
         // Kita kosongkan pelanggan tapi kode transaksi akan diisi ulang oleh fetchKodeTransaksi
@@ -497,6 +520,7 @@ export function usePembelianDariToko() {
         fetchKondisi,
         paymentPembelian,
         handleNextOrder,
+        handlePrintNota,
         paginatedPembelianDetail: computed(() => {
             const query = String(searchPembelianDetail.value || '').toLowerCase();
 

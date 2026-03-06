@@ -520,6 +520,7 @@ export function usePembelianDariLuarToko() {
             const response = await pembeliandariluartokoService.paymentPembelian(payload);
 
             if (response.status) {
+                lastCompletedPembelianKode.value = formDariLuarToko.kode;
                 toast.success("Transaksi Berhasil Disimpan!");
 
                 // 4. Reset Form & Refresh State
@@ -542,6 +543,30 @@ export function usePembelianDariLuarToko() {
             toast.error(error.response?.data?.message || "Gagal memproses pembayaran");
         } finally {
             isLoading.value = false;
+        }
+    };
+
+    // Contoh jika item adalah response dari API yang berbentuk array
+    const handlePrintNota = async () => {
+        // Cek apakah kode tersedia
+        if (!lastCompletedPembelianKode.value) {
+            toast.error("Tidak ada transaksi yang ditemukan untuk dicetak");
+            return;
+        }
+
+        const payload = {
+            kode: lastCompletedPembelianKode.value, // Langsung ambil nilainya
+        };
+
+        try {
+            // Memanggil service cetak
+            const response = await pembeliandariluartokoService.CetakNotaPembelian(payload);
+            if (response.url) {
+                window.open(response.url, '_blank');
+            }
+        } catch (e) {
+            console.error(e);
+            toast.error('Gagal mencetak nota pembelian');
         }
     };
 
@@ -610,6 +635,7 @@ export function usePembelianDariLuarToko() {
         handleEdit,
         handleDelete,
         paymentPembelian,
+        handlePrintNota,
         handleNextOrder,
         paginatedPembelianDetail: computed(() => {
             const query = String(searchPembelianDetail.value || '').toLowerCase();

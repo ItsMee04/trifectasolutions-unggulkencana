@@ -33,8 +33,8 @@ export const pembeliandariluartokoService = {
         const response = await apiClient.post('/pembelianluar/paymentPembelianDariLuar', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
-    async getCetakNotaPembelian(kode) {
-        const response = await apiClient.get(`/pembelianluar/${kode}/getsignedurlnota`);
+    async CetakNotaPembelian(payload) {
+        const response = await apiClient.post(`/pembelian/getSignedNotaPembelianUrl`, payload);
         return response.data;
-    }
+    },
 }
