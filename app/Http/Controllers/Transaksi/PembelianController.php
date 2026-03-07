@@ -909,6 +909,7 @@ class PembelianController extends Controller
             'LOGO'                  => public_path('assets/report/LOGOTOKO.png'),
             'LOGOTEXT'              => public_path('assets/report/LOGOTEXT.png'),
             'PRODUK'                => public_path('storage/images/produk/'),
+            'TERIMAKASIH'           => public_path('assets/report/thanksforshopping.png'),
             'TTD'                   => public_path('assets/ttd/'),
             'KODETRANSAKSI_INPUT'   => $kode, // Jasper biasanya butuh ID untuk query internal
         ];

@@ -40,7 +40,7 @@ export function useOfftake() {
     };
 
     // Contoh jika item adalah response dari API yang berbentuk array
-    const handlePrintNota = () => {
+    const handlePrintNota = async () => {
         // Pastikan selectedTransaction ada isinya sebelum mengambil kode
         if (!selectedTransaction.value) {
             console.error("Tidak ada transaksi yang dipilih untuk dicetak");
@@ -51,7 +51,13 @@ export function useOfftake() {
             kode: selectedTransaction.value.kode,
         };
 
-        console.log("Mencetak nota untuk kode:", payload.kode);
+        try {
+            const { url } = await offtakeService.CetakNotaOfftake(payload)
+            window.open(url, '_blank')
+        } catch (e) {
+            console.log(e)
+            toast.error('Gagal mencetak nota offtake')
+        }
 
         // Lanjutkan ke logika cetak (misal window.print() atau hit API)
     };

@@ -9,4 +9,8 @@ export const offtakeService = {
         const response = await apiClient.post('/transaksiofftake/batalTransaksi', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
+    async CetakNotaOfftake(payload) {
+        const response = await apiClient.post(`/offtake/getSignedNotaOfftakeUrl`, payload);
+        return response.data;
+    },
 }

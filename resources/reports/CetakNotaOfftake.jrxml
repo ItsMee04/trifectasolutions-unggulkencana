@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="CetakNotaPembelian" pageWidth="595" pageHeight="311" columnWidth="579" leftMargin="8" rightMargin="8" topMargin="2" bottomMargin="2" uuid="a55be951-3352-4216-9c27-810a890a2325">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="CetakNotaOfftake" language="groovy" pageWidth="595" pageHeight="842" columnWidth="579" leftMargin="8" rightMargin="8" topMargin="2" bottomMargin="2" uuid="a55be951-3352-4216-9c27-810a890a2325">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="db_unggulkencana.jrdax"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -11,7 +12,6 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="db_unggulkencana.jrdax"/>
 	<parameter name="KODETRANSAKSI_INPUT" class="java.lang.String"/>
 	<parameter name="LOGO" class="java.lang.String"/>
 	<parameter name="LOGOTEXT" class="java.lang.String"/>
@@ -19,82 +19,96 @@
 	<parameter name="TTD" class="java.lang.String"/>
 	<parameter name="TERIMAKASIH" class="java.lang.String"/>
 	<queryString language="SQL">
-		<![CDATA[CALL CetakNotaPembelian( $P{KODETRANSAKSI_INPUT} )]]>
+		<![CDATA[CALL CetakNotaOfftake( $P{KODETRANSAKSI_INPUT} )]]>
 	</queryString>
 	<field name="kode" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="kode"/>
 		<property name="com.jaspersoft.studio.field.label" value="kode"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="pembelian"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="offtake"/>
 	</field>
-	<field name="namapelanggan" class="java.lang.String">
+	<field name="tanggal" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="tanggal"/>
+		<property name="com.jaspersoft.studio.field.label" value="tanggal"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="offtake"/>
+	</field>
+	<field name="supplier_nama" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="nama"/>
-		<property name="com.jaspersoft.studio.field.label" value="namapelanggan"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="pelanggan"/>
-	</field>
-	<field name="alamat" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="alamat"/>
-		<property name="com.jaspersoft.studio.field.label" value="alamat"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="pelanggan"/>
+		<property name="com.jaspersoft.studio.field.label" value="supplier_nama"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="suplier"/>
 	</field>
 	<field name="kontak" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="kontak"/>
 		<property name="com.jaspersoft.studio.field.label" value="kontak"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="pelanggan"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="suplier"/>
 	</field>
-	<field name="nip" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="nip"/>
-		<property name="com.jaspersoft.studio.field.label" value="nip"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="pegawai"/>
-	</field>
-	<field name="namapegawai" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="nama"/>
-		<property name="com.jaspersoft.studio.field.label" value="namapegawai"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="pegawai"/>
+	<field name="alamat" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="alamat"/>
+		<property name="com.jaspersoft.studio.field.label" value="alamat"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="suplier"/>
 	</field>
 	<field name="kodeproduk" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="kodeproduk"/>
 		<property name="com.jaspersoft.studio.field.label" value="kodeproduk"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="produk"/>
 	</field>
-	<field name="namaproduk" class="java.lang.String">
+	<field name="produk_nama" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="nama"/>
-		<property name="com.jaspersoft.studio.field.label" value="namaproduk"/>
+		<property name="com.jaspersoft.studio.field.label" value="produk_nama"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="produk"/>
-	</field>
-	<field name="berat" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.name" value="berat"/>
-		<property name="com.jaspersoft.studio.field.label" value="berat"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="pembeliandetail"/>
-	</field>
-	<field name="karat" class="java.math.BigInteger">
-		<property name="com.jaspersoft.studio.field.name" value="karat"/>
-		<property name="com.jaspersoft.studio.field.label" value="karat"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="pembeliandetail"/>
-	</field>
-	<field name="hargabeli" class="java.math.BigInteger">
-		<property name="com.jaspersoft.studio.field.name" value="hargabeli"/>
-		<property name="com.jaspersoft.studio.field.label" value="hargabeli"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="pembeliandetail"/>
 	</field>
 	<field name="image" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="image"/>
 		<property name="com.jaspersoft.studio.field.label" value="image"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="produk"/>
 	</field>
+	<field name="berat" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="berat"/>
+		<property name="com.jaspersoft.studio.field.label" value="berat"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="offtakedetail"/>
+	</field>
+	<field name="karat" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="karat"/>
+		<property name="com.jaspersoft.studio.field.label" value="karat"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="offtakedetail"/>
+	</field>
+	<field name="hargajual" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="hargajual"/>
+		<property name="com.jaspersoft.studio.field.label" value="hargajual"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="offtakedetail"/>
+	</field>
 	<field name="total" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="total"/>
 		<property name="com.jaspersoft.studio.field.label" value="total"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="pembelian"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="offtakedetail"/>
+	</field>
+	<field name="potongan" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="potongan"/>
+		<property name="com.jaspersoft.studio.field.label" value="potongan"/>
+	</field>
+	<field name="subtotal" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="total"/>
+		<property name="com.jaspersoft.studio.field.label" value="subtotal"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="offtake"/>
 	</field>
 	<field name="terbilang" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="terbilang"/>
 		<property name="com.jaspersoft.studio.field.label" value="terbilang"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="pembeliandetail"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="offtake"/>
 	</field>
-	<field name="keranjangtotal" class="java.math.BigInteger">
-		<property name="com.jaspersoft.studio.field.name" value="total"/>
-		<property name="com.jaspersoft.studio.field.label" value="keranjangtotal"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="pembeliandetail"/>
+	<field name="hargatotal" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="hargatotal"/>
+		<property name="com.jaspersoft.studio.field.label" value="hargatotal"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="offtake"/>
+	</field>
+	<field name="nip" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nip"/>
+		<property name="com.jaspersoft.studio.field.label" value="nip"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pegawai"/>
+	</field>
+	<field name="pegawai_nama" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nama"/>
+		<property name="com.jaspersoft.studio.field.label" value="pegawai_nama"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="pegawai"/>
 	</field>
 	<pageHeader>
 		<band height="98" splitType="Stretch">
@@ -131,7 +145,7 @@
 			<textField>
 				<reportElement x="430" y="24" width="150" height="14" uuid="794fd474-30af-4d00-bc43-5d605bcef80e"/>
 				<textElement verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[": "+$F{namapelanggan}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[": "+$F{supplier_nama}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="430" y="38" width="150" height="14" uuid="bd767d0e-ec04-4559-abc3-b633ca7cd712"/>
@@ -159,7 +173,7 @@
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[NOTA PEMBELIAN]]></text>
+				<text><![CDATA[NOTA OFFTAKE]]></text>
 			</staticText>
 			<image hAlign="Right" vAlign="Middle">
 				<reportElement x="70" y="0" width="279" height="84" uuid="d37c03e4-8997-4490-ada0-e5b0445e9fc5"/>
@@ -271,7 +285,7 @@
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{namaproduk}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{produk_nama}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="249" y="0" width="51" height="56" uuid="ab2603b5-d077-4597-8386-e750535d36c1">
@@ -313,10 +327,10 @@
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[($F{hargabeli} == null) ? "Rp 0" : 
+				<textFieldExpression><![CDATA[($F{hargajual} == null) ? "Rp 0" : 
 new java.text.DecimalFormat("Rp #,##0", 
     new java.text.DecimalFormatSymbols(new java.util.Locale("id", "ID"))
-).format($F{hargabeli})]]></textFieldExpression>
+).format($F{hargajual})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="497" y="0" width="82" height="56" uuid="673310de-ad8a-4555-9431-d5de62f68801">
@@ -358,27 +372,23 @@ new java.text.DecimalFormat("Rp #,##0",
 			</image>
 		</band>
 	</detail>
-	<pageFooter>
-		<band height="16">
+	<lastPageFooter>
+		<band height="111">
 			<staticText>
-				<reportElement x="-1" y="0" width="580" height="16" uuid="2681fb0d-291f-42ee-b665-ca88865cb587"/>
+				<reportElement x="4" y="95" width="580" height="16" uuid="87915ca4-15ac-484c-83e5-cff196a9e396"/>
 				<textElement textAlignment="Center" verticalAlignment="Bottom">
 					<font size="9" isBold="true" isItalic="true"/>
 				</textElement>
 				<text><![CDATA[Toko Emas Unggul Kencana, Ruko No.8. Jl Patimura, Karanglewas, Purwokerto, Jawat Tengah, 0822 2537 7888]]></text>
 			</staticText>
-		</band>
-	</pageFooter>
-	<summary>
-		<band height="106">
 			<rectangle radius="5">
-				<reportElement x="100" y="20" width="479" height="18" backcolor="#FCC431" uuid="2c3837d0-5c9e-4d68-babb-17e2c81ebd4e"/>
+				<reportElement x="106" y="5" width="479" height="18" backcolor="#FCC431" uuid="4e84fadb-821d-45c9-9920-140f79e624b3"/>
 				<graphicElement>
 					<pen lineWidth="0.0" lineColor="#030200"/>
 				</graphicElement>
 			</rectangle>
 			<staticText>
-				<reportElement x="100" y="20" width="100" height="18" uuid="00af650b-b8e2-47de-a292-fe3bac350a8f"/>
+				<reportElement x="106" y="5" width="100" height="18" uuid="e5ea9e9b-b547-41c6-8a20-f2cd8a966ed3"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -392,7 +402,7 @@ new java.text.DecimalFormat("Rp #,##0",
 				<text><![CDATA[TERBILANG]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="249" y="20" width="330" height="18" uuid="2f4cb3ae-df8c-410a-b8bf-af24d6830f4e"/>
+				<reportElement x="255" y="5" width="330" height="18" uuid="98b69afc-4046-4836-9734-cfcdfd5ee8aa"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -407,14 +417,14 @@ new java.text.DecimalFormat("Rp #,##0",
 				<patternExpression><![CDATA[$F{terbilang}]]></patternExpression>
 			</textField>
 			<staticText>
-				<reportElement x="10" y="20" width="90" height="18" uuid="72081136-8290-4b3e-839a-a75655c3553f"/>
+				<reportElement x="16" y="5" width="90" height="18" uuid="b93fd344-85c0-43b5-86f4-05e2b38b4b43"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="13" isBold="true" isItalic="true"/>
 				</textElement>
 				<text><![CDATA[PERHATIAN ! ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="10" y="48" width="246" height="57" uuid="bc514223-41c6-483e-90a8-93d479a20437"/>
+				<reportElement x="16" y="33" width="246" height="57" uuid="e8281250-18c2-40c3-a2ef-85c95ada6ac5"/>
 				<textElement textAlignment="Justified" verticalAlignment="Middle">
 					<font size="6.5"/>
 				</textElement>
@@ -426,25 +436,25 @@ new java.text.DecimalFormat("Rp #,##0",
 6. Dengan melakukan transaksi ini pembeli telah setuju dengan ketentuan diatas]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="276" y="89" width="100" height="16" uuid="1a88b7c7-6645-4e4a-a2a3-e6421168ae64"/>
+				<reportElement x="282" y="74" width="100" height="16" uuid="dcbc5ed1-a105-4ed0-9dcf-f5bdea3371d4"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8" isBold="true" isItalic="true"/>
 				</textElement>
 				<text><![CDATA[UNGGUL KENCANA]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="276" y="73" width="100" height="16" uuid="dbb60a43-be1d-408b-bdf7-9d883c104d71"/>
+				<reportElement x="282" y="58" width="100" height="16" uuid="f6053cb1-3dd5-46f1-a4d7-800ee74a71f8"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{namapegawai}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{pegawai_nama}]]></textFieldExpression>
 			</textField>
 			<image hAlign="Center" vAlign="Middle" onErrorType="Blank">
-				<reportElement x="308" y="38" width="35" height="35" uuid="410b9614-92cd-438d-9d1a-2c6182818878"/>
+				<reportElement x="314" y="23" width="35" height="35" uuid="3ab41422-08e8-453d-9730-bb096abc5330"/>
 				<imageExpression><![CDATA[$P{TTD}+$F{nip}+".png"]]></imageExpression>
 			</image>
 			<image scaleImage="RetainShape" hAlign="Center" vAlign="Bottom">
-				<reportElement x="410" y="38" width="157" height="68" uuid="ae96b98e-feeb-4308-89e4-8cabe1c9079b"/>
+				<reportElement x="416" y="23" width="157" height="68" uuid="28e8ff70-6e54-4c2f-8463-10f26f6520de"/>
 				<imageExpression><![CDATA[$P{TERIMAKASIH}]]></imageExpression>
 			</image>
 		</band>
-	</summary>
+	</lastPageFooter>
 </jasperReport>

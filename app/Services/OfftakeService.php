@@ -15,7 +15,7 @@ class OfftakeService
 
         // 2. Cari transaksi terakhir yang kodenya mirip dengan prefix hari ini
         // Ini penting agar nomor urut di-reset setiap hari
-        $lastRecord = Offtake::where('kode', 'like', $prefix . '%')
+        $lastRecord = Offtake::where('kode', 'like', $prefix . 'OF-%')
             ->orderBy('id', 'desc')
             ->first();
 

@@ -341,6 +341,7 @@ class TransaksiController extends Controller
             'LOGOTEXT'              => public_path('assets/report/LOGOTEXT.png'),
             'PRODUK'                => public_path('storage/images/produk/'),
             'TTD'                   => public_path('assets/ttd/'),
+            'TERIMAKASIH'           => public_path('assets/report/thanksforshopping.png'),
             'KODETRANSAKSI_INPUT'   => $kode, // Jasper biasanya butuh ID untuk query internal
         ];
 
