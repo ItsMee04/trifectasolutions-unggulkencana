@@ -247,7 +247,15 @@ class OfftakeController extends Controller
             }
 
             // 2. Cari Header Offtake
-            $offtake = Offtake::where('kode', $request->kode)->where('status', 1)->firstOrFail();
+            $offtake = Offtake::where('kode', $request->kode)->first();
+
+            if (!$offtake) {
+                throw new \Exception("Data Offtake dengan kode " . $request->kode . " tidak ditemukan.");
+            }
+
+            if ($offtake->status != 1) {
+                throw new \Exception("Transaksi Offtake ini sudah pernah diproses atau statusnya tidak aktif.");
+            }
 
             // 3. Ambil Detail Produk
             $details = OfftakeDetail::where('kode', $request->kode)->where('status', 1)->get();

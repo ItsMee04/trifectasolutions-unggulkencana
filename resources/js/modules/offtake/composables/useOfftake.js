@@ -303,11 +303,17 @@ export function useOfftake() {
     };
 
     const handlePrint = async () => {
-        const kode = lastCompletedOfftakeKode.value;
-        if (!kode) return;
+        if (!lastCompletedOfftakeKode.value) {
+            console.error("Tidak ada transaksi yang dipilih untuk dicetak");
+            return;
+        }
+
+        const payload = {
+            kode: lastCompletedOfftakeKode.value,
+        };
 
         try {
-            const { url } = await offtakeService.getCetakNotaTransaksi(kode);
+            const { url } = await offtakeService.CetakNotaOfftake(payload);
             window.open(url, '_blank');
         } catch (e) {
             toast.error('Gagal mencetak nota');
