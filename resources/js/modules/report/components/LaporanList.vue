@@ -30,7 +30,7 @@
         </div>
 
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm bg-soft-info h-100" @click="pilih('stok')" style="cursor: pointer;">
+            <div class="card border-0 shadow-sm bg-soft-info h-100" @click="cetakLaporanOfftake" style="cursor: pointer;">
                 <div class="card-body p-3 d-flex align-items-center">
                     <div class="bg-white p-2 rounded me-3 shadow-sm">
                         <i data-feather="box" class="text-info" style="width: 20px;"></i>
@@ -44,7 +44,7 @@
         </div>
 
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm bg-soft-info h-100" @click="pilih('stok')" style="cursor: pointer;">
+            <div class="card border-0 shadow-sm bg-soft-info h-100" @click="cetakLaporanPerbaikan" style="cursor: pointer;">
                 <div class="card-body p-3 d-flex align-items-center">
                     <div class="bg-white p-2 rounded me-3 shadow-sm">
                         <i data-feather="box" class="text-info" style="width: 20px;"></i>
@@ -72,7 +72,7 @@
         </div>
 
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm bg-soft-info h-100" @click="pilih('stok')" style="cursor: pointer;">
+            <div class="card border-0 shadow-sm bg-soft-info h-100" @click="cetakLaporanMutasiSaldo" style="cursor: pointer;">
                 <div class="card-body p-3 d-flex align-items-center">
                     <div class="bg-white p-2 rounded me-3 shadow-sm">
                         <i data-feather="box" class="text-info" style="width: 20px;"></i>
@@ -96,6 +96,9 @@ const { initFeather } = useFeather();
 const {
     cetakLaporanPenjualan,
     cetakLaporanPembelian,
+    cetakLaporanOfftake,
+    cetakLaporanPerbaikan,
+    cetakLaporanMutasiSaldo
 } = useLaporan();
 
 onMounted(() => {

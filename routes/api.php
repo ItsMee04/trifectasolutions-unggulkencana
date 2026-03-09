@@ -190,6 +190,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('laporan/getsignedurl-cetaklaporanpenjualan',[LaporanController::class, 'getSignedCetakLaporanPenjualanUrl']);
     Route::post('laporan/getsignedurl-cetaklaporanpembelian',[LaporanController::class, 'getSignedCetakLaporanPembelianUrl']);
+    Route::post('laporan/getsignedurl-cetaklaporanofftake',[LaporanController::class, 'getSignedCetakLaporanOfftakeUrl']);
+    Route::post('laporan/getsignedurl-cetaklaporanperbaikan',[LaporanController::class, 'getSignedCetakLaporanPerbaikanUrl']);
+    Route::post('laporan/getsignedurl-cetaklaporanmutasisaldo',[LaporanController::class, 'getSignedCetakLaporanMutasiSaldoUrl']);
+
 });
 
 Route::get('/transaksi/CetakNotaPenjualan', [TransaksiController::class, 'CetakNotaPenjualan'])->name('produk.cetak_notapenjualan');
@@ -198,5 +202,8 @@ Route::get('/offtake/CetakNotaOfftake', [OfftakeController::class, 'CetakNotaOff
 
 Route::get('/laporan/cetaklaporanpenjualan', [LaporanController::class, 'CetakLaporanPenjualan'])->name('produk.cetak_laporanpenjualan');
 Route::get('/laporan/cetaklaporanpembelian', [LaporanController::class, 'CetakLaporanPembelian'])->name('produk.cetak_laporanpembelian');
+Route::get('/laporan/cetaklaporanofftake', [LaporanController::class, 'CetakLaporanOfftake'])->name('produk.cetak_laporanofftake');
+Route::get('/laporan/cetaklaporanperbaikan', [LaporanController::class, 'CetakLaporanPerbaikan'])->name('produk.cetak_laporanperbaikan');
+Route::get('/laporan/cetaklaporanmutasisaldo', [LaporanController::class, 'CetakLaporanMutasiSaldo'])->name('produk.cetak_laporanmutasisaldo');
 
 Route::post('laporan/CompileReports',[CompailReportController::class, 'CompileReports']);

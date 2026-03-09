@@ -61,10 +61,64 @@ export function useLaporan() {
         }
     }
 
+    const cetakLaporanOfftake = async () => {
+        if (!validateForm()) return false;
+
+        const payload = {
+            periodedari: formLaporan.tanggaldari,
+            periodesampai: formLaporan.tanggalsampai
+        }
+
+        try {
+            const { url } = await laporanService.cetakLaporanOfftake(payload)
+            window.open(url, '_blank')
+        } catch (e) {
+            console.log(e)
+            toast.error('Gagal mencetak laporan offtake')
+        }
+    }
+
+    const cetakLaporanPerbaikan = async () => {
+        if (!validateForm()) return false;
+
+        const payload = {
+            periodedari: formLaporan.tanggaldari,
+            periodesampai: formLaporan.tanggalsampai
+        }
+
+        try {
+            const { url } = await laporanService.cetakLaporanPerbaikan(payload)
+            window.open(url, '_blank')
+        } catch (e) {
+            console.log(e)
+            toast.error('Gagal mencetak laporan perbaikan')
+        }
+    }
+
+    const cetakLaporanMutasiSaldo = async () => {
+        if (!validateForm()) return false;
+
+        const payload = {
+            periodedari: formLaporan.tanggaldari,
+            periodesampai: formLaporan.tanggalsampai
+        }
+
+        try {
+            const { url } = await laporanService.cetakLaporanMutasiSaldo(payload)
+            window.open(url, '_blank')
+        } catch (e) {
+            console.log(e)
+            toast.error('Gagal mencetak laporan mutasi saldo')
+        }
+    }
+
     return {
         errors,
         formLaporan,
         cetakLaporanPenjualan,
         cetakLaporanPembelian,
+        cetakLaporanOfftake,
+        cetakLaporanPerbaikan,
+        cetakLaporanMutasiSaldo
     }
 }

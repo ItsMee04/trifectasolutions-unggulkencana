@@ -9,12 +9,16 @@ export const laporanService = {
         const response = await apiClient.post('/laporan/getsignedurl-cetaklaporanpembelian', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
-    async updatePelanggan(payload) {
-        const response = await apiClient.post('/pelanggan/updatePelanggan', payload);
+    async cetakLaporanOfftake(payload) {
+        const response = await apiClient.post('/laporan/getsignedurl-cetaklaporanofftake', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
-    async deletePelanggan(payload) {
-        const response = await apiClient.post('/pelanggan/deletePelanggan', payload);
+    async cetakLaporanPerbaikan(payload) {
+        const response = await apiClient.post('/laporan/getsignedurl-cetaklaporanperbaikan', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
-    }
+    },
+    async cetakLaporanMutasiSaldo(payload) {
+        const response = await apiClient.post('/laporan/getsignedurl-cetaklaporanmutasisaldo', payload);
+        return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
+    },
 }
