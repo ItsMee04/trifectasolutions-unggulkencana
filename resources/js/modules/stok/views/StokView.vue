@@ -3,8 +3,8 @@
     <div class="page-header">
       <div class="add-item d-flex">
         <div class="page-title">
-          <h4>Halaman Inventory Nampan Produk</h4>
-          <h6>Kelola Inventory Anda</h6>
+          <h4>Halaman Stok Produk</h4>
+          <h6>Kelola Stok Anda</h6>
         </div>
       </div>
       <ul class="table-top-head">
@@ -18,11 +18,11 @@
 
     <div class="row align-items-start">
       <div class="col-lg-4 col-xl-3">
-        <PeriodeList />
+        <!-- <PeriodeList /> -->
       </div>
 
       <div class="col-lg-8 col-xl-9">
-        <ProdukList />
+        <!-- <ProdukList /> -->
       </div>
     </div>
   </div>
@@ -30,9 +30,9 @@
 
 <script setup>
 import { computed } from 'vue';
-import { useStock } from '../composables/useStock'
-import PeriodeList from '../components/PeriodeList.vue';
-import ProdukList from '../components/ProdukList.vue';
+// import { useStock } from '../composables/useStock'
+// import PeriodeList from '../components/PeriodeList.vue';
+// import ProdukList from '../components/ProdukList.vue';
 
-const { handleRefresh } = useStock();
+// const { handleRefresh } = useStock();
 </script>

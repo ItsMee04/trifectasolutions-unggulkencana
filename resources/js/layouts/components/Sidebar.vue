@@ -146,6 +146,11 @@ const menuGroups = {
                 icon: 'server',
                 path: '/inventori'
             },
+            stokopname: {
+                label: 'stokopname',
+                icon: 'box',
+                path: '/stokopname'
+            },
             laporantransaksi: {
                 label: 'Laporan Transaksi',
                 icon: 'book',
