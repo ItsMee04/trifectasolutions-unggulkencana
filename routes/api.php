@@ -22,6 +22,7 @@ use App\Http\Controllers\Master\ProdukController;
 use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\SuplierController;
 use App\Http\Controllers\Master\UserController;
+use App\Http\Controllers\Stok\StokOpanemController;
 use App\Http\Controllers\Transaksi\OfftakeController;
 use App\Http\Controllers\Transaksi\PembelianController;
 use App\Http\Controllers\Transaksi\PerbaikanController;
@@ -187,6 +188,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('inventory/getNampanProdukByPeriodeStok', [StokController::class, 'getNampanProdukByPeriodeStok']);
     Route::post('inventory/getRekapStokByPeriode', [StokController::class, 'getRekapStokByPeriode']);
     Route::post('inventory/finalPeriodeStok', [StokController::class, 'finalPeriodeStok']);
+
+    Route::get('stokopname/getPeriodeStok', [StokOpanemController::class, 'getPeriodeStokOpname']);
+    Route::post('stokopname/storePeriodeStokOpname', [StokOpanemController::class, 'storePeriodeStokOpname']);
 
     Route::post('laporan/getsignedurl-cetaklaporanpenjualan',[LaporanController::class, 'getSignedCetakLaporanPenjualanUrl']);
     Route::post('laporan/getsignedurl-cetaklaporanpembelian',[LaporanController::class, 'getSignedCetakLaporanPembelianUrl']);

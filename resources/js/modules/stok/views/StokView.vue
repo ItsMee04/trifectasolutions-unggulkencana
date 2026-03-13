@@ -18,7 +18,7 @@
 
     <div class="row align-items-start">
       <div class="col-lg-4 col-xl-3">
-        <!-- <PeriodeList /> -->
+        <PeriodeList />
       </div>
 
       <div class="col-lg-8 col-xl-9">
@@ -30,9 +30,9 @@
 
 <script setup>
 import { computed } from 'vue';
-// import { useStock } from '../composables/useStock'
-// import PeriodeList from '../components/PeriodeList.vue';
+import { useStok } from '../composables/useStok'
+import PeriodeList from '../components/PeriodeList.vue';
 // import ProdukList from '../components/ProdukList.vue';
 
-// const { handleRefresh } = useStock();
+const { handleRefresh } = useStok();
 </script>
