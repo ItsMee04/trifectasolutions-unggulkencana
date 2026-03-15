@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Stok;
 
 use App\Http\Controllers\Controller;
 use App\Models\Stok\Stok;
+use App\Models\Stok\StokDetail;
 use App\Services\StokService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -61,6 +62,12 @@ class StokOpanemController extends Controller
                 'status'    => 1,
             ]);
 
+            if ($data) {
+                StokDetail::create([
+                    'kode'  => $kode,
+                ]);
+            }
+
             DB::commit();
 
             return response()->json([
@@ -77,5 +84,28 @@ class StokOpanemController extends Controller
                 'message' => 'Gagal menyimpan data: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getStokOpnameDetail(Request $request)
+    {
+        $request->validate([
+            'kode' => 'required|exists:stok,kode',
+        ]);
+
+        $data = StokDetail::where('kode', $request->kode)->get();
+
+        if($data->isEmpty()){
+            return response()->json([
+                'status'    => false,
+                'message'   => 'Data stok opname tidak ditemukan',
+                'data'      => []
+            ]);
+        }
+
+        return response()->json([
+            'status'    => true,
+            'message'   => 'Data stok opname berhasil ditemukan',
+            'data'      => $data
+        ]);
     }
 }

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('stokdetail', function (Blueprint $table) {
             $table->id();
             $table->string('kode', 100);
-            $table->unsignedBigInteger('jenisproduk_id');
+            $table->unsignedBigInteger('jenisproduk_id')->nullable();
             $table->integer('potong')->unsigned()->default(0);
             $table->decimal('berat', 8, 2)->nullable()->default(0.0);
             $table->integer('status')->unsigned()->default(1);

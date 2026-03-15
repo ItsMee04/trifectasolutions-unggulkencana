@@ -11,13 +11,53 @@ const searchPeriodeStok = ref('')
 const currentPagePeriodeStok = ref(1);
 const itemsPerPagePeriodeStok = 5;
 
+const StokDetail = ref([])
+const isLoadingStokDetail = ref(false)
+const searchStokDetail = ref('')
+const currentPageStokDetail = ref(1)
+const itemPerPageStokDetail = 5;
+
 const formPeriode = reactive({
-    periode:''
+    periode: ''
 });
+
+const formStokDetail = reactive({
+    id: null,
+    jenisproduk: null,
+    potong: '',
+    berat: ''
+})
 
 const errors = ref({});
 
-export function useStok(){
+const fetchStokDetail = async () => {
+    if (!selectedPeriodeStokID.value) return;
+
+    isLoadingStokDetail.value = true;
+
+    try {
+        const payload = {
+            kode: selectedPeriodeStokID.value
+        }
+
+        const response = await stokService.getStokOpnameDetail(payload)
+        StokDetail.value = Array.isArray(response) ? response : (response.data || []);
+    } catch (error) {
+        StokDetail.value = [];
+    } finally {
+        isLoadingStokDetail.value = false;
+    }
+}
+
+watch(selectedPeriodeStokID, (newId) => {
+    if (newId) {
+        currentPageStokDetail.value = 1; // Reset halaman PRODUK saja ke 1
+        fetchStokDetail();
+    }
+})
+
+
+export function useStok() {
 
     const fetchPeriodeStok = async () => {
         isLoadingPeriodeStok.value = true;
@@ -25,12 +65,30 @@ export function useStok(){
         try {
             const response = await stokService.getPeriodeStok();
             PeriodeStok.value = Array.isArray(response) ? response : (response.data || []);
-        } catch(error) {
+        } catch (error) {
             PeriodeStok.value = [];
             console.log(error);
         } finally {
             isLoadingPeriodeStok.value = false;
         }
+    }
+
+    const selectPeriodeStokOpname = (kode) => {
+        selectedPeriodeStokID.value = kode;
+    };
+
+    const selectedPeriodeOpnameData = computed(() => {
+        return PeriodeStok.value.find(item => item.kode === selectedPeriodeStokID.value) || {};
+        // Mengembalikan {} (objek kosong) jika tidak ketemu, bukan null
+    });
+
+    const handlePilihStokOpname = (item) => {
+        // 1. Update ID di composable agar class CSS ':class' aktif
+        // selectPeriodeStokOpname(item.kode);
+        // 1. Berikan nilai ke ref selectedPeriodeStokID
+        selectedPeriodeStokID.value = item.kode;
+
+        selectPeriodeStokOpname(selectedPeriodeStokID.value)
     }
 
     const validateForm = () => {
@@ -87,14 +145,26 @@ export function useStok(){
     const totalPagesPeriodeStok = computed(() => {
         const query = String(searchPeriodeStok.value || '').toLowerCase();
         const filteredCount = (PeriodeStok.value || []).filter(item => {
-            const valKode       = String(item.kode ?? '').toLowerCase();
-            const valPeriode    = String(item.periode ?? '').toLowerCase();
+            const valKode = String(item.kode ?? '').toLowerCase();
+            const valPeriode = String(item.periode ?? '').toLowerCase();
 
             return valKode.includes(query) || valPeriode.includes(query);
         }).length;
 
         return Math.ceil(filteredCount / itemsPerPagePeriodeStok) || 1;
     })
+
+    const totalPagesStokDetail = computed(() => {
+        const query = String(searchStokDetail.value || []).toLowerCase();
+        const filteredCount = (StokDetail.value || []).filter(item => {
+            const valBerat = String(item.berat || '').toLowerCase();
+            const valPotong = String(item.potong || '').toLowerCase();
+
+            return valBerat.includes(query) || valPotong.includes(query);
+        }).length;
+
+        return Math.ceil(filteredCount / itemPerPageStokDetail) || 1;
+    });
 
     const displayedPagesPeriodeStok = computed(() => {
         const total = totalPagesPeriodeStok.value;
@@ -104,14 +174,34 @@ export function useStok(){
         let start = Math.max(current - Math.floor(maxVisible / 2), 1);
         let end = start + maxVisible - 1;
 
-        if(end > total) {
+        if (end > total) {
             end = total;
             start = Math.max(end - maxVisible + 1, 1);
         }
 
         const pages = [];
-        for (let i = start; i <= end; i++){
+        for (let i = start; i <= end; i++) {
             pages.push(i)
+        }
+        return pages;
+    });
+
+    const displayedStokDetail = computed(() => {
+        const total = totalPagesStokDetail.value;
+        const current = currentPageStokDetail.value;
+        const maxVisible = 3; // Jumlah nomor yang ingin ditampilkan
+
+        let start = Math.max(current - Math.floor(maxVisible / 2), 1);
+        let end = start + maxVisible - 1;
+
+        if (end > total) {
+            end = total;
+            start = Math.max(end - maxVisible + 1, 1);
+        }
+
+        const pages = [];
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
         }
         return pages;
     });
@@ -136,7 +226,7 @@ export function useStok(){
             );
         }),
         paginatedPeriodeStok: computed(() => {
-            const start = (currentPagePeriodeStok.value -1) * itemsPerPagePeriodeStok;
+            const start = (currentPagePeriodeStok.value - 1) * itemsPerPagePeriodeStok;
             const query = String(searchPeriodeStok.value || '').toLowerCase();
 
             const filtered = (PeriodeStok.value || []).filter(item =>
@@ -148,5 +238,30 @@ export function useStok(){
         }),
         handleCreatePeriode,
         handleRefresh,
+
+        StokDetail,
+        currentPageStokDetail,
+        itemPerPageStokDetail,
+        totalPagesStokDetail,
+        displayedPagesPeriodeStok,
+        filteredStokDetail: computed(() => {
+            const query = String(searchStokDetail.value || '').toLowerCase();
+            return (StokDetail.value || []).filter(item =>
+                String(item.berat ?? '').toLowerCase().includes(query) ||
+                String(item.potong ?? '').toLowerCase().includes(query)
+            );
+        }),
+        paginatedStokDetail: computed(() => {
+            const start = (currentPageStokDetail.value - 1) * itemPerPageStokDetail;
+            const query = String(searchStokDetail.value || '').toLowerCase();
+
+            const filtered = (StokDetail.value || []).filter(item =>
+                String(item.breat ?? '').toLowerCase().includes(query) ||
+                String(item.potong ?? '').toLowerCase().includes(query)
+            );
+
+            return filtered.slice(start, start + itemPerPageStokDetail);
+        }),
+        handlePilihStokOpname,
     }
 }

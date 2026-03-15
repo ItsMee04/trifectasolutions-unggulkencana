@@ -191,6 +191,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('stokopname/getPeriodeStok', [StokOpanemController::class, 'getPeriodeStokOpname']);
     Route::post('stokopname/storePeriodeStokOpname', [StokOpanemController::class, 'storePeriodeStokOpname']);
+    Route::post('stokopname/getStokOpnameDetail', [StokOpanemController::class, 'getStokOpnameDetail']);
 
     Route::post('laporan/getsignedurl-cetaklaporanpenjualan',[LaporanController::class, 'getSignedCetakLaporanPenjualanUrl']);
     Route::post('laporan/getsignedurl-cetaklaporanpembelian',[LaporanController::class, 'getSignedCetakLaporanPembelianUrl']);

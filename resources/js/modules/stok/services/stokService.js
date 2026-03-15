@@ -9,10 +9,10 @@ export const stokService = {
         const response = await apiClient.post('/stokopname/storePeriodeStokOpname', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
-    // async getNampanProdukByPeriodeStok(payload) {
-    //     const response = await apiClient.post('/inventory/getNampanProdukByPeriodeStok', payload);
-    //     return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
-    // },
+    async getStokOpnameDetail(payload) {
+        const response = await apiClient.post('/stokopname/getStokOpnameDetail', payload);
+        return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
+    },
     // async getRekapStokByPeriode(payload) {
     //     const response = await apiClient.post('/inventory/getRekapStokByPeriode', payload);
     //     return response.data; // Sesuaikan dengan struktur JSON Laravel Anda

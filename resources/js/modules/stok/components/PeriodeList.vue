@@ -22,7 +22,7 @@
             </div>
 
             <div v-else class="list-group list-group-flush">
-                <a v-for="item in paginatedPeriodeStok" :key="item.id" @click.prevent="handlePilihPeriodeStok(item)"
+                <a v-for="item in paginatedPeriodeStok" :key="item.id" @click.prevent="handlePilihStokOpname(item)"
                     class="list-group-item list-group-item-action border-0 py-3"
                     :class="{ 'bg-light shadow-sm active-nampan': item.id === selectedPeriodeStokID }">
                     <div class="d-flex align-items-center justify-content-between">
@@ -138,6 +138,7 @@ const {
     paginatedPeriodeStok,
     fetchPeriodeStok,
     handleCreatePeriode,
+    handlePilihStokOpname
     // handlePilihPeriodeStok,
     // handleFinalisasiPeriode
 } = useStok();
