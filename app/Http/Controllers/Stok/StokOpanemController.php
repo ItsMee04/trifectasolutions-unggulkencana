@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Stok;
 
 use App\Http\Controllers\Controller;
+use App\Models\Master\JenisProduk;
 use App\Models\Stok\Stok;
 use App\Models\Stok\StokDetail;
 use App\Services\StokService;
@@ -62,10 +63,22 @@ class StokOpanemController extends Controller
                 'status'    => 1,
             ]);
 
-            if ($data) {
-                StokDetail::create([
-                    'kode'  => $kode,
-                ]);
+            $semuaJenis = JenisProduk::all();
+
+            if ($data && $semuaJenis->count() > 0) {
+                $detailData = [];
+
+                foreach ($semuaJenis as $jenis) {
+                    $detailData[] = [
+                        'kode'           => $kode,
+                        'jenisproduk_id' => $jenis->id,
+                        'created_at'     => now(),
+                        'updated_at'     => now(),
+                    ];
+                }
+
+                // 3. Insert sekaligus banyak (Batch Insert) agar lebih cepat
+                StokDetail::insert($detailData);
             }
 
             DB::commit();
@@ -92,9 +105,9 @@ class StokOpanemController extends Controller
             'kode' => 'required|exists:stok,kode',
         ]);
 
-        $data = StokDetail::where('kode', $request->kode)->get();
+        $data = StokDetail::with(['stok', 'jenisproduk'])->where('kode', $request->kode)->get();
 
-        if($data->isEmpty()){
+        if ($data->isEmpty()) {
             return response()->json([
                 'status'    => false,
                 'message'   => 'Data stok opname tidak ditemukan',

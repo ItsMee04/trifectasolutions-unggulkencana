@@ -218,6 +218,7 @@ export function useStok() {
         displayedPagesPeriodeStok,
         fetchPeriodeStok,
         selectedPeriodeStokID,
+        selectedPeriodeOpnameData,
         filteredPeriodeStok: computed(() => {
             const query = String(searchPeriodeStok.value || '').toLowerCase();
             return (PeriodeStok.value || []).filter(item =>
@@ -243,7 +244,7 @@ export function useStok() {
         currentPageStokDetail,
         itemPerPageStokDetail,
         totalPagesStokDetail,
-        displayedPagesPeriodeStok,
+        displayedStokDetail,
         filteredStokDetail: computed(() => {
             const query = String(searchStokDetail.value || '').toLowerCase();
             return (StokDetail.value || []).filter(item =>
@@ -256,12 +257,13 @@ export function useStok() {
             const query = String(searchStokDetail.value || '').toLowerCase();
 
             const filtered = (StokDetail.value || []).filter(item =>
-                String(item.breat ?? '').toLowerCase().includes(query) ||
+                String(item.berat ?? '').toLowerCase().includes(query) ||
                 String(item.potong ?? '').toLowerCase().includes(query)
             );
 
             return filtered.slice(start, start + itemPerPageStokDetail);
         }),
         handlePilihStokOpname,
+        searchStokDetail,
     }
 }

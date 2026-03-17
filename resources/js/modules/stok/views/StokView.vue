@@ -22,7 +22,7 @@
       </div>
 
       <div class="col-lg-8 col-xl-9">
-        <!-- <ProdukList /> -->
+        <StokList />
       </div>
     </div>
   </div>
@@ -32,7 +32,7 @@
 import { computed } from 'vue';
 import { useStok } from '../composables/useStok'
 import PeriodeList from '../components/PeriodeList.vue';
-// import ProdukList from '../components/ProdukList.vue';
+import StokList from '../components/StokList.vue';
 
 const { handleRefresh } = useStok();
 </script>
