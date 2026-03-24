@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+.env
+.git
+.gitignore
+.vscode
+.idea
+storage/logs/*
+storage/framework/*
+storage/app/*
+public/hot
+public/storage
+.DS_Store
+docker-compose.yml
+laravel.conf
