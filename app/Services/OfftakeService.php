@@ -39,31 +39,31 @@ class OfftakeService
     public function terbilang($angka)
     {
         $angka = abs((int)$angka);
-        $huruf = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
+        $huruf = ["", "SATU", "DUA", "TIGA", "EMPAT", "LIMA", "ENAM", "TUJUH", "DELAPAN", "SEMBILAN", "SEPULUH", "SEBELAS"];
         $hasil = "";
 
         if ($angka < 12) {
             $hasil = $huruf[$angka];
         } elseif ($angka < 20) {
-            $hasil = $this->terbilang($angka - 10) . " belas";
+            $hasil = $this->terbilang($angka - 10) . " BELAS";
         } elseif ($angka < 100) {
-            $hasil = $this->terbilang(floor($angka / 10)) . " puluh " . $this->terbilang($angka % 10);
+            $hasil = $this->terbilang(floor($angka / 10)) . " PULUH " . $this->terbilang($angka % 10);
         } elseif ($angka < 200) {
             $hasil = "seratus " . $this->terbilang($angka - 100);
         } elseif ($angka < 1000) {
-            $hasil = $this->terbilang(floor($angka / 100)) . " ratus " . $this->terbilang($angka % 100);
+            $hasil = $this->terbilang(floor($angka / 100)) . " RATUS " . $this->terbilang($angka % 100);
         } elseif ($angka < 2000) {
             $hasil = "seribu " . $this->terbilang($angka - 1000);
         } elseif ($angka < 1000000) {
-            $hasil = $this->terbilang(floor($angka / 1000)) . " ribu " . $this->terbilang($angka % 1000);
+            $hasil = $this->terbilang(floor($angka / 1000)) . " RIBU " . $this->terbilang($angka % 1000);
         } elseif ($angka < 1000000000) {
-            $hasil = $this->terbilang(floor($angka / 1000000)) . " juta " . $this->terbilang($angka % 1000000);
+            $hasil = $this->terbilang(floor($angka / 1000000)) . " JUTA " . $this->terbilang($angka % 1000000);
         } elseif ($angka < 1000000000000) {
-            $hasil = $this->terbilang(floor($angka / 1000000000)) . " miliar " . $this->terbilang($angka % 1000000000);
+            $hasil = $this->terbilang(floor($angka / 1000000000)) . " MILIAR " . $this->terbilang($angka % 1000000000);
         } elseif ($angka < 1000000000000000) {
-            $hasil = $this->terbilang(floor($angka / 1000000000000)) . " triliun " . $this->terbilang($angka % 1000000000000);
+            $hasil = $this->terbilang(floor($angka / 1000000000000)) . " TRILIUN " . $this->terbilang($angka % 1000000000000);
         } else {
-            return "angka terlalu besar";
+            return "ANGKA TERLALU BESAR";
         }
 
         return trim($hasil);

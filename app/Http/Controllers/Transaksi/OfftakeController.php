@@ -103,7 +103,7 @@ class OfftakeController extends Controller
                 $detail->lingkar   = $item['lingkar'] ?? 0;
                 $detail->panjang   = $item['panjang'] ?? 0;
                 $detail->total     = $totalHargaItem;
-                $detail->terbilang = $this->offtakeService->terbilang($totalHargaItem) . " rupiah";
+                $detail->terbilang = $this->offtakeService->terbilang($totalHargaItem) . " RUPIAH";
                 $detail->oleh      = Auth::id();
                 $detail->status    = 1;
                 $detail->save();
@@ -198,7 +198,7 @@ class OfftakeController extends Controller
                     $offtake->update([
                         'total'      => $newTotal,
                         'hargatotal' => $newTotal,
-                        'terbilang'  => $this->offtakeService->terbilang($newTotal) . " rupiah",
+                        'terbilang'  => $this->offtakeService->terbilang($newTotal) . " RUPIAH",
                     ]);
                 } else {
                     // KONDISI B: Sudah tidak ada produk aktif (Kosong)
@@ -206,7 +206,7 @@ class OfftakeController extends Controller
                     $offtake->update([
                         'total'      => 0,
                         'hargatotal' => 0,
-                        'terbilang'  => 'rupiah',
+                        'terbilang'  => 'NOL RUPIAH',
                         'status'     => 0, // Header ikut menjadi non-aktif
                     ]);
                 }
@@ -291,7 +291,7 @@ class OfftakeController extends Controller
                 }
             }
 
-            $terbilangFix = $this->offtakeService->terbilang($request->total) . " rupiah";
+            $terbilangFix = $this->offtakeService->terbilang($request->total) . " RUPIAH";
 
             // 6. Update Header Offtake
             $offtake->update([

@@ -3,14 +3,24 @@
         <div class="card-body p-0">
             <div class="p-3 border-bottom">
                 <h6 class="fw-bold mb-3">Daftar Periode</h6>
-                <div class="input-group">
+
+                <!-- Search input - ini di dalam input-group -->
+                <div class="input-group mb-3">
                     <span class="input-group-text bg-white border-end-0">
                         <i data-feather="search" style="width: 14px;"></i>
                     </span>
                     <input type="text" v-model="searchPeriodeStok" class="form-control border-start-0"
                         placeholder="Cari periode...">
                 </div>
+
+                <!-- Filter Nampan - ini di luar input-group, tepat di bawah search -->
+                <div class="mb-3">
+                    <Multiselect v-model="formPeriode.nampan" :options="nampanList" :searchable="true" label="label"
+                        track-by="value" placeholder="Pilih Nampan / Baki" id="nampanList" />
+                    <div class="invalid-feedback" v-if="errors.nampan">{{ errors.nampan }}</div>
+                </div>
             </div>
+
 
             <div v-if="isLoadingPeriodeStok" class="p-5 text-center">
                 <div class="spinner-border spinner-border-sm text-primary me-2"></div>
@@ -120,6 +130,8 @@
 
 <script setup>
 import { onMounted, watch } from 'vue'
+import Multiselect from 'vue-multiselect';
+import 'vue-multiselect/dist/vue-multiselect.css';
 import { useFeather } from '../../../helper/feather';
 import { useStok } from '../composables/useStok';
 
@@ -138,7 +150,9 @@ const {
     paginatedPeriodeStok,
     fetchPeriodeStok,
     handleCreatePeriode,
-    handlePilihStokOpname
+    handlePilihStokOpname,
+    nampanList,
+    fetchNampan,
     // handlePilihPeriodeStok,
     // handleFinalisasiPeriode
 } = useStok();
@@ -152,6 +166,7 @@ watch([paginatedPeriodeStok, isLoadingPeriodeStok], () => {
 
 onMounted(() => {
     fetchPeriodeStok();
+    fetchNampan();
 })
 </script>
 
@@ -162,6 +177,7 @@ onMounted(() => {
     padding-right: calc(1.5em + 0.75rem) !important;
     /* Kembalikan padding normal */
 }
+
 /* Tombol Aksi Final */
 .btn-final-action {
     background-color: #ffffff;

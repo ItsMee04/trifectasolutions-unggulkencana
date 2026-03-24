@@ -3,6 +3,7 @@ import toast from '../../../helper/toast'
 import Swal from "sweetalert2";
 
 import { stokService } from "../services/stokService";
+import { nampanService } from "../../nampan/services/nampanService";
 
 const PeriodeStok = ref([])
 const selectedPeriodeStokID = ref(null)
@@ -10,6 +11,7 @@ const isLoadingPeriodeStok = ref(false)
 const searchPeriodeStok = ref('')
 const currentPagePeriodeStok = ref(1);
 const itemsPerPagePeriodeStok = 5;
+const nampanList = ref([])
 
 const StokDetail = ref([])
 const isLoadingStokDetail = ref(false)
@@ -18,7 +20,8 @@ const currentPageStokDetail = ref(1)
 const itemPerPageStokDetail = 5;
 
 const formPeriode = reactive({
-    periode: ''
+    periode: '',
+    nampan: null
 });
 
 const formStokDetail = reactive({
@@ -70,6 +73,19 @@ export function useStok() {
             console.log(error);
         } finally {
             isLoadingPeriodeStok.value = false;
+        }
+    }
+
+    const fetchNampan = async () => {
+        try {
+            const response = await nampanService.getNampan();
+            nampanList.value = response.data.map(nampanList => ({
+                value: nampanList.id,
+                label: nampanList.nampan
+            }))
+        } catch(error) {
+            toast.error("Gagal memuat data nampan")
+            console.log(error)
         }
     }
 
@@ -219,6 +235,8 @@ export function useStok() {
         fetchPeriodeStok,
         selectedPeriodeStokID,
         selectedPeriodeOpnameData,
+        nampanList,
+        fetchNampan,
         filteredPeriodeStok: computed(() => {
             const query = String(searchPeriodeStok.value || '').toLowerCase();
             return (PeriodeStok.value || []).filter(item =>

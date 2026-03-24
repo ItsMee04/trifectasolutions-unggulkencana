@@ -117,7 +117,7 @@ class PembelianController extends Controller
                     'jenis'         => 'DARITOKO',
                     'pelanggan_id'  => $request->pelanggan_id, // Simpan nama pelanggan di sini
                     'total'         => 0,
-                    'terbilang'     => 'rupiah',
+                    'terbilang'     => 'RUPIAH',
                     'oleh'          => Auth::id(),
                     'status'        => 1,
                 ]
@@ -281,7 +281,7 @@ class PembelianController extends Controller
 
                 $transaksi->update([
                     'total'     => $newTotal,
-                    'terbilang' => $this->pembelianService->terbilang($newTotal) . " rupiah",
+                    'terbilang' => $this->pembelianService->terbilang($newTotal) . " RUPIAH",
                     'status'    => 0,
                 ]);
             }
@@ -480,7 +480,7 @@ class PembelianController extends Controller
                     'tanggal'   => now(),
                     'jenis'     => 'LUARTOKO',
                     'total'     => 0,
-                    'terbilang' => 'nol rupiah',
+                    'terbilang' => 'NOL RUPIAH',
                     'oleh'      => Auth::id(),
                     'status'    => 1, // Status draft/proses
                 ]
@@ -641,7 +641,7 @@ class PembelianController extends Controller
             if ($transaksi) {
                 $transaksi->update([
                     'total'     => 0,
-                    'terbilang' => "nol rupiah",
+                    'terbilang' => "NOL RUPIAH",
                     'status'    => 0, // Langsung set 0 sesuai permintaan (1 transaksi 1 barang)
                 ]);
             }
@@ -692,7 +692,7 @@ class PembelianController extends Controller
 
             // --- HITUNG ULANG TOTAL DARI DETAIL ---
             $totalFix = $details->sum('total');
-            $terbilangFix = $this->pembelianService->terbilang($totalFix) . " rupiah";
+            $terbilangFix = $this->pembelianService->terbilang($totalFix) . " RUPIAH";
 
             foreach ($details as $item) {
                 $produk = Produk::findOrFail($item->produk_id);

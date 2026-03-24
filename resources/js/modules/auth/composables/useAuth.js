@@ -1,6 +1,6 @@
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { AuthService } from '../services/AuthService';
+import { AuthService } from '../services/authService';
 import { useAuthStore } from '../../../store/auth';
 import toast from '../../../helper/toast';
 

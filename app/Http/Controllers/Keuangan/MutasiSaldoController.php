@@ -51,7 +51,7 @@ class MutasiSaldoController extends Controller
         $data = MutasiSaldo::create([
             'saldo_id'      => $request->saldo,
             'tanggal'       => $request->tanggal,
-            'keterangan'    => $request->keterangan,
+            'keterangan'    => strtoupper($request->keterangan),
             'jenis'         => $request->jenis,
             'jumlah'        => $request->jumlah,
             'oleh'          => Auth::user()->id,
@@ -110,7 +110,7 @@ class MutasiSaldoController extends Controller
 
         // 4. Update data Mutasi dengan data baru dari request
         $mutasisaldo->tanggal    = $request->tanggal;
-        $mutasisaldo->keterangan = $request->keterangan;
+        $mutasisaldo->keterangan = strtoupper($request->keterangan);
         $mutasisaldo->jenis      = $request->jenis;
         $mutasisaldo->jumlah     = $request->jumlah;
         $mutasisaldo->oleh       = Auth::user()->id;

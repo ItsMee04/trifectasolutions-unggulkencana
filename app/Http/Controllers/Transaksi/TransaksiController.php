@@ -98,7 +98,7 @@ class TransaksiController extends Controller
                     'oleh'      => Auth::id(),
                     'status'    => 1,
                     'total'     => 0,
-                    'terbilang' => 'nol rupiah'
+                    'terbilang' => 'NOL RUPIAH'
                 ]
             );
 
@@ -115,7 +115,7 @@ class TransaksiController extends Controller
             $detail->lingkar    = $request->lingkar ?? 0;
             $detail->panjang    = $request->panjang ?? 0;
             $detail->total      = $totalHargaBarang;
-            $detail->terbilang  = $terbilangBarang . " rupiah";
+            $detail->terbilang  = $terbilangBarang . " RUPIAH";
             $detail->oleh       = Auth::id();
             $detail->status     = 1;
             $detail->save();
@@ -124,7 +124,7 @@ class TransaksiController extends Controller
             $transaksi->increment('total', $detail->total);
             $transaksi->refresh();
             $transaksi->update([
-                'terbilang' => $this->transaksiService->terbilang($transaksi->total) . " rupiah"
+                'terbilang' => $this->transaksiService->terbilang($transaksi->total) . " RUPIAH"
             ]);
 
             DB::commit();
@@ -192,7 +192,7 @@ class TransaksiController extends Controller
 
                 $transaksi->update([
                     'total'     => $newTotal,
-                    'terbilang' => $this->transaksiService->terbilang($newTotal) . " rupiah",
+                    'terbilang' => $this->transaksiService->terbilang($newTotal) . " RUPIAH",
                     'status'    => 0,
                 ]);
             }

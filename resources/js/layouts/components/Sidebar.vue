@@ -149,7 +149,10 @@ const menuGroups = {
             stokopname: {
                 label: 'stokopname',
                 icon: 'box',
-                path: '/stokopname'
+                submenus: [
+                    { name: 'Stok Opname Harian', path: '/stokopname' },
+                    { name: 'Stok Opname Bulanan', path: '/stokopnamebulanan' }
+                ]
             },
             laporantransaksi: {
                 label: 'Laporan Transaksi',
