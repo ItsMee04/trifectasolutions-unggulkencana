@@ -14,11 +14,11 @@
                 </div>
 
                 <!-- Filter Nampan - ini di luar input-group, tepat di bawah search -->
-                <div class="mb-3">
+                <!-- <div class="mb-3">
                     <Multiselect v-model="formPeriode.nampan" :options="nampanList" :searchable="true" label="label"
                         track-by="value" placeholder="Pilih Nampan / Baki" id="nampanList" />
                     <div class="invalid-feedback" v-if="errors.nampan">{{ errors.nampan }}</div>
-                </div>
+                </div> -->
             </div>
 
 
