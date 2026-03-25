@@ -167,6 +167,31 @@ export function useStock() {
         currentPageNampanProduk.value = 1;  // Reset pagination produk
     };
 
+    const handlePrint = async (item) => {
+        // 1. Ambil data dari computed selectedPeriodeStokData yang sudah ada di composable
+        // .value digunakan karena ini adalah computed property di dalam script
+        const dataAktif = selectedPeriodeStokData.value;
+
+        // 2. Validasi apakah ada periode yang sedang dipilih
+        if (!dataAktif || !dataAktif.id) {
+            toast.error("Silahkan pilih periode terlebih dahulu.");
+            return;
+        }
+
+        // 3. Siapkan payload berdasarkan data yang aktif
+        const payload = {
+            PERIODE: dataAktif.periode,
+        };
+
+        try {
+            const { url } = await stockService.CetakLaporanStok(payload)
+            window.open(url, '_blank')
+        } catch (e) {
+            console.log(e)
+            toast.error('Gagal mencetak laporan')
+        }
+    };
+
     const handleRefresh = async () => {
         // 1. Reset semua data produk & pilihan periode dulu
         resetProductData();
@@ -329,6 +354,7 @@ export function useStock() {
         displayedPagesNampanProduk,
         fetchNampanProduk,
         rekapstok,
+        handlePrint,
         filteredNampanProduk: computed(() => {
             const query = String(searchNampanProduk.value || '').toLowerCase();
             return (nampanproduk.value || []).filter(item =>

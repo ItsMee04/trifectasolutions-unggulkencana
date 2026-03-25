@@ -21,4 +21,8 @@ export const stockService = {
         const response = await apiClient.post('/inventory/finalPeriodeStok', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
+    async CetakLaporanStok(payload) {
+        const response = await apiClient.post(`/inventory/getSignedLaporanStokUrl`, payload);
+        return response.data;
+    },
 }

@@ -9,6 +9,7 @@ use App\Services\StokService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 
 class StokController extends Controller
 {
@@ -225,5 +226,82 @@ class StokController extends Controller
             'message'   => 'Data periode stok berhasil dihapus',
             'data'      => $periode,
         ], 200);
+    }
+
+    public function getSignedLaporanStokUrl(Request $request)
+    {
+        $route_name = 'produk.cetak_laporanstok';
+        $expiration = now()->addMinutes(5);
+
+        $signedUrl = URL::temporarySignedRoute(
+            $route_name,
+            $expiration,
+            [
+                'PERIODE' => $request->PERIODE,
+            ]
+        );
+
+        return response()->json(['url' => $signedUrl]);
+    }
+
+    public function CetakLaporanStok(Request $request)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '512M');
+
+        if (!$request->hasValidSignature()) {
+            abort(401, 'Invalid signature.');
+        }
+
+        $PERIODE  = $request->query('PERIODE');
+        $formattedPeriode = date('Y-m-d', strtotime($PERIODE));
+
+        if (!$formattedPeriode) {
+            abort(400, 'Periode tidak ditemukan');
+        }
+
+        $jasper_file = resource_path('reports/CetakLaporanStok.jasper');
+
+        $db = config('database.connections.mysql');
+
+        $parameters = [
+            'PERIODE' => $formattedPeriode,
+        ];
+
+        try {
+            $tempDir = storage_path('app/temp');
+            if (!file_exists($tempDir)) mkdir($tempDir, 0777, true);
+
+            $outputFile = $tempDir . '/LaporanStok-' . $PERIODE;
+
+            $jasper = new \PHPJasper\PHPJasper;
+            $jasper->process(
+                $jasper_file,
+                $outputFile,
+                [
+                    'format' => ['pdf'],
+                    'params' => $parameters,
+                    'db_connection' => [
+                        'driver' => 'mysql',
+                        'host' => $db['host'],
+                        'port' => $db['port'],
+                        'database' => $db['database'],
+                        'username' => $db['username'],
+                        'password' => $db['password'],
+                    ],
+                ]
+            )->execute();
+
+            $pdfPath = $outputFile . '.pdf';
+            $pdfContent = file_get_contents($pdfPath);
+            unlink($pdfPath);
+
+            return response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="LAPORAN-STOK-' . $PERIODE . '.pdf"',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Gagal membuat laporan: ' . $e->getMessage()], 500);
+        }
     }
 }

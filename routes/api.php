@@ -187,6 +187,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('inventory/getNampanProdukByPeriodeStok', [StokController::class, 'getNampanProdukByPeriodeStok']);
     Route::post('inventory/getRekapStokByPeriode', [StokController::class, 'getRekapStokByPeriode']);
     Route::post('inventory/finalPeriodeStok', [StokController::class, 'finalPeriodeStok']);
+    Route::post('inventory/getSignedLaporanStokUrl', [StokController::class, 'getSignedLaporanStokUrl']);
 
     Route::post('laporan/getsignedurl-cetaklaporanpenjualan',[LaporanController::class, 'getSignedCetakLaporanPenjualanUrl']);
     Route::post('laporan/getsignedurl-cetaklaporanpembelian',[LaporanController::class, 'getSignedCetakLaporanPembelianUrl']);
@@ -199,6 +200,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::get('/transaksi/CetakNotaPenjualan', [TransaksiController::class, 'CetakNotaPenjualan'])->name('produk.cetak_notapenjualan');
 Route::get('/pembelian/CetakNotaPembelian', [PembelianController::class, 'CetakNotaPembelian'])->name('produk.cetak_notapembelian');
 Route::get('/offtake/CetakNotaOfftake', [OfftakeController::class, 'CetakNotaOfftake'])->name('produk.cetak_notaofftake');
+Route::get('/inventory/CetakLaporanStok', [StokController::class, 'CetakLaporanStok'])->name('produk.cetak_laporanstok');
 
 Route::get('/laporan/cetaklaporanpenjualan', [LaporanController::class, 'CetakLaporanPenjualan'])->name('produk.cetak_laporanpenjualan');
 Route::get('/laporan/cetaklaporanpembelian', [LaporanController::class, 'CetakLaporanPembelian'])->name('produk.cetak_laporanpembelian');
