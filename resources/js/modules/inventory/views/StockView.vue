@@ -3,8 +3,8 @@
     <div class="page-header">
       <div class="add-item d-flex">
         <div class="page-title">
-          <h4>Halaman Inventory Nampan Produk</h4>
-          <h6>Kelola Inventory Anda</h6>
+          <h4>Halaman Stok Harian</h4>
+          <h6>Kelola Stok Anda</h6>
         </div>
       </div>
       <ul class="table-top-head">

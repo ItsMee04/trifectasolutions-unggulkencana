@@ -158,8 +158,24 @@ export function useStock() {
         selectPeriodeStok(item.id);
     }
 
+    // Fungsi Reset State Internal
+    const resetProductData = () => {
+        selectedPeriodeStokID.value = null; // Hapus pilihan periode
+        nampanproduk.value = [];            // Kosongkan daftar produk
+        rekapstok.value = [];               // Kosongkan rekap
+        searchNampanProduk.value = '';      // Reset pencarian produk
+        currentPageNampanProduk.value = 1;  // Reset pagination produk
+    };
+
     const handleRefresh = async () => {
+        // 1. Reset semua data produk & pilihan periode dulu
+        resetProductData();
+
+        // 2. Tarik ulang daftar periode saja
         await fetchPeriodeStok();
+
+        // Opsional: Jika ingin memberi toast pemberitahuan
+        // toast.success("Data berhasil direset.");
     }
 
     const handleFinalisasiPeriode = async (item) => {

@@ -14,77 +14,74 @@ return new class extends Migration
 
         DB::unprepared("
             CREATE PROCEDURE CetakLaporanStok(
-                IN TANGGAL_AWAL DATE,
-                IN TANGGAL_AKHIR DATE
+                IN PERIODE DATE
             )
             BEGIN
-                WITH RECURSIVE deret_tanggal AS (
-                    SELECT TANGGAL_AWAL AS tanggal
-                    UNION ALL
-                    SELECT DATE_ADD(tanggal, INTERVAL 1 DAY)
-                    FROM deret_tanggal
-                    WHERE tanggal < TANGGAL_AKHIR
-                ),
-                kategori_hari AS (
-                    SELECT d.tanggal, jp.id AS jenisproduk_id, jp.jenis
-                    FROM deret_tanggal d
-                    CROSS JOIN jenisproduk jp
-                ),
-                transaksi_data AS (
-                    SELECT
-                        DATE(n.tanggal) as tgl,
-                        p.jenisproduk_id,
-                        n.jenis as tipe,
-                        1 as pt,
-                        p.berat as gr
-                    FROM nampanproduk n
-                    JOIN produk p ON n.produk_id = p.id
-                    WHERE DATE(n.tanggal) BETWEEN TANGGAL_AWAL AND TANGGAL_AKHIR
-                )
-                -- Langsung SELECT datanya tanpa UNION ALL TOTAL
                 SELECT
-                    DATE_FORMAT(kh.tanggal, '%d-%m-%Y') as tgl,
+                    jp.jenis AS kategori,
 
-                    -- ANTING
-                    SUM(CASE WHEN kh.jenis = 'ANTING' AND td.tipe = 'MASUK' THEN td.pt ELSE 0 END) as anting_m_pt,
-                    SUM(CASE WHEN kh.jenis = 'ANTING' AND td.tipe = 'MASUK' THEN td.gr ELSE 0 END) as anting_m_gr,
-                    SUM(CASE WHEN kh.jenis = 'ANTING' AND td.tipe = 'KELUAR' THEN td.pt ELSE 0 END) as anting_k_pt,
-                    SUM(CASE WHEN kh.jenis = 'ANTING' AND td.tipe = 'KELUAR' THEN td.gr ELSE 0 END) as anting_k_gr,
+                    -- STOK AWAL (Semua pergerakan SEBELUM PERIODE)
+                    COALESCE((
+                        SELECT SUM(CASE WHEN n2.jenis = 'MASUK' THEN 1 ELSE -1 END)
+                        FROM nampanproduk n2
+                        JOIN produk p2 ON n2.produk_id = p2.id
+                        WHERE p2.jenisproduk_id = jp.id AND DATE(n2.tanggal) < PERIODE
+                    ), 0) AS unit_awal,
 
-                    -- CINCIN
-                    SUM(CASE WHEN kh.jenis = 'CINCIN' AND td.tipe = 'MASUK' THEN td.pt ELSE 0 END) as cincin_m_pt,
-                    SUM(CASE WHEN kh.jenis = 'CINCIN' AND td.tipe = 'MASUK' THEN td.gr ELSE 0 END) as cincin_m_gr,
-                    SUM(CASE WHEN kh.jenis = 'CINCIN' AND td.tipe = 'KELUAR' THEN td.pt ELSE 0 END) as cincin_k_pt,
-                    SUM(CASE WHEN kh.jenis = 'CINCIN' AND td.tipe = 'KELUAR' THEN td.gr ELSE 0 END) as cincin_k_gr,
+                    COALESCE((
+                        SELECT SUM(CASE WHEN n2.jenis = 'MASUK' THEN p2.berat ELSE -p2.berat END)
+                        FROM nampanproduk n2
+                        JOIN produk p2 ON n2.produk_id = p2.id
+                        WHERE p2.jenisproduk_id = jp.id AND DATE(n2.tanggal) < PERIODE
+                    ), 0) AS berat_awal,
 
-                    -- GELANG
-                    SUM(CASE WHEN kh.jenis = 'GELANG' AND td.tipe = 'MASUK' THEN td.pt ELSE 0 END) as gelang_m_pt,
-                    SUM(CASE WHEN kh.jenis = 'GELANG' AND td.tipe = 'MASUK' THEN td.gr ELSE 0 END) as gelang_m_gr,
-                    SUM(CASE WHEN kh.jenis = 'GELANG' AND td.tipe = 'KELUAR' THEN td.pt ELSE 0 END) as gelang_k_pt,
-                    SUM(CASE WHEN kh.jenis = 'GELANG' AND td.tipe = 'KELUAR' THEN td.gr ELSE 0 END) as gelang_k_gr,
+                    -- MASUK HARI INI (Pas PERIODE)
+                    COALESCE((
+                        SELECT SUM(1)
+                        FROM nampanproduk n3
+                        JOIN produk p3 ON n3.produk_id = p3.id
+                        WHERE p3.jenisproduk_id = jp.id AND DATE(n3.tanggal) = PERIODE AND n3.jenis = 'MASUK'
+                    ), 0) AS unit_masuk,
 
-                    -- KALUNG
-                    SUM(CASE WHEN kh.jenis = 'KALUNG' AND td.tipe = 'MASUK' THEN td.pt ELSE 0 END) as kalung_m_pt,
-                    SUM(CASE WHEN kh.jenis = 'KALUNG' AND td.tipe = 'MASUK' THEN td.gr ELSE 0 END) as kalung_m_gr,
-                    SUM(CASE WHEN kh.jenis = 'KALUNG' AND td.tipe = 'KELUAR' THEN td.pt ELSE 0 END) as kalung_k_pt,
-                    SUM(CASE WHEN kh.jenis = 'KALUNG' AND td.tipe = 'KELUAR' THEN td.gr ELSE 0 END) as kalung_k_gr,
+                    COALESCE((
+                        SELECT SUM(p3.berat)
+                        FROM nampanproduk n3
+                        JOIN produk p3 ON n3.produk_id = p3.id
+                        WHERE p3.jenisproduk_id = jp.id AND DATE(n3.tanggal) = PERIODE AND n3.jenis = 'MASUK'
+                    ), 0) AS berat_masuk,
 
-                    -- SUBENG
-                    SUM(CASE WHEN kh.jenis = 'SUBENG' AND td.tipe = 'MASUK' THEN td.pt ELSE 0 END) as subeng_m_pt,
-                    SUM(CASE WHEN kh.jenis = 'SUBENG' AND td.tipe = 'MASUK' THEN td.gr ELSE 0 END) as subeng_m_gr,
-                    SUM(CASE WHEN kh.jenis = 'SUBENG' AND td.tipe = 'KELUAR' THEN td.pt ELSE 0 END) as subeng_k_pt,
-                    SUM(CASE WHEN kh.jenis = 'SUBENG' AND td.tipe = 'KELUAR' THEN td.gr ELSE 0 END) as subeng_k_gr,
+                    -- KELUAR HARI INI (Pas PERIODE)
+                    COALESCE((
+                        SELECT SUM(1)
+                        FROM nampanproduk n4
+                        JOIN produk p4 ON n4.produk_id = p4.id
+                        WHERE p4.jenisproduk_id = jp.id AND DATE(n4.tanggal) = PERIODE AND n4.jenis = 'KELUAR'
+                    ), 0) AS unit_keluar,
 
-                    -- TOTAL PER TANGGAL
-                    SUM(CASE WHEN td.tipe = 'MASUK' THEN td.pt ELSE 0 END) as total_m_pt,
-                    SUM(CASE WHEN td.tipe = 'MASUK' THEN td.gr ELSE 0 END) as total_m_gr,
-                    SUM(CASE WHEN td.tipe = 'KELUAR' THEN td.pt ELSE 0 END) as total_k_pt,
-                    SUM(CASE WHEN td.tipe = 'KELUAR' THEN td.gr ELSE 0 END) as total_k_gr
+                    COALESCE((
+                        SELECT SUM(p4.berat)
+                        FROM nampanproduk n4
+                        JOIN produk p4 ON n4.produk_id = p4.id
+                        WHERE p4.jenisproduk_id = jp.id AND DATE(n4.tanggal) = PERIODE AND n4.jenis = 'KELUAR'
+                    ), 0) AS berat_keluar,
 
-                FROM kategori_hari kh
-                LEFT JOIN transaksi_data td ON kh.tanggal = td.tgl AND kh.jenisproduk_id = td.jenisproduk_id
-                GROUP BY kh.tanggal
-                ORDER BY kh.tanggal ASC;
+                    -- STOK AKHIR (Kalkulasi Gabungan)
+                    (
+                        COALESCE((SELECT SUM(CASE WHEN n_a.jenis = 'MASUK' THEN 1 ELSE -1 END) FROM nampanproduk n_a JOIN produk p_a ON n_a.produk_id = p_a.id WHERE p_a.jenisproduk_id = jp.id AND DATE(n_a.tanggal) < PERIODE), 0) +
+                        COALESCE((SELECT SUM(1) FROM nampanproduk n_m JOIN produk p_m ON n_m.produk_id = p_m.id WHERE p_m.jenisproduk_id = jp.id AND DATE(n_m.tanggal) = PERIODE AND n_m.jenis = 'MASUK'), 0) -
+                        COALESCE((SELECT SUM(1) FROM nampanproduk n_k JOIN produk p_k ON n_k.produk_id = p_k.id WHERE p_k.jenisproduk_id = jp.id AND DATE(n_k.tanggal) = PERIODE AND n_k.jenis = 'KELUAR'), 0)
+                    ) AS unit_akhir,
+
+                    ROUND(
+                        (
+                            COALESCE((SELECT SUM(CASE WHEN n_ba.jenis = 'MASUK' THEN p_ba.berat ELSE -p_ba.berat END) FROM nampanproduk n_ba JOIN produk p_ba ON n_ba.produk_id = p_ba.id WHERE p_ba.jenisproduk_id = jp.id AND DATE(n_ba.tanggal) < PERIODE), 0) +
+                            COALESCE((SELECT SUM(p_bm.berat) FROM nampanproduk n_bm JOIN produk p_bm ON n_bm.produk_id = p_bm.id WHERE p_bm.jenisproduk_id = jp.id AND DATE(n_bm.tanggal) = PERIODE AND n_bm.jenis = 'MASUK'), 0) -
+                            COALESCE((SELECT SUM(p_bk.berat) FROM nampanproduk n_bk JOIN produk p_bk ON n_bk.produk_id = p_bk.id WHERE p_bk.jenisproduk_id = jp.id AND DATE(n_bk.tanggal) = PERIODE AND n_bk.jenis = 'KELUAR'), 0)
+                        ), 3
+                    ) AS berat_akhir
+
+                FROM jenisproduk jp
+                ORDER BY jp.jenis ASC;
             END
         ");
     }

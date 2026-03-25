@@ -155,11 +155,6 @@ const routes = [
                 component: () => import('@/modules/inventory/views/StockView.vue')
             },
             {
-                path: 'stokopname',
-                name: 'stokopname',
-                component: () => import('@/modules/stok/views/StokView.vue')
-            },
-            {
                 path: 'laporan',
                 name: 'laporan',
                 component: () => import('@/modules/report/views/LaporanView.vue')

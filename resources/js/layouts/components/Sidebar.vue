@@ -144,13 +144,8 @@ const menuGroups = {
             iventory: {
                 label: 'Inventori',
                 icon: 'server',
-                path: '/inventori'
-            },
-            stokopname: {
-                label: 'stokopname',
-                icon: 'box',
                 submenus: [
-                    { name: 'Stok Opname Harian', path: '/stokopname' },
+                    { name: 'Stok Opname Harian', path: '/inventori' },
                     { name: 'Stok Opname Bulanan', path: '/stokopnamebulanan' }
                 ]
             },
