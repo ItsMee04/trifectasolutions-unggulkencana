@@ -19,7 +19,7 @@ class PelangganController extends Controller
 
     public function getPelanggan()
     {
-        $data = Pelanggan::where('status', 1)->get();
+        $data = Pelanggan::with(['poin'])->where('status', 1)->get();
 
         if ($data->isEmpty()) {
             return response()->json([
@@ -52,7 +52,7 @@ class PelangganController extends Controller
                 'nama'    => strtoupper($request->nama),
                 'kontak'  => $request->kontak,
                 'alamat'  => strtoupper($request->alamat),
-                'tanggal' => now()->toDateString(),
+                'tanggal' => $request->tanggal,
                 'status'  => 1
             ]);
 
@@ -87,7 +87,7 @@ class PelangganController extends Controller
             'nama'    => strtoupper($request->nama),
             'kontak'  => $request->kontak,
             'alamat'  => strtoupper($request->alamat),
-            'tanggal' => now()->toDateString(),
+            'tanggal' => $request->tanggal
         ]);
 
         return response()->json([
@@ -118,5 +118,23 @@ class PelangganController extends Controller
             'message'   => 'Data pelanggan berhasil dihapus',
             'data'      => $pelanggan,
         ], 200);
+    }
+
+    public function getPelangganUlangTahun()
+    {
+        try {
+            $today = now();
+            $data = Pelanggan::whereMonth('tanggal', $today->month)
+                ->whereDay('tanggal', $today->day)
+                ->where('status', 1)
+                ->get(['id', 'nama', 'kontak', 'tanggal']);
+
+            return response()->json([
+                'success' => true,
+                'data'    => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 }

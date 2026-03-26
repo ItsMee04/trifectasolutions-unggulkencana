@@ -37,33 +37,57 @@
             </li>
 
             <li class="nav-item dropdown nav-item-box">
-                <a href="javascript:void(0);" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
-                    <i data-feather="bell"></i><span class="badge rounded-pill">2</span>
+                <a href="javascript:void(0);" class="dropdown-toggle nav-link" :class="{ 'show': isBellDropdownOpen }"
+                    @click.prevent="toggleBellDropdown">
+                    <i data-feather="bell"></i>
+                    <span v-if="pelangganUltah.length > 0" class="badge rounded-pill bg-danger">
+                        {{ pelangganUltah.length }}
+                    </span>
                 </a>
-                <div class="dropdown-menu notifications">
+                <div class="dropdown-menu notifications" :class="{ 'show': isBellDropdownOpen }">
                     <div class="topnav-dropdown-header">
-                        <span class="notification-title">Notifications</span>
-                        <a href="javascript:void(0)" class="clear-noti"> Clear All </a>
+                        <span class="notification-title">Ulang Tahun Hari Ini</span>
+                        <a href="javascript:void(0)" class="clear-noti" v-if="pelangganUltah.length > 0">
+                            {{ currentDate }}
+                        </a>
                     </div>
                     <div class="noti-content">
                         <ul class="notification-list">
-                            <li class="notification-message">
-                                <a href="#">
-                                    <div class="media d-flex">
-                                        <span class="avatar flex-shrink-0">
-                                            <img alt="" src="/public/assets/img/profiles/avatar-02.jpg" />
-                                        </span>
-                                        <div class="media-body flex-grow-1">
-                                            <p class="noti-details">
-                                                <span class="noti-title">John Doe</span> added new task
-                                                <span class="noti-title">Patient appointment booking</span>
+                            <li v-for="p in pelangganUltah" :key="p.id" class="notification-message">
+                                <a :href="`https://wa.me/${formatPhone(p.kontak)}?text=Halo+${p.nama},+Selamat+Ulang+Tahun!`"
+                                    target="_blank" class="py-2 px-3 w-100 d-block">
+                                    <div class="d-flex align-items-center w-100">
+                                        <div class="flex-shrink-0 me-3">
+                                            <div class="bg-warning-light rounded-circle d-flex align-items-center justify-content-center"
+                                                style="width: 38px; height: 38px;">
+                                                <i class="fas fa-birthday-cake text-warning" style="font-size: 14px;"></i>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex-grow-1 min-width-0">
+                                            <p class="noti-details mb-0 text-truncate">
+                                                <span class="noti-title fw-bold text-dark" style="font-size: 14px;">{{ p.nama }}</span>
                                             </p>
-                                            <p class="noti-time"><span class="notification-time">4 mins ago</span></p>
+                                            <div class="line-height-xs">
+                                                <small class="text-muted d-block" style="font-size: 11px;">Ulang tahun hari ini</small>
+                                                <span class="small text-primary fw-semibold">{{ p.kontak }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex-shrink-0 ms-2">
+                                            <i class="fab fa-whatsapp text-success" style="font-size: 18px; opacity: 0.6;"></i>
                                         </div>
                                     </div>
                                 </a>
                             </li>
+
+                            <li v-if="pelangganUltah.length === 0" class="p-3 text-center text-muted">
+                                <small>Tidak ada pelanggan ulang tahun hari ini</small>
+                            </li>
                         </ul>
+                    </div>
+                    <div class="topnav-dropdown-footer" v-if="pelangganUltah.length > 0">
+                        <router-link :to="{ name: 'pelanggan' }">Lihat Semua Pelanggan</router-link>
                     </div>
                 </div>
             </li>
@@ -88,7 +112,7 @@
                         <div class="profileset">
                             <span class="user-img">
                                 <img :src="authStore.profileImage" @error="(e) => e.target.src = BASE_DEFAULT_IMAGE_URL"
-                                alt="User Image" />
+                                    alt="User Image" />
                                 <span class="status online"></span>
                             </span>
                             <div class="profilesets">
@@ -119,31 +143,57 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { watch, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useFeather } from '../../helper/feather';
 import { useAuthStore } from '../../store/auth';
 import toast from '../../helper/toast';
 import router from '../../router';
-import { BASE_URL, STORAGE_URL, BASE_DEFAULT_IMAGE_URL } from '../../helper/base';
+import { BASE_URL, BASE_DEFAULT_IMAGE_URL } from '../../helper/base';
+import { pelangganService } from '../../modules/pelanggan/services/pelangganService';
+
 const { initFeather } = useFeather();
+const route = useRoute();
 
 // State
+const pelangganUltah = ref([]);
 const currentTime = ref("");
 const currentDate = ref("");
 const isMobileMenuOpen = ref(false);
 const isMobileUserMenuOpen = ref(false);
-const isUserDropdownOpen = ref(false); // State untuk dropdown profil desktop
+const isUserDropdownOpen = ref(false);
 const isMiniSidebar = ref(false);
 const isExpandMenu = ref(false);
+const isBellDropdownOpen = ref(false);
 const authStore = useAuthStore();
-let timer = null;
 
+// Timers
+let clockTimer = null;
+let dataPollingTimer = null;
+
+// Fungsi Fetch Data (Real-time compatible)
+const fetchPelangganUltah = async () => {
+    try {
+        const res = await pelangganService.getPelangganUlangTahun();
+        if (res && res.success) {
+            // Data langsung diperbarui tanpa mengosongkan array (mencegah kedipan "No Data")
+            pelangganUltah.value = res.data;
+        }
+    } catch (error) {
+        console.error("Gagal sinkronisasi data ultah:", error);
+    }
+};
+
+// Update Waktu
 const updateTime = () => {
     const now = new Date();
     const optionsDate = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
     currentDate.value = now.toLocaleDateString("id-ID", optionsDate);
     currentTime.value = now.toLocaleTimeString("id-ID", { hour12: false });
 };
+
+// Pantau rute: Jika user pindah halaman, pastikan data terbaru
+watch(() => route.path, () => { fetchPelangganUltah(); });
 
 function toggleFullscreen() {
     if (!document.fullscreenElement) {
@@ -152,6 +202,24 @@ function toggleFullscreen() {
         document.exitFullscreen();
     }
 }
+
+const toggleBellDropdown = () => {
+    isBellDropdownOpen.value = !isBellDropdownOpen.value;
+    isUserDropdownOpen.value = false;
+};
+
+const handleClickOutside = (event) => {
+    if (!event.target.closest('.mobile-user-menu')) isMobileUserMenuOpen.value = false;
+    if (!event.target.closest('.main-drop')) isUserDropdownOpen.value = false;
+    if (!event.target.closest('.nav-item.dropdown.nav-item-box')) isBellDropdownOpen.value = false;
+};
+
+const formatPhone = (phone) => {
+    if (!phone) return "";
+    let cleaned = phone.replace(/[^0-9]/g, "");
+    if (cleaned.startsWith("0")) cleaned = "62" + cleaned.substring(1);
+    return cleaned;
+};
 
 const toggleSidebar = () => {
     isMiniSidebar.value = !isMiniSidebar.value;
@@ -194,77 +262,102 @@ const closeMobileMenu = () => {
 
 const toggleMobileUserMenu = () => {
     isMobileUserMenuOpen.value = !isMobileUserMenuOpen.value;
-    isUserDropdownOpen.value = false; // tutup desktop jika mobile dibuka
+    isUserDropdownOpen.value = false;
 };
 
 const toggleUserDropdown = () => {
     isUserDropdownOpen.value = !isUserDropdownOpen.value;
-    isMobileUserMenuOpen.value = false; // tutup mobile jika desktop dibuka
+    isMobileUserMenuOpen.value = false;
 };
 
 const handleLogout = async () => {
     try {
-        // 1. Hapus data di Pinia Store & SessionStorage
         authStore.logout();
-
-        // 2. Tampilkan notifikasi
         toast.success("Berhasil keluar.");
-
-        // 3. Redirect ke halaman login
-        // Menggunakan replace agar user tidak bisa klik 'Back' kembali ke Dashboard
         await router.replace({ name: 'login' });
     } catch (error) {
         console.error("Logout Error:", error);
     }
 };
 
-const handleClickOutside = (event) => {
-    if (!event.target.closest('.mobile-user-menu')) {
-        isMobileUserMenuOpen.value = false;
-    }
-    if (!event.target.closest('.main-drop')) {
-        isUserDropdownOpen.value = false;
-    }
-};
-
 onMounted(() => {
+    fetchPelangganUltah();
     initFeather();
     updateTime();
-    timer = setInterval(updateTime, 1000);
+
+    // Real-time Jam (setiap 1 detik)
+    clockTimer = setInterval(updateTime, 1000);
+
+    // Real-time Data (Polling setiap 5 menit agar tidak membebani server namun tetap update)
+    dataPollingTimer = setInterval(fetchPelangganUltah, 300000);
+
     document.addEventListener("mouseover", handleMouseOver);
     document.addEventListener("click", handleClickOutside);
 });
 
 onBeforeUnmount(() => {
-    clearInterval(timer);
+    clearInterval(clockTimer);
+    clearInterval(dataPollingTimer);
     document.removeEventListener("mouseover", handleMouseOver);
     document.removeEventListener("click", handleClickOutside);
 });
 </script>
 
 <style scoped>
-/* DROPDOWN MOBILE */
-.mobile-user-menu .dropdown-menu.show {
-    display: block !important;
-    opacity: 1;
-    visibility: visible;
-    top: 70px !important;
-    margin: 0;
-    transform: none;
-    margin-right: 15px;
+.notification-list {
+    padding: 0 !important;
+    margin: 0 !important;
+    list-style: none !important;
 }
 
-/* DROPDOWN DESKTOP PROFILE */
-.main-drop .dropdown-menu.show {
+.notification-message {
+    padding: 0 !important;
+    border-bottom: 1px solid #f1f1f1;
+    transition: background 0.2s;
+}
+
+.notification-message:last-child {
+    border-bottom: none;
+}
+
+.notification-message a:hover {
+    background-color: #f4fff7 !important;
+}
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.line-height-xs {
+    line-height: 1.2;
+}
+
+.main-drop .dropdown-menu.show,
+.nav-item.dropdown .dropdown-menu.notifications.show {
     display: block !important;
     opacity: 1;
     visibility: visible;
     top: 50px !important;
-    /* Mengatur agar tidak terlalu ke bawah */
-    right: 0;
-    left: auto;
+    right: 0 !important;
+    left: auto !important;
     margin: 0;
     transform: none;
+    z-index: 1000;
+}
+
+.nav-item.dropdown .dropdown-menu.notifications.show {
+    width: 320px !important;
+}
+
+.noti-content {
+    max-height: 350px;
+    overflow-y: auto !important;
+}
+
+.bg-warning-light {
+    background-color: #fff9e6;
 }
 
 .header-left.active {
@@ -272,13 +365,7 @@ onBeforeUnmount(() => {
     align-items: center;
 }
 
-.nav-searchinputs {
-    display: flex;
-    align-items: center;
-    padding: 0 15px;
-}
-
-.dropdown-menu {
-    margin-top: 0;
+.dropdown-menu.notifications {
+    padding: 0 !important;
 }
 </style>

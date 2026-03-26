@@ -133,6 +133,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('pelanggan/storePelanggan', [PelangganController::class, 'storePelanggan']);
     Route::post('pelanggan/updatePelanggan', [PelangganController::class, 'updatePelanggan']);
     Route::post('pelanggan/deletePelanggan', [PelangganController::class, 'deletePelanggan']);
+    Route::get('pelanggan/getPelangganUlangTahun', [PelangganController::class, 'getPelangganUlangTahun']);
 
     Route::get('suplier/getSuplier', [SuplierController::class, 'getSuplier']);
     Route::post('suplier/storeSuplier', [SuplierController::class, 'storeSuplier']);

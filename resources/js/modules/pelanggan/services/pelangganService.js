@@ -16,5 +16,9 @@ export const pelangganService = {
     async deletePelanggan(payload) {
         const response = await apiClient.post('/pelanggan/deletePelanggan', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
-    }
+    },
+    async getPelangganUlangTahun() {
+        const response = await apiClient.get('/pelanggan/getPelangganUlangTahun');
+        return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
+    },
 }

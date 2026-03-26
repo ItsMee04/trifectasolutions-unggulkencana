@@ -23,20 +23,21 @@
                                 <th scope="col">KODE PELANGGAN</th>
                                 <th scope="col">NAMA</th>
                                 <th scope="col">KONTAK</th>
+                                <th scope="col">POIN</th>
                                 <th scope="col">STATUS</th>
                                 <th scope="col" class="text-center">ACTIONS</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="isLoading">
-                                <td colspan="6" class="text-center">
+                                <td colspan="7" class="text-center">
                                     <span class="spinner-border spinner-border-sm me-2 text-secondary" role="status"
                                         aria-hidden="true"></span>
                                     Memuat data...
                                 </td>
                             </tr>
                             <tr v-else-if="paginatedPelanggan.length === 0">
-                                <td colspan="6" class="text-center">Tidak ada data.</td>
+                                <td colspan="7" class="text-center">Tidak ada data.</td>
                             </tr>
                             <tr v-else v-for="(item, index) in paginatedPelanggan" :key="item.id">
                                 <td scope="row">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
@@ -68,6 +69,19 @@
                                     </div>
                                 </td>
                                 <td>
+                                    <div class="d-flex align-items-center">
+                                        <div>
+                                            <div class="lh-1">
+                                                <span>{{ item?.poin?.jumlah }}</span>
+
+                                                <span>
+                                                    {{item.poin.reduce((acc, curr) => acc + curr.jumlah, 0)}}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
                                     <span v-if="item.status == 1" class="badge bg-success">
                                         ACTIVE
                                     </span>
@@ -80,7 +94,7 @@
                                         <a class="me-2 p-2" @click.prevent="handleEdit(item)">
                                             <i data-feather="edit" class="feather-edit"></i>
                                         </a>
-                                        <a class="confirm-text p-2"  @click.prevent="handleDelete(item)">
+                                        <a class="confirm-text p-2" @click.prevent="handleDelete(item)">
                                             <i data-feather="trash-2" class="feather-trash-2"></i>
                                         </a>
                                     </div>

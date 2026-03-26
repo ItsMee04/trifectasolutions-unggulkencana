@@ -293,6 +293,19 @@ class TransaksiController extends Controller
             // 10. UPDATE TOTAL SALDO (Opsional: Jika Anda ingin saldo di tabel 'saldo' ikut bertambah secara real-time)
             DB::table('saldo')->where('id', $saldoAktif->id)->increment('total', $request->total);
 
+            $jumlahPoin = floor($produk->berat);
+
+            // Pastikan poin hanya diinput jika berat >= 1 gram
+            if ($jumlahPoin > 0) {
+                DB::table('poinpelanggan')->insert([
+                    'pelanggan_id' => $request->pelanggan,
+                    'kode'         => $request->kode, // Kode Transaksi
+                    'jumlah'       => $jumlahPoin,
+                    'oleh'         => Auth::id(),
+                    'status'       => 1,
+                ]);
+            }
+
             DB::commit();
             return response()->json([
                 'status'  => true,
@@ -329,7 +342,7 @@ class TransaksiController extends Controller
             abort(401, 'Link kadaluarsa atau tidak valid.');
         }
 
-       $kode  = $request->query('kode');
+        $kode  = $request->query('kode');
 
         // Configuration
         $jasper_file = resource_path('reports/CetakNotaPenjualan.jasper');
