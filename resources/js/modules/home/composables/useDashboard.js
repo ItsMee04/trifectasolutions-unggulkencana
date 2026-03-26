@@ -7,6 +7,9 @@ const chartSales = ref([]);
 const chartPurchases = ref([]);
 const isLoadingChart = ref(false);
 
+const hargaEmas = ref([])
+const produkPerbaikan = ref([])
+
 export function useHome() {
     // 1. Refs untuk tampilan animasi
     const displaySaldo = ref(0);
@@ -114,6 +117,36 @@ export function useHome() {
         }
     };
 
+    const fetchHargaEmas = async () => {
+        isLoading.value = true; // Set loading agar UI memberikan feedback
+        try {
+            const response = await homeService.getHargaEmas();
+            if (response.success) {
+                // PERBAIKAN: Langsung ke hargaEmas.value, bukan state.hargaEmas
+                hargaEmas.value = response.data;
+            }
+        } catch (error) {
+            console.error("Gagal memuat harga emas:", error);
+        } finally {
+            isLoading.value = false;
+        }
+    }
+
+    const fetchProdukPerbaikan = async () => {
+        isLoading.value = true; // Set loading agar UI memberikan feedback
+        try {
+            const response = await homeService.getProdukPerbaikan();
+            if (response.success) {
+                // PERBAIKAN: Langsung ke hargaEmas.value, bukan state.hargaEmas
+                produkPerbaikan.value = response.data;
+            }
+        } catch (error) {
+            console.error("Gagal memuat harga emas:", error);
+        } finally {
+            isLoading.value = false;
+        }
+    }
+
     return {
         displaySaldo,
         displaySaldoKeluar,
@@ -124,12 +157,16 @@ export function useHome() {
         displayTotalTransaksi,
         displayTotalPembelian,
         isLoading,
+        hargaEmas,
+        produkPerbaikan,
         fetchDashboardData,
         chartLabels,
         chartSales,
         chartPurchases,
         isLoadingChart,
         fetchDashboardData,
-        fetchChartData
+        fetchChartData,
+        fetchHargaEmas,
+        fetchProdukPerbaikan,
     };
 }

@@ -41,4 +41,12 @@ export const homeService = {
         const response = await apiClient.get('/dashboard/getSalesChartPembelian');
         return response.data;
     },
+    async getHargaEmas() {
+        const response = await apiClient.get('/dashboard/getHargaEmas');
+        return response.data;
+    },
+    async getProdukPerbaikan() {
+        const response = await apiClient.get('/dashboard/getProdukPerbaikan');
+        return response.data;
+    },
 }

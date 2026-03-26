@@ -59,6 +59,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('dashboard/getTotalPembelian', [HomeController::class, 'getTotalPembelian']);
     Route::get('dashboard/getSalesChart', [HomeController::class, 'getSalesChart']);
     Route::get('dashboard/getSalesChartPembelian', [HomeController::class, 'getSalesChartPembelian']);
+    Route::get('dashboard/getHargaEmas', [HomeController::class, 'getHargaEmas']);
+    Route::get('dashboard/getProdukPerbaikan', [HomeController::class, 'getProdukPerbaikan']);
 
     Route::get('jabatan/getJabatan', [JabatanController::class, 'getJabatan']);
     Route::post('jabatan/storeJabatan', [JabatanController::class, 'storeJabatan']);

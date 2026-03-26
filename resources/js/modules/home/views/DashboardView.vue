@@ -104,6 +104,8 @@
         </div>
 
         <SalesChart />
+        <HargaEmas />
+
     </div>
 </template>
 <script setup>
@@ -112,6 +114,7 @@ import { formatRupiah } from '../../../helper/formatRupiah'; // Pastikan path be
 import { useHome } from '../composables/useDashboard';
 
 import SalesChart from '../components/SalesChart.vue';
+import HargaEmas from '../components/HargaEmas.vue';
 
 // Ambil variabel dan function dari composable
 const {

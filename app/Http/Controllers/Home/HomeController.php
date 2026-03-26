@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Home;
 
 use App\Http\Controllers\Controller;
 use App\Models\Keuangan\MutasiSaldo;
+use App\Models\Master\Harga;
 use App\Models\Master\Pelanggan;
 use App\Models\Master\Suplier;
 use App\Models\Transaksi\Offtake;
 use App\Models\Transaksi\Pembelian;
+use App\Models\Transaksi\Perbaikan;
 use App\Models\Transaksi\Transaksi;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -222,5 +224,27 @@ class HomeController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getHargaEmas()
+    {
+        $data = Harga::with(['karat', 'jeniskarat'])->where('status', 1)->get();
+
+        return response()->json([
+            'success'   => true,
+            'message'   => 'Data produk terlaris ditemukan',
+            'data'      => $data
+        ]);
+    }
+
+    public function getProdukPerbaikan()
+    {
+        $data = Perbaikan::with(['produk','kondisi'])->where('status', 1)->get();
+
+        return response()->json([
+            'success'   => true,
+            'message'   => 'Data produk perbaikan ditemukan',
+            'data'      => $data
+        ]);
     }
 }
