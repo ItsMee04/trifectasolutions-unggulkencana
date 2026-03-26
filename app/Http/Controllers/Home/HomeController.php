@@ -175,43 +175,42 @@ class HomeController extends Controller
     public function getSalesChartPembelian()
     {
         try {
-            // 1. Tentukan rentang waktu (14 hari terakhir)
             $endDate = Carbon::now();
             $startDate = Carbon::now()->subDays(13);
 
-            // 2. Ambil data dari database
-            $salesData = Pembelian::select(
+            // 1. Ambil data dan pastikan key-nya adalah string tanggal 'YYYY-MM-DD'
+            $purchaseData = Pembelian::select(
                 DB::raw('DATE(created_at) as date'),
                 DB::raw('SUM(total) as total')
             )
                 ->where('created_at', '>=', $startDate->startOfDay())
                 ->groupBy('date')
                 ->get()
-                ->pluck('total', 'date');
+                ->pluck('total', 'date')
+                ->toArray(); // Ubah ke array agar pencarian key lebih stabil
 
-            // 3. Buat periode 14 hari
             $period = CarbonPeriod::create($startDate, $endDate);
 
             $labels = [];
             $data = [];
 
             foreach ($period as $date) {
+                // Ini harus SAMA dengan format 'date' yang dihasilkan oleh SQL DATE(created_at)
                 $formattedDate = $date->format('Y-m-d');
+
                 $labels[] = $date->format('d M');
 
-                // --- PERBAIKAN DI SINI ---
-                // 1. Ambil nilai dari collection
-                $val = $salesData->get($formattedDate, 0);
-
-                // 2. Jika null, ubah ke 0. Jika ada nilai, cast ke (int) atau (float)
-                // Ini akan mengubah "1700000" (string) menjadi 1700000 (number)
-                $data[] = $val ? (float)$val : 0;
-                // -------------------------
+                // 2. Cek apakah key $formattedDate ada di dalam array hasil query
+                if (isset($purchaseData[$formattedDate])) {
+                    $data[] = (float)$purchaseData[$formattedDate];
+                } else {
+                    $data[] = 0;
+                }
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data grafik 14 hari berhasil diambil',
+                'message' => 'Data grafik pembelian berhasil diambil',
                 'data' => [
                     'labels' => $labels,
                     'sales' => $data

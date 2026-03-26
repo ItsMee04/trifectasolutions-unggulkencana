@@ -1,6 +1,7 @@
 import { ref } from "vue";
 import { homeService } from '../services/homeService';
 
+// STATE GLOBAL (Di luar function agar data menetap)
 const chartLabels = ref([]);
 const chartSales = ref([]);
 const chartPurchases = ref([]);
@@ -38,7 +39,6 @@ export function useHome() {
     // 3. Fungsi Fetch Utama (Berjalan Bersamaan)
     const fetchDashboardData = async () => {
         isLoading.value = true;
-        isLoadingChart.value = true;
         try {
             // Menjalankan semua API secara paralel
             const [
@@ -50,8 +50,6 @@ export function useHome() {
                 resSuplier,
                 resTotalTransaksi,
                 resTotalPembelian,
-                resChartSales,
-                resChartPurchases
             ] = await Promise.all([
                 homeService.getTotalSaldoMasuk(),
                 homeService.getTotalSaldoKeluar(),
@@ -61,8 +59,6 @@ export function useHome() {
                 homeService.getTotalSuplier(),
                 homeService.getTotalPenjualan(),
                 homeService.getTotalPembelian(),
-                homeService.getSalesChart(),         // Panggil bareng
-                homeService.getSalesChartPembelian()
             ]);
 
             // Ekstrak nilai (asumsi response.data berisi angka)
@@ -87,27 +83,15 @@ export function useHome() {
             animateValue(displayTotalTransaksi, 0, data.penjualan);
             animateValue(displayTotalPembelian, 0, data.pembelian);
 
-            // Set Data Chart
-            if (resChartSales?.data?.success) {
-                chartLabels.value = resChartSales.data.data.labels || [];
-                chartSales.value = resChartSales.data.data.sales || [];
-            }
-            if (resChartPurchases?.data?.success) {
-                chartPurchases.value = resChartPurchases.data.data.sales || [];
-            }
-
         } catch (error) {
             console.error("Gagal mengambil data dashboard:", error);
         } finally {
             isLoading.value = false;
-            isLoadingChart.value = false;
         }
     };
 
     const fetchChartData = async () => {
-        // Hindari fetch ganda jika data sudah ada
-        if (chartLabels.value.length > 0) return;
-
+        if (chartLabels.value.length > 0) return; // Jangan fetch lagi jika sudah ada
         isLoadingChart.value = true;
         try {
             const [resSales, resPurchases] = await Promise.all([
@@ -115,21 +99,16 @@ export function useHome() {
                 homeService.getSalesChartPembelian()
             ]);
 
-            // Perhatikan akses .data.data sesuai JSON yang Anda kirim
-            if (resSales?.data?.success) {
-                const payload = resSales.data.data; // Ini masuk ke { labels: [], sales: [] }
-                chartLabels.value = payload.labels || [];
-                chartSales.value = (payload.sales || []).map(Number);
+            // SESUAIKAN DENGAN STRUKTUR JSON ANDA: res.data
+            if (resSales?.success) {
+                chartLabels.value = resSales.data.labels || [];
+                chartSales.value = (resSales.data.sales || []).map(Number);
             }
-
-            if (resPurchases?.data?.success) {
-                const payload = resPurchases.data.data;
-                chartPurchases.value = (payload.sales || []).map(Number);
+            if (resPurchases?.success) {
+                chartPurchases.value = (resPurchases.data.sales || []).map(Number);
             }
-
-            console.log("Data mendarat di Composable:", chartLabels.value);
         } catch (error) {
-            console.error("Error Fetch Chart:", error);
+            console.error("Gagal ambil data chart:", error);
         } finally {
             isLoadingChart.value = false;
         }
@@ -150,6 +129,7 @@ export function useHome() {
         chartSales,
         chartPurchases,
         isLoadingChart,
+        fetchDashboardData,
         fetchChartData
     };
 }
