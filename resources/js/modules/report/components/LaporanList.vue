@@ -58,13 +58,13 @@
         </div>
 
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm bg-soft-info h-100" @click="pilih('stok')" style="cursor: pointer;">
+            <div class="card border-0 shadow-sm bg-soft-info h-100" @click="cetakLaporanStokBulanan" style="cursor: pointer;">
                 <div class="card-body p-3 d-flex align-items-center">
                     <div class="bg-white p-2 rounded me-3 shadow-sm">
                         <i data-feather="box" class="text-info" style="width: 20px;"></i>
                     </div>
                     <div>
-                        <h6 class="fw-bold mb-0 text-dark">LAPORAN STOK</h6>
+                        <h6 class="fw-bold mb-0 text-dark">LAPORAN STOK BULANAN</h6>
                         <small class="text-muted">Catatan Stok</small>
                     </div>
                 </div>
@@ -98,6 +98,7 @@ const {
     cetakLaporanPembelian,
     cetakLaporanOfftake,
     cetakLaporanPerbaikan,
+    cetakLaporanStokBulanan,
     cetakLaporanMutasiSaldo
 } = useLaporan();
 

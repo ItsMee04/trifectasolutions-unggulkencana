@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Authentication\AuthController;
+use App\Http\Controllers\Home\HomeController;
 use App\Http\Controllers\Inventori\StokController;
 use App\Http\Controllers\Keuangan\MutasiSaldoController;
 use App\Http\Controllers\Keuangan\SaldoController;
@@ -47,6 +48,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::get('dashboard/getTotalSaldoMasuk', [HomeController::class, 'getTotalSaldoMasuk']);
+    Route::get('dashboard/getTotalSaldoKeluar', [HomeController::class, 'getTotalSaldoKeluar']);
+    Route::get('dashboard/getTotalPenjualanMasuk', [HomeController::class, 'getTotalPenjualanMasuk']);
+    Route::get('dashboard/getTotalPenjualanKeluar', [HomeController::class, 'getTotalPenjualanKeluar']);
+    Route::get('dashboard/getTotalPelanggan', [HomeController::class, 'getTotalPelanggan']);
+    Route::get('dashboard/getTotalSuplier', [HomeController::class, 'getTotalSuplier']);
+    Route::get('dashboard/getTotalPenjualan', [HomeController::class, 'getTotalPenjualan']);
+    Route::get('dashboard/getTotalPembelian', [HomeController::class, 'getTotalPembelian']);
+    Route::get('dashboard/getSalesChart', [HomeController::class, 'getSalesChart']);
+    Route::get('dashboard/getSalesChartPembelian', [HomeController::class, 'getSalesChartPembelian']);
 
     Route::get('jabatan/getJabatan', [JabatanController::class, 'getJabatan']);
     Route::post('jabatan/storeJabatan', [JabatanController::class, 'storeJabatan']);
@@ -169,9 +181,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('pembelianluar/batalPembelianDetailDariLuar', [PembelianController::class, 'batalPembelianDetailDariLuar']);
     Route::post('pembelianluar/paymentPembelianDariLuar', [PembelianController::class, 'paymentPembelianDariLuar']);
 
-    Route::get('perbaikan/getPerbaikan',[PerbaikanController::class, 'getPerbaikan']);
-    Route::post('perbaikan/finalPerbaikan',[PerbaikanController::class, 'finalPerbaikan']);
-    Route::post('perbaikan/batalPerbaikan',[PerbaikanController::class, 'batalPerbaikan']);
+    Route::get('perbaikan/getPerbaikan', [PerbaikanController::class, 'getPerbaikan']);
+    Route::post('perbaikan/finalPerbaikan', [PerbaikanController::class, 'finalPerbaikan']);
+    Route::post('perbaikan/batalPerbaikan', [PerbaikanController::class, 'batalPerbaikan']);
 
     Route::get('transaksipenjualan/getTransaksiPenjualan', [TransaksiController::class, 'getTransaksiPenjualan']);
     Route::post('transaksipenjualan/batalTransaksi', [TransaksiController::class, 'batalTransaksi']);
@@ -189,12 +201,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('inventory/finalPeriodeStok', [StokController::class, 'finalPeriodeStok']);
     Route::post('inventory/getSignedLaporanStokUrl', [StokController::class, 'getSignedLaporanStokUrl']);
 
-    Route::post('laporan/getsignedurl-cetaklaporanpenjualan',[LaporanController::class, 'getSignedCetakLaporanPenjualanUrl']);
-    Route::post('laporan/getsignedurl-cetaklaporanpembelian',[LaporanController::class, 'getSignedCetakLaporanPembelianUrl']);
-    Route::post('laporan/getsignedurl-cetaklaporanofftake',[LaporanController::class, 'getSignedCetakLaporanOfftakeUrl']);
-    Route::post('laporan/getsignedurl-cetaklaporanperbaikan',[LaporanController::class, 'getSignedCetakLaporanPerbaikanUrl']);
-    Route::post('laporan/getsignedurl-cetaklaporanmutasisaldo',[LaporanController::class, 'getSignedCetakLaporanMutasiSaldoUrl']);
-
+    Route::post('laporan/getsignedurl-cetaklaporanpenjualan', [LaporanController::class, 'getSignedCetakLaporanPenjualanUrl']);
+    Route::post('laporan/getsignedurl-cetaklaporanpembelian', [LaporanController::class, 'getSignedCetakLaporanPembelianUrl']);
+    Route::post('laporan/getsignedurl-cetaklaporanofftake', [LaporanController::class, 'getSignedCetakLaporanOfftakeUrl']);
+    Route::post('laporan/getsignedurl-cetaklaporanperbaikan', [LaporanController::class, 'getSignedCetakLaporanPerbaikanUrl']);
+    Route::post('laporan/getsignedurl-cetaklaporanmutasisaldo', [LaporanController::class, 'getSignedCetakLaporanMutasiSaldoUrl']);
+    Route::post('laporan/getsignedurl-cetaklaporanstokbulanan', [LaporanController::class, 'getSignedCetakLaporanStokBulananUrl']);
 });
 
 Route::get('/transaksi/CetakNotaPenjualan', [TransaksiController::class, 'CetakNotaPenjualan'])->name('produk.cetak_notapenjualan');
@@ -207,5 +219,6 @@ Route::get('/laporan/cetaklaporanpembelian', [LaporanController::class, 'CetakLa
 Route::get('/laporan/cetaklaporanofftake', [LaporanController::class, 'CetakLaporanOfftake'])->name('produk.cetak_laporanofftake');
 Route::get('/laporan/cetaklaporanperbaikan', [LaporanController::class, 'CetakLaporanPerbaikan'])->name('produk.cetak_laporanperbaikan');
 Route::get('/laporan/cetaklaporanmutasisaldo', [LaporanController::class, 'CetakLaporanMutasiSaldo'])->name('produk.cetak_laporanmutasisaldo');
+Route::get('/laporan/cetaklaporanstokbulanan', [LaporanController::class, 'CetakLaporanStokBulanan'])->name('produk.cetak_laporanstokbulanan');
 
-Route::post('laporan/CompileReports',[CompailReportController::class, 'CompileReports']);
+Route::post('laporan/CompileReports', [CompailReportController::class, 'CompileReports']);

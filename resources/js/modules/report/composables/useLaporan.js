@@ -95,6 +95,23 @@ export function useLaporan() {
         }
     }
 
+    const cetakLaporanStokBulanan = async () => {
+        if (!validateForm()) return false;
+
+        const payload = {
+            periodedari: formLaporan.tanggaldari,
+            periodesampai: formLaporan.tanggalsampai
+        }
+
+        try {
+            const { url } = await laporanService.cetakLaporanStokBulanan(payload)
+            window.open(url, '_blank')
+        } catch (e) {
+            console.log(e)
+            toast.error('Gagal mencetak laporan stok bulanan')
+        }
+    }
+
     const cetakLaporanMutasiSaldo = async () => {
         if (!validateForm()) return false;
 
@@ -119,6 +136,7 @@ export function useLaporan() {
         cetakLaporanPembelian,
         cetakLaporanOfftake,
         cetakLaporanPerbaikan,
+        cetakLaporanStokBulanan,
         cetakLaporanMutasiSaldo
     }
 }
