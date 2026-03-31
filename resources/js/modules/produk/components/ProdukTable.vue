@@ -44,7 +44,7 @@
                                 <td scope="row">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
                                 <td class="barcode-column text-center">
                                     <div class="d-flex flex-column align-items-center justify-content-center">
-                                        <img :src="item.kodeproduk ? `/storage/images/barcode/${item.kodeproduk}.jpg?t=${new Date().getTime()}` : BASE_DEFAULT_IMAGE_URL"
+                                        <img :src="item.kodeproduk ? `/storage/images/barcode/${item.kodeproduk}.png?t=${new Date().getTime()}` : BASE_DEFAULT_IMAGE_URL"
                                             class="barcode-style" :alt="item.kodeproduk">
 
                                         <span class="barcode-text fw-bold">{{ item.kodeproduk }}</span>
