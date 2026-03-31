@@ -59,18 +59,24 @@ class ProdukController extends Controller
         // 2. Gunakan Transaction untuk memastikan atomisitas
         DB::beginTransaction();
 
+        // Inisialisasi variabel untuk keperluan cleanup di blok catch
+        $barcodePath = null;
+        $image = '';
+
         try {
             // Generate kode hanya dilakukan SETELAH validasi request berhasil
             $kodeproduk = $this->productService->generateUniqueCode();
 
             /**
              * 3. Generate BARCODE
+             * Optimasi: Menggunakan PNG, skala lebar 2, dan tinggi 40 agar mudah di-scan.
              */
             $barcodeGenerator = new DNS1D();
-            // Gunakan parameter 2 (lebar) dan 25 (tinggi) agar barcode ramping [cite: 2025-10-25]
-            $barcodeBase64 = $barcodeGenerator->getBarcodeJPG($kodeproduk, 'C128', 1.2, 20);
+
+            // Menggunakan getBarcodePNG karena PNG lebih tajam (lossless) daripada JPG untuk barcode
+            $barcodeBase64 = $barcodeGenerator->getBarcodePNG($kodeproduk, 'C128', 2, 40);
             $barcodeData = base64_decode($barcodeBase64);
-            $barcodePath = 'images/barcode/' . $kodeproduk . '.jpg';
+            $barcodePath = 'images/barcode/' . $kodeproduk . '.png';
 
             // Simpan Barcode ke Storage
             Storage::disk('public')->put($barcodePath, $barcodeData);
@@ -78,7 +84,6 @@ class ProdukController extends Controller
             /**
              * 4. Handle Image Produk
              */
-            $image = '';
             if ($request->hasFile('image')) {
                 $extension = $request->file('image')->getClientOriginalExtension();
                 $image = $kodeproduk . '.' . $extension;
@@ -114,9 +119,14 @@ class ProdukController extends Controller
             // Jika ada error apa pun (DB error, Disk full, dll), batalkan semua
             DB::rollBack();
 
-            // Hapus file yang terlanjur diupload jika ada (opsional tapi bersih)
-            if (isset($barcodePath)) Storage::disk('public')->delete($barcodePath);
-            if ($image) Storage::disk('public')->delete('images/produk/' . $image);
+            // Hapus file yang terlanjur diupload jika ada
+            if ($barcodePath && Storage::disk('public')->exists($barcodePath)) {
+                Storage::disk('public')->delete($barcodePath);
+            }
+
+            if ($image && Storage::disk('public')->exists('images/produk/' . $image)) {
+                Storage::disk('public')->delete('images/produk/' . $image);
+            }
 
             return response()->json([
                 'status' => false,
@@ -217,6 +227,28 @@ class ProdukController extends Controller
             'status' => true,
             'message' => 'Data produk berhasil dihapus',
             'data' => []
+        ], 200);
+    }
+
+    public function getProdukByKode(Request $request)
+    {
+        $produk = Produk::with(['jenisproduk', 'karat', 'jeniskarat', 'harga', 'kondisi'])
+            ->where('kodeproduk', $request->kodeproduk)
+            ->where('status', 1)
+            ->first();
+
+        if (!$produk) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Data produk tidak ditemukan',
+                'data' => []
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Data produk berhasil diambil',
+            'data' => $produk
         ], 200);
     }
 }

@@ -114,6 +114,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('produk/storeProduk', [ProdukController::class, 'storeProduk']);
     Route::post('produk/updateProduk', [ProdukController::class, 'updateProduk']);
     Route::post('produk/deleteProduk', [ProdukController::class, 'deleteProduk']);
+    Route::post('produk/getProdukByKode', [ProdukController::class, 'getProdukByKode']);
 
     Route::get('nampan/getNampan', [NampanController::class, 'getNampan']);
     Route::post('nampan/storeNampan', [NampanController::class, 'storeNampan']);
