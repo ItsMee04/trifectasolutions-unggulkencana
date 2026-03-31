@@ -29,14 +29,19 @@ class ProdukSeeder extends Seeder
         for ($i = 1; $i <= 100; $i++) {
             $kodeproduk = $productService->generateUniqueCode();
 
-            // Logika Barcode sama dengan Controller
-            $barcodeBase64 = $barcodeGenerator->getBarcodeJPG($kodeproduk, 'C128', 1.2, 20);
-            Storage::disk('public')->put('images/barcode/' . $kodeproduk . '.jpg', base64_decode($barcodeBase64));
+            /**
+             * PERBAIKAN DI SINI:
+             * 1. Menggunakan getBarcodePNG agar lebih tajam.
+             * 2. Skala lebar 2 dan tinggi 40 (sama dengan controller).
+             * 3. Ekstensi file diganti ke .png
+             */
+            $barcodeBase64 = $barcodeGenerator->getBarcodePNG($kodeproduk, 'C128', 2, 40);
+            Storage::disk('public')->put('images/barcode/' . $kodeproduk . '.png', base64_decode($barcodeBase64));
 
             $karatId = array_rand($karatMap);
             $indexKarat = array_rand($karatMap[$karatId]);
             $jenisKaratId = $karatMap[$karatId][$indexKarat];
-            $hargaId = $jenisKaratId; // Kebetulan di JSON Anda ID Harga = ID Jenis Karat
+            $hargaId = $jenisKaratId;
 
             Produk::create([
                 'kodeproduk'    => $kodeproduk,
