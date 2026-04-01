@@ -11,7 +11,7 @@ class CompailReportController extends Controller
     public function CompileReports()
     {
         // Target file JRXML
-        $input_jrxml = resource_path('reports/CetakLaporanStokBulanan.jrxml');
+        $input_jrxml = resource_path('reports/CetakLaporanPenjualan.jrxml');
         $output_dir = resource_path('reports'); // Output .jasper di folder reports/
 
         if (!file_exists($input_jrxml)) {
@@ -28,8 +28,8 @@ class CompailReportController extends Controller
             )->execute();
 
             return response()->json([
-                'message' => 'Kompilasi CetakLaporanStokBulanan.jrxml berhasil!',
-                'output_file' => $output_dir . '/CetakLaporanStokBulanan.jasper'
+                'message' => 'Kompilasi CetakLaporanPenjualan.jrxml berhasil!',
+                'output_file' => $output_dir . '/CetakLaporanPenjualan.jasper'
             ]);
         } catch (\Exception $e) {
             // Jika ini gagal, cek kembali JRXML Anda di Jaspersoft Studio!
