@@ -60,13 +60,9 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="d-flex align-items-center">
-                                        <div>
-                                            <div class="lh-1">
-                                                <span>{{ item.kontak }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <button class="btn btn-sm btn-secondary" @click="handleKirimPesanForm(item)">
+                                        {{ item.kontak }}
+                                    </button>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -159,7 +155,8 @@ const {
     displayedPages,
     totalPages,
     handleEdit,
-    handleDelete
+    handleDelete,
+    handleKirimPesanForm
 } = usePelanggan();
 
 const { initFeather } = useFeather();

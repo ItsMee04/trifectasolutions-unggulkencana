@@ -27,12 +27,14 @@
     </div>
 
     <PelangganModal />
+    <PesanModal />
 </template>
 <script setup>
 import { onMounted } from 'vue';
 import { usePelanggan } from '../composables/usePelanggan';
 import PelangganTable from '../components/PelangganTable.vue';
 import PelangganModal from '../components/PelangganModal.vue';
+import PesanModal from '../components/PesanModal.vue';
 
 const { fetchPelanggan, handleRefresh, handleCreate } = usePelanggan();
 onMounted(() => {
