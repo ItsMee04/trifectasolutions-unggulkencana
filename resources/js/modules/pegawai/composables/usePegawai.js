@@ -52,7 +52,7 @@ export function usePegawai() {
                 label: jabatanList.jabatan // Sesuaikan field 'role' dengan nama kolom di tabel roles Anda
             }));
         } catch (error) {
-            console.error("Gagal memuat Jabatan:", error);
+            console.log("Gagal memuat Jabatan:", error);
         }
     };
 
@@ -92,8 +92,6 @@ export function usePegawai() {
                 URL.revokeObjectURL(currentImagePreview.value);
             }
             currentImagePreview.value = URL.createObjectURL(file);
-
-            console.log("File baru dipilih:", file.name);
         }
     };
 
@@ -123,8 +121,6 @@ export function usePegawai() {
             // Buat URL lengkap untuk preview
             const timestamp = new Date().getTime();
             currentImagePreview.value = `${STORAGE_URL}/images/pegawai/${item.image}?t=${timestamp}`;
-
-            console.log("Preview Edit Set:", currentImagePreview.value);
         } else {
             currentImagePreview.value = null;
         }
