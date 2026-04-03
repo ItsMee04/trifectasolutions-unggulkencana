@@ -82,17 +82,16 @@ export function useJabatan() {
 
             return true;
         } catch (error) {
-            if (error.response?.status === 422) {
-                // 1. Simpan error untuk ditampilkan di bawah input field
-                errors.value = error.response.data.errors;
+            const errorMessage = error.response?.data?.message || 'Gagal menyimpan data.';
 
-                // 2. ✨ TAMBAHKAN INI: Munculkan notify agar user tahu ada yang salah
-                const firstErrorMessage = error.response.data.message || 'Terjadi kesalahan validasi.';
-                toast.error(firstErrorMessage);
-            } else {
-                // Untuk error server (500), koneksi, dsb.
-                toast.error(error.response?.message || 'Gagal menyimpan data.');
+            // 2. Tampilkan pesan ke Toast
+            toast.error(errorMessage);
+
+            // 3. Khusus validasi (422), tetap simpan detail error per field agar muncul di input
+            if (error.response?.status === 422) {
+                errors.value = error.response.data.errors;
             }
+
             return false;
         } finally {
             isLoading.value = false;
@@ -136,7 +135,17 @@ export function useJabatan() {
                 await fetchJabatan();
             } catch (error) {
                 console.error('Gagal menghapus data Jabatan:', error);
-                toast.error('Gagal menghapus data Jabatan.');
+                const errorMessage = error.response?.data?.message || 'Gagal menyimpan data.';
+
+                // 2. Tampilkan pesan ke Toast
+                toast.error(errorMessage);
+
+                // 3. Khusus validasi (422), tetap simpan detail error per field agar muncul di input
+                if (error.response?.status === 422) {
+                    errors.value = error.response.data.errors;
+                }
+
+                return false;
             } finally {
                 isLoading.value = false;
             }

@@ -3,6 +3,7 @@ import toast from '../../../helper/toast';
 import Swal from 'sweetalert2';
 
 import { roleService } from '../services/roleService';
+import { usePermission } from './usePermission';
 
 const role = ref([]);
 const isLoading = ref(false);
@@ -18,6 +19,21 @@ const formRole = reactive({
 });
 
 export function useRole() {
+
+    const { fetchPermissions } = usePermission();
+
+    const handlePermission = async (item) => {
+        // 1. Set data role yang dipilih ke form agar ID-nya bisa dipakai
+        formRole.id = item.id;
+        formRole.role = item.role;
+
+        // 2. Panggil API permission untuk role ini
+        await fetchPermissions(item.id);
+
+        // 3. Munculkan Modal Permission
+        const modal = new bootstrap.Modal(document.getElementById('permissionModal'));
+        modal.show();
+    };
 
     const fetchRole = async () => {
         isLoading.value = true;
@@ -201,6 +217,7 @@ export function useRole() {
             const start = (currentPage.value - 1) * itemsPerPage;
             return (role.value.filter(item => (item.role || '').toLowerCase().includes(searchQuery.value.toLowerCase())))
                 .slice(start, start + itemsPerPage);
-        })
+        }),
+        handlePermission,
     }
 }

@@ -50,6 +50,7 @@ class AuthController extends Controller
             'email' => $user->email,
             'nama' => $user->pegawai->nama ?? '-',
             'jabatan' => $user->pegawai->jabatan->jabatan ?? '-',
+            'role_id' => $user->role_id, // WAJIB TAMBAHKAN INI
             'role' => $user->role->role ?? '-',
             'image' => $user->pegawai->image ?? 'default.png',
         ];

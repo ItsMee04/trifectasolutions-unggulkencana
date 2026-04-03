@@ -4,18 +4,20 @@
             <div id="sidebar-menu" class="sidebar-menu">
                 <ul>
                     <template v-for="(group, groupKey) in menuGroups" :key="groupKey">
-                        <li class="submenu-open">
+                        <li v-if="hasGroupAccess(group.menus)" class="submenu-open">
                             <h6 class="submenu-hdr">{{ group.header }}</h6>
                             <ul>
                                 <template v-for="(menu, menuKey) in group.menus" :key="menuKey">
 
-                                    <li v-if="!menu.submenus" :class="{ 'active': isRouteActive(menu.path) }">
+                                    <li v-if="!menu.submenus && hasAccess(menuKey, 'can_view')"
+                                        :class="{ 'active': isRouteActive(menu.path) }">
                                         <router-link :to="menu.path">
                                             <i :data-feather="menu.icon"></i><span>{{ menu.label }}</span>
                                         </router-link>
                                     </li>
 
-                                    <li v-else class="submenu">
+                                    <li v-else-if="menu.submenus && hasSubmenuAccess(menu.submenus, menuKey)"
+                                        class="submenu">
                                         <a href="javascript:void(0);" @click.prevent="toggleSubmenu(menuKey)" :class="{
                                             'subdrop': openMenuId === menuKey,
                                             'active': isGroupActive(menu.submenus)
@@ -25,12 +27,15 @@
                                             <span class="menu-arrow"></span>
                                         </a>
                                         <ul :style="{ display: openMenuId === menuKey ? 'block' : 'none' }">
-                                            <li v-for="sub in menu.submenus" :key="sub.path">
-                                                <router-link :to="sub.path"
-                                                    :class="{ 'active': isRouteActive(sub.path) }">
-                                                    {{ sub.name }}
-                                                </router-link>
-                                            </li>
+                                            <template v-for="sub in menu.submenus" :key="sub.path">
+                                                <li
+                                                    v-if="hasAccess(sub.permissionKey || sub.path.replace('/', ''), 'can_view')">
+                                                    <router-link :to="sub.path"
+                                                        :class="{ 'active': isRouteActive(sub.path) }">
+                                                        {{ sub.name }}
+                                                    </router-link>
+                                                </li>
+                                            </template>
                                         </ul>
                                     </li>
 
@@ -48,12 +53,16 @@
 import { ref, onMounted, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { useFeather } from '../../helper/feather';
+import { useAuthStore } from '../../store/auth'; // Import store
+// Import Composable Permission
+import { usePermission } from '../../modules/role/composables/usePermission';
 
 const route = useRoute();
 const { initFeather } = useFeather();
+const { hasAccess } = usePermission();
+const authStore = useAuthStore(); // Import store
 
-// State logic
-const openMenuId = ref(null); // Menu mana yang sedang terbuka (accordion)
+const openMenuId = ref(null);
 
 const menuGroups = {
     main: {
@@ -88,21 +97,21 @@ const menuGroups = {
                     { name: 'Produk', path: '/produk' },
                 ]
             },
-            nampan:{
+            nampan: {
                 label: 'Nampan',
                 icon: 'layers',
                 submenus: [
-                    { name: 'Nampan', path: '/nampan'},
-                    { name: 'Nampan Produk', path: '/nampanproduk'}
+                    { name: 'Nampan', path: '/nampan' },
+                    { name: 'Nampan Produk', path: '/nampanproduk', permissionKey: 'nampanproduk' }
                 ]
             },
-            pelanggan:{
+            pelanggan: {
                 label: 'Pelanggan',
                 icon: 'users',
                 submenus: [
-                    { name: 'Pelanggan', path: '/pelanggan'},
-                    { name: 'Suplier', path: '/suplier'},
-                    { name: 'Pesan', path: '/pesan'},
+                    { name: 'Pelanggan', path: '/pelanggan' },
+                    { name: 'Suplier', path: '/suplier' },
+                    { name: 'Pesan', path: '/pesan' },
                 ]
             }
         }
@@ -117,14 +126,14 @@ const menuGroups = {
     transaksi: {
         header: 'Transaksi',
         menus: {
-            pos: { label: 'POS', icon: 'hard-drive', path: '/pos' },
+            transaksi: { label: 'POS', icon: 'hard-drive', path: '/pos' },
             offtake: { label: 'Offtake', icon: 'pocket', path: '/offtake' },
             pembelian: {
                 label: 'Pembelian',
                 icon: 'shopping-bag',
                 submenus: [
-                    { name: 'Pembelian Dari Toko', path: '/pembeliandaritoko' },
-                    { name: 'Pembelian Dari Luar Toko', path: '/pembeliandariluartoko' }
+                    { name: 'Pembelian Dari Toko', path: '/pembeliandaritoko', permissionKey: 'pembelian' },
+                    { name: 'Pembelian Dari Luar Toko', path: '/pembeliandariluartoko', permissionKey: 'pembeliandariluartoko' }
                 ]
             },
             perbaikan: { label: 'Perbaikan', icon: 'repeat', path: '/perbaikan' },
@@ -141,38 +150,58 @@ const menuGroups = {
     Laporan: {
         header: 'Laporan',
         menus: {
-            iventory: {
-                label: 'Inventori',
-                icon: 'server',
-                path: '/inventori'
-            },
-            laporantransaksi: {
-                label: 'Laporan Transaksi',
-                icon: 'book',
-                path: '/laporan'
-            },
+            iventory: { label: 'Inventori', icon: 'server', path: '/inventori' },
+            laporantransaksi: { label: 'Laporan Transaksi', icon: 'book', path: '/laporan' },
         }
     },
 };
 
 // --- LOGIC FUNCTIONS ---
 
-// Cek apakah route sedang aktif
+/**
+ * Cek apakah sebuah group (Main, Master, dll) punya minimal 1 menu yang boleh tampil
+ */
+const hasGroupAccess = (menus) => {
+    // BYPASS ADMIN: Jika user di store adalah Admin, munculkan semua group
+    if (authStore.user?.role_id == 1 || authStore.user?.role === 'ADMIN') {
+        return true;
+    }
+
+    return Object.entries(menus).some(([key, menu]) => {
+        if (menu.submenus) {
+            return hasSubmenuAccess(menu.submenus, key);
+        }
+        return hasAccess(key, 'can_view');
+    });
+};
+
+/**
+ * Cek akses untuk submenu.
+ * Kita cek apakah ada salah satu anak yang boleh dilihat.
+ */
+const hasSubmenuAccess = (submenus, parentKey) => {
+    // Jika ADMIN, tampilkan semua submenu
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.role === 'ADMIN') return true;
+
+    return submenus.some(sub => {
+        // Gunakan permissionKey jika ada, jika tidak gunakan path
+        const key = sub.permissionKey || sub.path.replace('/', '');
+        return hasAccess(key, 'can_view');
+    });
+};
+
 const isRouteActive = (path) => route.path === path;
 
-// Cek apakah salah satu anak submenu sedang aktif (agar induknya ikut berwarna biru)
 const isGroupActive = (submenus) => {
     return submenus.some(sub => route.path === sub.path);
 };
 
-// Buka/Tutup Submenu
 const toggleSubmenu = (menuId) => {
     openMenuId.value = openMenuId.value === menuId ? null : menuId;
-    // Re-init feather jika ada perubahan DOM
     nextTick(() => initFeather());
 };
 
-// Otomatis buka folder submenu jika kita berada di halaman salah satu anaknya
 const autoOpenSubmenu = () => {
     for (const group of Object.values(menuGroups)) {
         for (const [menuKey, menu] of Object.entries(group.menus)) {
@@ -184,13 +213,11 @@ const autoOpenSubmenu = () => {
     }
 };
 
-// --- LIFECYCLE ---
 onMounted(() => {
     autoOpenSubmenu();
     initFeather();
 });
 
-// Watch rute untuk update status aktif dan re-init feather icons
 watch(() => route.path, () => {
     autoOpenSubmenu();
     nextTick(() => initFeather());
@@ -198,15 +225,13 @@ watch(() => route.path, () => {
 </script>
 
 <style scoped>
-/* Area Scroll */
+/* Style tetap sama seperti milik Anda */
 .sidebar-scroll-area {
     height: calc(100vh - 60px);
-    /* Kurangi tinggi header */
     overflow-y: auto;
     overflow-x: hidden;
 }
 
-/* Custom Scrollbar minimalis agar mirip simplebar */
 .sidebar-scroll-area::-webkit-scrollbar {
     width: 5px;
 }
@@ -218,11 +243,9 @@ watch(() => route.path, () => {
 
 .sidebar-inner {
     height: 100%;
-    max-height: 100%;
     width: 100%;
 }
 
-/* Perbaikan transisi arrow */
 .menu-arrow {
     transition: transform 0.3s ease;
 }

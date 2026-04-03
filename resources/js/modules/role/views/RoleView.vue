@@ -27,12 +27,14 @@
     </div>
 
     <RoleModal />
+    <PermissionModal />
 </template>
 <script setup>
 import { onMounted } from 'vue';
 import { useRole } from '../composables/useRole';
 import RoleTable from '../components/RoleTable.vue';
 import RoleModal from '../components/RoleModal.vue';
+import PermissionModal from '../components/PermissionModal.vue';
 
 const { fetchRole, handleRefresh, handleCreate } = useRole();
 onMounted(() => {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Authentication\AuthController;
+use App\Http\Controllers\Authentication\PermissionController;
 use App\Http\Controllers\Home\HomeController;
 use App\Http\Controllers\Inventori\StokController;
 use App\Http\Controllers\Keuangan\MutasiSaldoController;
@@ -49,168 +50,178 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    Route::get('dashboard/getTotalSaldoMasuk', [HomeController::class, 'getTotalSaldoMasuk']);
-    Route::get('dashboard/getTotalSaldoKeluar', [HomeController::class, 'getTotalSaldoKeluar']);
-    Route::get('dashboard/getTotalPenjualanMasuk', [HomeController::class, 'getTotalPenjualanMasuk']);
-    Route::get('dashboard/getTotalPenjualanKeluar', [HomeController::class, 'getTotalPenjualanKeluar']);
-    Route::get('dashboard/getTotalPelanggan', [HomeController::class, 'getTotalPelanggan']);
-    Route::get('dashboard/getTotalSuplier', [HomeController::class, 'getTotalSuplier']);
-    Route::get('dashboard/getTotalPenjualan', [HomeController::class, 'getTotalPenjualan']);
-    Route::get('dashboard/getTotalPembelian', [HomeController::class, 'getTotalPembelian']);
-    Route::get('dashboard/getSalesChart', [HomeController::class, 'getSalesChart']);
-    Route::get('dashboard/getSalesChartPembelian', [HomeController::class, 'getSalesChartPembelian']);
-    Route::get('dashboard/getHargaEmas', [HomeController::class, 'getHargaEmas']);
-    Route::get('dashboard/getProdukPerbaikan', [HomeController::class, 'getProdukPerbaikan']);
+    Route::get('dashboard/getTotalSaldoMasuk', [HomeController::class, 'getTotalSaldoMasuk'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getTotalSaldoKeluar', [HomeController::class, 'getTotalSaldoKeluar'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getTotalPenjualanMasuk', [HomeController::class, 'getTotalPenjualanMasuk'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getTotalPenjualanKeluar', [HomeController::class, 'getTotalPenjualanKeluar'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getTotalPelanggan', [HomeController::class, 'getTotalPelanggan'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getTotalSuplier', [HomeController::class, 'getTotalSuplier'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getTotalPenjualan', [HomeController::class, 'getTotalPenjualan'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getTotalPembelian', [HomeController::class, 'getTotalPembelian'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getSalesChart', [HomeController::class, 'getSalesChart'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getSalesChartPembelian', [HomeController::class, 'getSalesChartPembelian'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getHargaEmas', [HomeController::class, 'getHargaEmas'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getProdukPerbaikan', [HomeController::class, 'getProdukPerbaikan'])->middleware('check.permission:dashboard,can_view');
 
-    Route::get('jabatan/getJabatan', [JabatanController::class, 'getJabatan']);
-    Route::post('jabatan/storeJabatan', [JabatanController::class, 'storeJabatan']);
-    Route::post('jabatan/updateJabatan', [JabatanController::class, 'updateJabatan']);
-    Route::post('jabatan/deleteJabatan', [JabatanController::class, 'deleteJabatan']);
+    Route::get('jabatan/getJabatan', [JabatanController::class, 'getJabatan'])->middleware('check.permission:jabatan,can_view');
+    Route::post('jabatan/storeJabatan', [JabatanController::class, 'storeJabatan'])->middleware('check.permission:jabatan,can_create');
+    Route::post('jabatan/updateJabatan', [JabatanController::class, 'updateJabatan'])->middleware('check.permission:jabatan,can_edit');
+    Route::post('jabatan/deleteJabatan', [JabatanController::class, 'deleteJabatan'])->middleware('check.permission:jabatan,can_delete');
 
-    Route::get('pegawai/getPegawai', [PegawaiController::class, 'getPegawai']);
-    Route::post('pegawai/storePegawai', [PegawaiController::class, 'storePegawai']);
-    Route::post('pegawai/updatePegawai', [PegawaiController::class, 'updatePegawai']);
-    Route::post('pegawai/deletePegawai', [PegawaiController::class, 'deletePegawai']);
+    Route::get('pegawai/getPegawai', [PegawaiController::class, 'getPegawai'])->middleware('check.permission:pegawai,can_view');
+    Route::post('pegawai/storePegawai', [PegawaiController::class, 'storePegawai'])->middleware('check.permission:pegawai,can_create');
+    Route::post('pegawai/updatePegawai', [PegawaiController::class, 'updatePegawai'])->middleware('check.permission:pegawai,can_edit');
+    Route::post('pegawai/deletePegawai', [PegawaiController::class, 'deletePegawai'])->middleware('check.permission:pegawai,can_delete');
 
-    Route::get('role/getRole', [RoleController::class, 'getRole']);
-    Route::post('role/storeRole', [RoleController::class, 'storeRole']);
-    Route::post('role/updateRole', [RoleController::class, 'updateRole']);
-    Route::post('role/deleteRole', [RoleController::class, 'deleteRole']);
+    Route::get('role/getRole', [RoleController::class, 'getRole'])->middleware('check.permission:role,can_view');
+    Route::post('role/storeRole', [RoleController::class, 'storeRole'])->middleware('check.permission:role,can_create');
+    Route::post('role/updateRole', [RoleController::class, 'updateRole'])->middleware('check.permission:role,can_edit');
+    Route::post('role/deleteRole', [RoleController::class, 'deleteRole'])->middleware('check.permission:role,can_delete');
 
-    Route::get('users/getUsers', [UserController::class, 'getUser']);
-    Route::post('users/updateUsers', [UserController::class, 'updateUser']);
+    // api.php
+    Route::prefix('permissions')->group(function () {
+        // Biarkan semua user login bisa mengambil data ini untuk keperluan UI/Sidebar
+        Route::get('getPermissionsByRole/{roleId}', [PermissionController::class, 'getPermissionsByRole']);
 
-    Route::get('kondisi/getKondisi', [KondisiController::class, 'getKondisi']);
-    Route::post('kondisi/storeKondisi', [KondisiController::class, 'storeKondisi']);
-    Route::post('kondisi/updateKondisi', [KondisiController::class, 'updateKondisi']);
-    Route::post('kondisi/deleteKondisi', [KondisiController::class, 'deleteKondisi']);
+        // Tetap proteksi fungsi update hanya untuk yang punya akses edit role
+        Route::post('updatePermission', [PermissionController::class, 'updatePermission'])
+            ->middleware('check.permission:role,can_edit');
+    });
 
-    Route::get('karat/getKarat', [KaratController::class, 'getKarat']);
-    Route::post('karat/storeKarat', [KaratController::class, 'storeKarat']);
-    Route::post('karat/updateKarat', [KaratController::class, 'updateKarat']);
-    Route::post('karat/deleteKarat', [KaratController::class, 'deleteKarat']);
+    Route::get('users/getUsers', [UserController::class, 'getUser'])->middleware('check.permission:users,can_view');
+    Route::post('users/updateUsers', [UserController::class, 'updateUser'])->middleware('check.permission:users,can_edit');
 
-    Route::get('jeniskarat/getJenisKarat', [JenisKaratController::class, 'getJenisKarat']);
-    Route::post('jeniskarat/storeJenisKarat', [JenisKaratController::class, 'storeJenisKarat']);
-    Route::post('jeniskarat/updateJenisKarat', [JenisKaratController::class, 'updateJenisKarat']);
-    Route::post('jeniskarat/deleteJenisKarat', [JenisKaratController::class, 'deleteJenisKarat']);
+    Route::get('kondisi/getKondisi', [KondisiController::class, 'getKondisi'])->middleware('check.permission:kondisi,can_view');
+    Route::post('kondisi/storeKondisi', [KondisiController::class, 'storeKondisi'])->middleware('check.permission:kondisi,can_create');
+    Route::post('kondisi/updateKondisi', [KondisiController::class, 'updateKondisi'])->middleware('check.permission:kondisi,can_edit');
+    Route::post('kondisi/deleteKondisi', [KondisiController::class, 'deleteKondisi'])->middleware('check.permission:kondisi,can_delete');
 
-    Route::get('harga/getHarga', [HargaController::class, 'getHarga']);
-    Route::post('harga/storeHarga', [HargaController::class, 'storeHarga']);
-    Route::post('harga/updateHarga', [HargaController::class, 'updateHarga']);
-    Route::post('harga/deleteHarga', [HargaController::class, 'deleteHarga']);
+    Route::get('karat/getKarat', [KaratController::class, 'getKarat'])->middleware('check.permission:karat,can_view');
+    Route::post('karat/storeKarat', [KaratController::class, 'storeKarat'])->middleware('check.permission:karat,can_create');
+    Route::post('karat/updateKarat', [KaratController::class, 'updateKarat'])->middleware('check.permission:karat,can_edit');
+    Route::post('karat/deleteKarat', [KaratController::class, 'deleteKarat'])->middleware('check.permission:karat,can_delete');
 
-    Route::get('diskon/getDiskon', [DiskonController::class, 'getDiskon']);
-    Route::post('diskon/storeDiskon', [DiskonController::class, 'storeDiskon']);
-    Route::post('diskon/updateDiskon', [DiskonController::class, 'updateDiskon']);
-    Route::post('diskon/deleteDiskon', [DiskonController::class, 'deleteDiskon']);
+    Route::get('jeniskarat/getJenisKarat', [JenisKaratController::class, 'getJenisKarat'])->middleware('check.permission:jeniskarat,can_view');
+    Route::post('jeniskarat/storeJenisKarat', [JenisKaratController::class, 'storeJenisKarat'])->middleware('check.permission:jeniskarat,can_create');
+    Route::post('jeniskarat/updateJenisKarat', [JenisKaratController::class, 'updateJenisKarat'])->middleware('check.permission:jeniskarat,can_edit');
+    Route::post('jeniskarat/deleteJenisKarat', [JenisKaratController::class, 'deleteJenisKarat'])->middleware('check.permission:jeniskarat,can_delete');
 
-    Route::get('jenisproduk/getJenisProduk', [JenisProdukController::class, 'getJenisProduk']);
-    Route::post('jenisproduk/storeJenisProduk', [JenisProdukController::class, 'storeJenisProduk']);
-    Route::post('jenisproduk/updateJenisProduk', [JenisProdukController::class, 'updateJenisProduk']);
-    Route::post('jenisproduk/deleteJenisProduk', [JenisProdukController::class, 'deleteJenisProduk']);
+    Route::get('harga/getHarga', [HargaController::class, 'getHarga'])->middleware('check.permission:harga,can_view');
+    Route::post('harga/storeHarga', [HargaController::class, 'storeHarga'])->middleware('check.permission:harga,can_create');
+    Route::post('harga/updateHarga', [HargaController::class, 'updateHarga'])->middleware('check.permission:harga,can_edit');
+    Route::post('harga/deleteHarga', [HargaController::class, 'deleteHarga'])->middleware('check.permission:harga,can_delete');
 
-    Route::get('produk/getProduk', [ProdukController::class, 'getProduk']);
-    Route::post('produk/storeProduk', [ProdukController::class, 'storeProduk']);
-    Route::post('produk/updateProduk', [ProdukController::class, 'updateProduk']);
-    Route::post('produk/deleteProduk', [ProdukController::class, 'deleteProduk']);
-    Route::post('produk/getProdukByKode', [ProdukController::class, 'getProdukByKode']);
+    Route::get('diskon/getDiskon', [DiskonController::class, 'getDiskon'])->middleware('check.permission:diskon,can_view');
+    Route::post('diskon/storeDiskon', [DiskonController::class, 'storeDiskon'])->middleware('check.permission:diskon,can_create');
+    Route::post('diskon/updateDiskon', [DiskonController::class, 'updateDiskon'])->middleware('check.permission:diskon,can_edit');
+    Route::post('diskon/deleteDiskon', [DiskonController::class, 'deleteDiskon'])->middleware('check.permission:diskon,can_delete');
 
-    Route::get('nampan/getNampan', [NampanController::class, 'getNampan']);
-    Route::post('nampan/storeNampan', [NampanController::class, 'storeNampan']);
-    Route::post('nampan/updateNampan', [NampanController::class, 'updateNampan']);
-    Route::post('nampan/deleteNampan', [NampanController::class, 'deleteNampan']);
+    Route::get('jenisproduk/getJenisProduk', [JenisProdukController::class, 'getJenisProduk'])->middleware('check.permission:jenisproduk,can_view');
+    Route::post('jenisproduk/storeJenisProduk', [JenisProdukController::class, 'storeJenisProduk'])->middleware('check.permission:jenisproduk,can_create');
+    Route::post('jenisproduk/updateJenisProduk', [JenisProdukController::class, 'updateJenisProduk'])->middleware('check.permission:jenisproduk,can_edit');
+    Route::post('jenisproduk/deleteJenisProduk', [JenisProdukController::class, 'deleteJenisProduk'])->middleware('check.permission:jenisproduk,can_delete');
 
-    Route::get('nampanproduk/getNampanProduk', [NampanProdukController::class, 'getNampanProduk']);
-    Route::post('nampanproduk/getNampanProdukByNampan', [NampanProdukController::class, 'getNampanProdukByNampan']);
-    Route::post('nampanproduk/getProdukByJenisNampan', [NampanProdukController::class, 'getProdukByJenisNampan']);
-    Route::post('nampanproduk/storeNampanProduk', [NampanProdukController::class, 'storeNampanProduk']);
-    Route::post('nampanproduk/pindahNampanProduk', [NampanProdukController::class, 'pindahNampanProduk']);
-    Route::post('nampanproduk/deleteNampanProduk', [NampanProdukController::class, 'deleteNampanProduk']);
-    Route::post('nampanproduk/getProdukInNampanByJenis', [NampanProdukController::class, 'getProdukInNampanByJenis']);
+    Route::get('produk/getProduk', [ProdukController::class, 'getProduk'])->middleware('check.permission:produk,can_view');
+    Route::post('produk/storeProduk', [ProdukController::class, 'storeProduk'])->middleware('check.permission:produk,can_create');
+    Route::post('produk/updateProduk', [ProdukController::class, 'updateProduk'])->middleware('check.permission:produk,can_edit');
+    Route::post('produk/deleteProduk', [ProdukController::class, 'deleteProduk'])->middleware('check.permission:produk,can_delete');
+    Route::post('produk/getProdukByKode', [ProdukController::class, 'getProdukByKode'])->middleware('check.permission:produk,can_view');
+
+    Route::get('nampan/getNampan', [NampanController::class, 'getNampan'])->middleware('check.permission:nampan,can_view');
+    Route::post('nampan/storeNampan', [NampanController::class, 'storeNampan'])->middleware('check.permission:nampan,can_create');
+    Route::post('nampan/updateNampan', [NampanController::class, 'updateNampan'])->middleware('check.permission:nampan,can_edit');
+    Route::post('nampan/deleteNampan', [NampanController::class, 'deleteNampan'])->middleware('check.permission:nampan,can_delete');
+
+    Route::get('nampanproduk/getNampanProduk', [NampanProdukController::class, 'getNampanProduk'])->middleware('check.permission:nampanproduk,can_view');
+    Route::post('nampanproduk/getNampanProdukByNampan', [NampanProdukController::class, 'getNampanProdukByNampan'])->middleware('check.permission:nampanproduk,can_view');
+    Route::post('nampanproduk/getProdukByJenisNampan', [NampanProdukController::class, 'getProdukByJenisNampan'])->middleware('check.permission:nampanproduk,can_view');
+    Route::post('nampanproduk/storeNampanProduk', [NampanProdukController::class, 'storeNampanProduk'])->middleware('check.permission:nampanproduk,can_create');
+    Route::post('nampanproduk/pindahNampanProduk', [NampanProdukController::class, 'pindahNampanProduk'])->middleware('check.permission:nampanproduk,can_edit');
+    Route::post('nampanproduk/deleteNampanProduk', [NampanProdukController::class, 'deleteNampanProduk'])->middleware('check.permission:nampanproduk,can_delete');
+    Route::post('nampanproduk/getProdukInNampanByJenis', [NampanProdukController::class, 'getProdukInNampanByJenis'])->middleware('check.permission:nampanproduk,can_view');
 
 
-    Route::get('pelanggan/getPelanggan', [PelangganController::class, 'getPelanggan']);
-    Route::post('pelanggan/storePelanggan', [PelangganController::class, 'storePelanggan']);
-    Route::post('pelanggan/updatePelanggan', [PelangganController::class, 'updatePelanggan']);
-    Route::post('pelanggan/deletePelanggan', [PelangganController::class, 'deletePelanggan']);
-    Route::get('pelanggan/getPelangganUlangTahun', [PelangganController::class, 'getPelangganUlangTahun']);
+    Route::get('pelanggan/getPelanggan', [PelangganController::class, 'getPelanggan'])->middleware('check.permission:pelanggan,can_view');
+    Route::post('pelanggan/storePelanggan', [PelangganController::class, 'storePelanggan'])->middleware('check.permission:pelanggan,can_create');
+    Route::post('pelanggan/updatePelanggan', [PelangganController::class, 'updatePelanggan'])->middleware('check.permission:pelanggan,can_edit');
+    Route::post('pelanggan/deletePelanggan', [PelangganController::class, 'deletePelanggan'])->middleware('check.permission:pelanggan,can_delete');
+    Route::get('pelanggan/getPelangganUlangTahun', [PelangganController::class, 'getPelangganUlangTahun'])->middleware('check.permission:pelanggan,can_view');
 
-    Route::get('suplier/getSuplier', [SuplierController::class, 'getSuplier']);
-    Route::post('suplier/storeSuplier', [SuplierController::class, 'storeSuplier']);
-    Route::post('suplier/updateSuplier', [SuplierController::class, 'updateSuplier']);
-    Route::post('suplier/deleteSuplier', [SuplierController::class, 'deleteSuplier']);
+    Route::get('suplier/getSuplier', [SuplierController::class, 'getSuplier'])->middleware('check.permission:suplier,can_view');
+    Route::post('suplier/storeSuplier', [SuplierController::class, 'storeSuplier'])->middleware('check.permission:suplier,can_create');
+    Route::post('suplier/updateSuplier', [SuplierController::class, 'updateSuplier'])->middleware('check.permission:suplier,can_edit');
+    Route::post('suplier/deleteSuplier', [SuplierController::class, 'deleteSuplier'])->middleware('check.permission:suplier,can_delete');
 
-    Route::get('pesan/getPesan', [PesanController::class, 'getPesan']);
-    Route::post('pesan/storePesan', [PesanController::class, 'storePesan']);
-    Route::post('pesan/updatePesan', [PesanController::class, 'updatePesan']);
-    Route::post('pesan/deletePesan', [PesanController::class, 'deletePesan']);
+    Route::get('pesan/getPesan', [PesanController::class, 'getPesan'])->middleware('check.permission:pesan,can_view');
+    Route::post('pesan/storePesan', [PesanController::class, 'storePesan'])->middleware('check.permission:pesan,can_create');
+    Route::post('pesan/updatePesan', [PesanController::class, 'updatePesan'])->middleware('check.permission:pesan,can_edit');
+    Route::post('pesan/deletePesan', [PesanController::class, 'deletePesan'])->middleware('check.permission:pesan,can_delete');
 
-    Route::get('saldo/getSaldo', [SaldoController::class, 'getSaldo']);
-    Route::post('saldo/storeSaldo', [SaldoController::class, 'storeSaldo']);
-    Route::post('saldo/updateSaldo', [SaldoController::class, 'updateSaldo']);
-    Route::post('saldo/deleteSaldo', [SaldoController::class, 'deleteSaldo']);
+    Route::get('saldo/getSaldo', [SaldoController::class, 'getSaldo'])->middleware('check.permission:saldo,can_view');
+    Route::post('saldo/storeSaldo', [SaldoController::class, 'storeSaldo'])->middleware('check.permission:saldo,can_create');
+    Route::post('saldo/updateSaldo', [SaldoController::class, 'updateSaldo'])->middleware('check.permission:saldo,can_edit');
+    Route::post('saldo/deleteSaldo', [SaldoController::class, 'deleteSaldo'])->middleware('check.permission:saldo,can_delete');
 
-    Route::get('mutasisaldo/getMutasiSaldo', [MutasiSaldoController::class, 'getMutasiSaldo']);
-    Route::post('mutasisaldo/storeMutasiSaldo', [MutasiSaldoController::class, 'storeMutasiSaldo']);
-    Route::post('mutasisaldo/updateMutasiSaldo', [MutasiSaldoController::class, 'updateMutasiSaldo']);
-    Route::post('mutasisaldo/deleteMutasiSaldo', [MutasiSaldoController::class, 'deleteMutasiSaldo']);
+    Route::get('mutasisaldo/getMutasiSaldo', [MutasiSaldoController::class, 'getMutasiSaldo'])->middleware('check.permission:mutasisaldo,can_view');
+    Route::post('mutasisaldo/storeMutasiSaldo', [MutasiSaldoController::class, 'storeMutasiSaldo'])->middleware('check.permission:mutasisaldo,can_create');
+    Route::post('mutasisaldo/updateMutasiSaldo', [MutasiSaldoController::class, 'updateMutasiSaldo'])->middleware('check.permission:mutasisaldo,can_edit');
+    Route::post('mutasisaldo/deleteMutasiSaldo', [MutasiSaldoController::class, 'deleteMutasiSaldo'])->middleware('check.permission:mutasisaldo,can_delete');
 
-    Route::get('transaksi/getKodeTransaksi', [TransaksiController::class, 'getKodeTransaksi']);
-    Route::post('transaksi/storeProdukToTransaksiDetail', [TransaksiController::class, 'storeProdukToTransaksiDetail']);
-    Route::get('transaksi/getTransaksiDetail', [TransaksiController::class, 'getTransaksiDetail']);
-    Route::post('transaksi/batalTransaksiDetail', [TransaksiController::class, 'batalTransaksiDetail']);
-    Route::post('transaksi/paymentTransaksi', [TransaksiController::class, 'paymentTransaksi']);
-    Route::post('/transaksi/getSignedNotaPenjualanUrl', [TransaksiController::class, 'getSignedNotaPenjualanUrl']);
+    Route::get('transaksi/getKodeTransaksi', [TransaksiController::class, 'getKodeTransaksi'])->middleware('check.permission:transaksi,can_view');
+    Route::post('transaksi/storeProdukToTransaksiDetail', [TransaksiController::class, 'storeProdukToTransaksiDetail'])->middleware('check.permission:transaksi,can_create');
+    Route::get('transaksi/getTransaksiDetail', [TransaksiController::class, 'getTransaksiDetail'])->middleware('check.permission:transaksi,can_view');
+    Route::post('transaksi/batalTransaksiDetail', [TransaksiController::class, 'batalTransaksiDetail'])->middleware('check.permission:transaksi,can_edit');
+    Route::post('transaksi/paymentTransaksi', [TransaksiController::class, 'paymentTransaksi'])->middleware('check.permission:transaksi,can_create');
+    Route::post('/transaksi/getSignedNotaPenjualanUrl', [TransaksiController::class, 'getSignedNotaPenjualanUrl'])->middleware('check.permission:transaksi,can_view');
 
-    Route::get('offtake/getKodeTransaksi', [OfftakeController::class, 'getKodeTransaksi']);
-    Route::post('offtake/storeProdukToOfftakeDetail', [OfftakeController::class, 'storeProdukToOfftakeDetail']);
-    Route::get('offtake/getOfftakeDetail', [OfftakeController::class, 'getOfftakeDetail']);
-    Route::post('offtake/batalOfftakeDetail', [OfftakeController::class, 'batalOfftakeDetail']);
-    Route::post('offtake/paymentOfftake', [OfftakeController::class, 'paymentOfftake']);
-    Route::post('/offtake/getSignedNotaOfftakeUrl', [OfftakeController::class, 'getSignedNotaOfftakeUrl']);
+    Route::get('offtake/getKodeTransaksi', [OfftakeController::class, 'getKodeTransaksi'])->middleware('check.permission:offtake,can_view');
+    Route::post('offtake/storeProdukToOfftakeDetail', [OfftakeController::class, 'storeProdukToOfftakeDetail'])->middleware('check.permission:offtake,can_create');
+    Route::get('offtake/getOfftakeDetail', [OfftakeController::class, 'getOfftakeDetail'])->middleware('check.permission:offtake,can_view');
+    Route::post('offtake/batalOfftakeDetail', [OfftakeController::class, 'batalOfftakeDetail'])->middleware('check.permission:offtake,can_edit');
+    Route::post('offtake/paymentOfftake', [OfftakeController::class, 'paymentOfftake'])->middleware('check.permission:offtake,can_create');
+    Route::post('/offtake/getSignedNotaOfftakeUrl', [OfftakeController::class, 'getSignedNotaOfftakeUrl'])->middleware('check.permission:offtake,can_view');
 
-    Route::get('pembelian/getKodeTransaksi', [PembelianController::class, 'getKodeTransaksi']);
-    Route::post('pembelian/getTransaksiByKode', [PembelianController::class, 'getTransaksiByKode']);
-    Route::post('pembelian/storeProdukToPembelianDetail', [PembelianController::class, 'storeProdukToPembelianDetail']);
-    Route::get('pembelian/getPembelianDetail', [PembelianController::class, 'getPembelianDetail']);
-    Route::post('pembelian/updatePembelianDetail', [PembelianController::class, 'updatePembelianDetail']);
-    Route::post('pembelian/batalPembelianDetail', [PembelianController::class, 'batalPembelianDetail']);
-    Route::post('pembelian/paymentPembelian', [PembelianController::class, 'paymentPembelian']);
-    Route::post('/pembelian/getSignedNotaPembelianUrl', [PembelianController::class, 'getSignedNotaPembelianUrl']);
+    Route::get('pembelian/getKodeTransaksi', [PembelianController::class, 'getKodeTransaksi'])->middleware('check.permission:pembelian,can_view');
+    Route::post('pembelian/getTransaksiByKode', [PembelianController::class, 'getTransaksiByKode'])->middleware('check.permission:pembelian,can_view');
+    Route::post('pembelian/storeProdukToPembelianDetail', [PembelianController::class, 'storeProdukToPembelianDetail'])->middleware('check.permission:pembelian,can_create');
+    Route::get('pembelian/getPembelianDetail', [PembelianController::class, 'getPembelianDetail'])->middleware('check.permission:pembelian,can_view');
+    Route::post('pembelian/updatePembelianDetail', [PembelianController::class, 'updatePembelianDetail'])->middleware('check.permission:pembelian,can_edit');
+    Route::post('pembelian/batalPembelianDetail', [PembelianController::class, 'batalPembelianDetail'])->middleware('check.permission:pembelian,can_edit');
+    Route::post('pembelian/paymentPembelian', [PembelianController::class, 'paymentPembelian'])->middleware('check.permission:pembelian,can_create');
+    Route::post('/pembelian/getSignedNotaPembelianUrl', [PembelianController::class, 'getSignedNotaPembelianUrl'])->middleware('check.permission:pembelian,can_view');
 
-    Route::get('pembelianluar/getPembelianDetailDariLuar', [PembelianController::class, 'getPembelianDetailDariLuar']);
-    Route::post('pembelianluar/storeProdukToPembelianDetailDariLuar', [PembelianController::class, 'storeProdukToPembelianDetailDariLuar']);
-    Route::post('pembelianluar/updatePembelianDetailDariLuar', [PembelianController::class, 'updatePembelianDetailDariLuar']);
-    Route::post('pembelianluar/batalPembelianDetailDariLuar', [PembelianController::class, 'batalPembelianDetailDariLuar']);
-    Route::post('pembelianluar/paymentPembelianDariLuar', [PembelianController::class, 'paymentPembelianDariLuar']);
+    Route::get('pembelianluar/getPembelianDetailDariLuar', [PembelianController::class, 'getPembelianDetailDariLuar'])->middleware('check.permission:pembelian,can_view');
+    Route::post('pembelianluar/storeProdukToPembelianDetailDariLuar', [PembelianController::class, 'storeProdukToPembelianDetailDariLuar'])->middleware('check.permission:pembelian,can_create');
+    Route::post('pembelianluar/updatePembelianDetailDariLuar', [PembelianController::class, 'updatePembelianDetailDariLuar'])->middleware('check.permission:pembelian,can_edit');
+    Route::post('pembelianluar/batalPembelianDetailDariLuar', [PembelianController::class, 'batalPembelianDetailDariLuar'])->middleware('check.permission:pembelian,can_edit');
+    Route::post('pembelianluar/paymentPembelianDariLuar', [PembelianController::class, 'paymentPembelianDariLuar'])->middleware('check.permission:pembelian,can_create');
 
-    Route::get('perbaikan/getPerbaikan', [PerbaikanController::class, 'getPerbaikan']);
-    Route::post('perbaikan/finalPerbaikan', [PerbaikanController::class, 'finalPerbaikan']);
-    Route::post('perbaikan/batalPerbaikan', [PerbaikanController::class, 'batalPerbaikan']);
+    Route::get('perbaikan/getPerbaikan', [PerbaikanController::class, 'getPerbaikan'])->middleware('check.permission:perbaikan,can_view');
+    Route::post('perbaikan/finalPerbaikan', [PerbaikanController::class, 'finalPerbaikan'])->middleware('check.permission:perbaikan,can_edit');
+    Route::post('perbaikan/batalPerbaikan', [PerbaikanController::class, 'batalPerbaikan'])->middleware('check.permission:perbaikan,can_edit');
 
-    Route::get('transaksipenjualan/getTransaksiPenjualan', [TransaksiController::class, 'getTransaksiPenjualan']);
-    Route::post('transaksipenjualan/batalTransaksi', [TransaksiController::class, 'batalTransaksi']);
+    Route::get('transaksipenjualan/getTransaksiPenjualan', [TransaksiController::class, 'getTransaksiPenjualan'])->middleware('check.permission:penjualan,can_view');
+    Route::post('transaksipenjualan/batalTransaksi', [TransaksiController::class, 'batalTransaksi'])->middleware('check.permission:penjualan,can_edit');
 
-    Route::get('transaksipembelian/getTransaksiPembelian', [PembelianController::class, 'getTransaksiPembelian']);
-    Route::post('transaksipembelian/batalTransaksi', [PembelianController::class, 'batalTransaksi']);
+    Route::get('transaksipembelian/getTransaksiPembelian', [PembelianController::class, 'getTransaksiPembelian'])->middleware('check.permission:pembelian,can_view');
+    Route::post('transaksipembelian/batalTransaksi', [PembelianController::class, 'batalTransaksi'])->middleware('check.permission:pembelian,can_edit');
 
-    Route::get('transaksiofftake/getTransaksiOfftake', [OfftakeController::class, 'getTransaksiOfftake']);
-    Route::post('transaksiofftake/batalTransaksi', [OfftakeController::class, 'batalTransaksi']);
+    Route::get('transaksiofftake/getTransaksiOfftake', [OfftakeController::class, 'getTransaksiOfftake'])->middleware('check.permission:offtake,can_view');
+    Route::post('transaksiofftake/batalTransaksi', [OfftakeController::class, 'batalTransaksi'])->middleware('check.permission:offtake,can_edit');
 
-    Route::get('inventory/getPeriodeStok', [StokController::class, 'getPeriodeStok']);
-    Route::post('inventory/storePeriodeStok', [StokController::class, 'storePeriodeStok']);
-    Route::post('inventory/getNampanProdukByPeriodeStok', [StokController::class, 'getNampanProdukByPeriodeStok']);
-    Route::post('inventory/getRekapStokByPeriode', [StokController::class, 'getRekapStokByPeriode']);
-    Route::post('inventory/finalPeriodeStok', [StokController::class, 'finalPeriodeStok']);
-    Route::post('inventory/getSignedLaporanStokUrl', [StokController::class, 'getSignedLaporanStokUrl']);
+    Route::get('inventory/getPeriodeStok', [StokController::class, 'getPeriodeStok'])->middleware('check.permission:inventory,can_view');
+    Route::post('inventory/storePeriodeStok', [StokController::class, 'storePeriodeStok'])->middleware('check.permission:inventory,can_create');
+    Route::post('inventory/getNampanProdukByPeriodeStok', [StokController::class, 'getNampanProdukByPeriodeStok'])->middleware('check.permission:inventory,can_view');
+    Route::post('inventory/getRekapStokByPeriode', [StokController::class, 'getRekapStokByPeriode'])->middleware('check.permission:inventory,can_view');
+    Route::post('inventory/finalPeriodeStok', [StokController::class, 'finalPeriodeStok'])->middleware('check.permission:inventory,can_edit');
+    Route::post('inventory/getSignedLaporanStokUrl', [StokController::class, 'getSignedLaporanStokUrl'])->middleware('check.permission:inventory,can_view');
 
-    Route::post('laporan/getsignedurl-cetaklaporanpenjualan', [LaporanController::class, 'getSignedCetakLaporanPenjualanUrl']);
-    Route::post('laporan/getsignedurl-cetaklaporanpembelian', [LaporanController::class, 'getSignedCetakLaporanPembelianUrl']);
-    Route::post('laporan/getsignedurl-cetaklaporanofftake', [LaporanController::class, 'getSignedCetakLaporanOfftakeUrl']);
-    Route::post('laporan/getsignedurl-cetaklaporanperbaikan', [LaporanController::class, 'getSignedCetakLaporanPerbaikanUrl']);
-    Route::post('laporan/getsignedurl-cetaklaporanmutasisaldo', [LaporanController::class, 'getSignedCetakLaporanMutasiSaldoUrl']);
-    Route::post('laporan/getsignedurl-cetaklaporanstokbulanan', [LaporanController::class, 'getSignedCetakLaporanStokBulananUrl']);
+    Route::post('laporan/getsignedurl-cetaklaporanpenjualan', [LaporanController::class, 'getSignedCetakLaporanPenjualanUrl'])->middleware('check.permission:laporan,can_view');
+    Route::post('laporan/getsignedurl-cetaklaporanpembelian', [LaporanController::class, 'getSignedCetakLaporanPembelianUrl'])->middleware('check.permission:laporan,can_view');
+    Route::post('laporan/getsignedurl-cetaklaporanofftake', [LaporanController::class, 'getSignedCetakLaporanOfftakeUrl'])->middleware('check.permission:laporan,can_view');
+    Route::post('laporan/getsignedurl-cetaklaporanperbaikan', [LaporanController::class, 'getSignedCetakLaporanPerbaikanUrl'])->middleware('check.permission:laporan,can_view');
+    Route::post('laporan/getsignedurl-cetaklaporanmutasisaldo', [LaporanController::class, 'getSignedCetakLaporanMutasiSaldoUrl'])->middleware('check.permission:laporan,can_view');
+    Route::post('laporan/getsignedurl-cetaklaporanstokbulanan', [LaporanController::class, 'getSignedCetakLaporanStokBulananUrl'])->middleware('check.permission:laporan,can_view');
 });
 
 Route::get('/transaksi/CetakNotaPenjualan', [TransaksiController::class, 'CetakNotaPenjualan'])->name('produk.cetak_notapenjualan');
