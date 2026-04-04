@@ -26,7 +26,14 @@
             <li class="nav-item nav-searchinputs">
                 <div class="text-end me-3 d-none d-md-block">
                     <div class="fw-bold fs-6">{{ currentTime }}</div>
-                    <div class="small text-muted">{{ currentDate }}</div>
+
+                    <div class="small text-muted d-flex align-items-center justify-content-end">
+                        <span class="badge bg-primary-light text-primary me-2"
+                            style="font-size: 10px; line-height: 1; padding: 3px 6px;">
+                            {{ appVersion }}
+                        </span>
+                        <span>{{ currentDate }}</span>
+                    </div>
                 </div>
             </li>
 
@@ -60,22 +67,26 @@
                                         <div class="flex-shrink-0 me-3">
                                             <div class="bg-warning-light rounded-circle d-flex align-items-center justify-content-center"
                                                 style="width: 38px; height: 38px;">
-                                                <i class="fas fa-birthday-cake text-warning" style="font-size: 14px;"></i>
+                                                <i class="fas fa-birthday-cake text-warning"
+                                                    style="font-size: 14px;"></i>
                                             </div>
                                         </div>
 
                                         <div class="flex-grow-1 min-width-0">
                                             <p class="noti-details mb-0 text-truncate">
-                                                <span class="noti-title fw-bold text-dark" style="font-size: 14px;">{{ p.nama }}</span>
+                                                <span class="noti-title fw-bold text-dark" style="font-size: 14px;">{{
+                                                    p.nama }}</span>
                                             </p>
                                             <div class="line-height-xs">
-                                                <small class="text-muted d-block" style="font-size: 11px;">Ulang tahun hari ini</small>
+                                                <small class="text-muted d-block" style="font-size: 11px;">Ulang tahun
+                                                    hari ini</small>
                                                 <span class="small text-primary fw-semibold">{{ p.kontak }}</span>
                                             </div>
                                         </div>
 
                                         <div class="flex-shrink-0 ms-2">
-                                            <i class="fab fa-whatsapp text-success" style="font-size: 18px; opacity: 0.6;"></i>
+                                            <i class="fab fa-whatsapp text-success"
+                                                style="font-size: 18px; opacity: 0.6;"></i>
                                         </div>
                                     </div>
                                 </a>
@@ -166,10 +177,23 @@ const isMiniSidebar = ref(false);
 const isExpandMenu = ref(false);
 const isBellDropdownOpen = ref(false);
 const authStore = useAuthStore();
+const appVersion = ref("v1.0.0"); // Default jika gagal fetch
 
 // Timers
 let clockTimer = null;
 let dataPollingTimer = null;
+
+const fetchVersion = () => {
+    // Jika Anda menggunakan Inertia.js:
+    // appVersion.value = usePage().props.appVersion;
+
+    // Jika menggunakan API biasa, Anda bisa hardcode sementara
+    // atau mengambil dari meta tag yang diletakkan di app.blade.php
+    const versionTag = document.querySelector('meta[name="app-version"]');
+    if (versionTag) {
+        appVersion.value = versionTag.getAttribute('content');
+    }
+};
 
 // Fungsi Fetch Data (Real-time compatible)
 const fetchPelangganUltah = async () => {
@@ -284,7 +308,7 @@ onMounted(() => {
     fetchPelangganUltah();
     initFeather();
     updateTime();
-
+    fetchVersion(); // Panggil saat mount
     // Real-time Jam (setiap 1 detik)
     clockTimer = setInterval(updateTime, 1000);
 

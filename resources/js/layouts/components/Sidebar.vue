@@ -150,7 +150,7 @@ const menuGroups = {
     Laporan: {
         header: 'Laporan',
         menus: {
-            iventory: { label: 'Inventori', icon: 'server', path: '/inventori' },
+            inventory: { label: 'Inventori', icon: 'server', path: '/inventori' },
             laporantransaksi: { label: 'Laporan Transaksi', icon: 'book', path: '/laporan' },
         }
     },
