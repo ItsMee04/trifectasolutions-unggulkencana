@@ -44,7 +44,7 @@ return new class extends Migration
                 LEFT JOIN diskon ds ON tr.diskon_id = ds.id
                 JOIN users us ON tr.oleh = us.id
                 JOIN pegawai pg ON us.pegawai_id = pg.id
-                WHERE tr.kode = KODETRANSAKSI_INPUT COLLATE utf8mb4_unicode_ci;
+                WHERE tr.kode = KODETRANSAKSI_INPUT COLLATE utf8mb4_unicode_ci AND tr.status != 0 AND kr.status != 0;
             END;
         ");
     }
