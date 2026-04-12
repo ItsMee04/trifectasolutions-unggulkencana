@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('jenisproduk', function (Blueprint $table) {
             $table->id();
             $table->string('jenis', 100);
-            $table->string('image', 100);
+            $table->string('image', 100)->nullable();
             $table->integer('status')->unsigned()->default(1);
             $table->timestamps();
         });
