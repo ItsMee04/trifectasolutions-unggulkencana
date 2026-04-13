@@ -214,74 +214,79 @@ class TransaksiController extends Controller
     public function paymentTransaksi(Request $request)
     {
         $request->validate([
-            'kode'      => 'required',
-            'pelanggan' => 'required',
-            'total'     => 'required|numeric'
+            'kode'            => 'required',
+            'pelanggan'       => 'required',
+            'total'           => 'required|numeric',
+            'point_digunakan' => 'nullable|numeric' // Tambahkan validasi input poin
         ]);
 
         try {
             DB::beginTransaction();
 
-            // 1. Cari Saldo/Rekening yang sedang Aktif (Status 1)
+            // 1. Validasi Saldo & Header
             $saldoAktif = DB::table('saldo')->where('status', 1)->first();
             if (!$saldoAktif) {
-                throw new \Exception("Tidak ada rekening saldo yang aktif. Harap setel rekening aktif terlebih dahulu.");
+                throw new \Exception("Rekening saldo aktif tidak ditemukan.");
             }
 
-            // 2. Cari Header Transaksi
             $transaksi = Transaksi::where('kode', $request->kode)->firstOrFail();
 
-            // 3. Cari Detail Transaksi (Draft)
-            $detail = TransaksiDetail::where('kode', $request->kode)
-                ->where('status', 1)
-                ->firstOrFail();
+            $detail = TransaksiDetail::where('kode', $request->kode)->where('status', 1)->first();
+            if (!$detail) {
+                throw new \Exception("Detail transaksi tidak ditemukan atau sudah diproses.");
+            }
 
-            // 4. Cari Produk & Data Nampan Terakhir
             $produk = Produk::findOrFail($detail->produk_id);
 
+            // --- HITUNG LOGIKA POIN ---
+            // A. Penambahan Poin (Hanya per 1 gram penuh)
+            $beratProduk = (float) $produk->berat;
+            $jumlahPoinBaru = floor($beratProduk);
+
+            // B. Penggunaan Poin
+            $jumlahPoinPakai = $request->point_digunakan ?? 0;
+
+            // 2. UPDATE HEADER TRANSAKSI
+            // Menyimpan history poin langsung ke tabel transaksi sesuai migrasi terbaru
+            $transaksi->update([
+                'pelanggan_id'  => $request->pelanggan,
+                'diskon_id'     => $request->diskon,
+                'total'         => $request->total,
+                'point_dapat'   => $jumlahPoinBaru,  // History Poin Masuk
+                'point_dipakai' => $jumlahPoinPakai, // History Poin Keluar
+                'status'        => 2,
+                'tanggal'       => now(),
+            ]);
+
+            // 3. UPDATE PRODUK & DETAIL
+            $produk->update(['status' => 2]);
+            $detail->update(['status' => 2]);
+
+            // Logic Nampan (Insert Mutasi Keluar)
             $nampanLama = DB::table('nampanproduk')
                 ->where('produk_id', $produk->id)
-                ->where('jenis', 'MASUK')
                 ->where('status', 1)
                 ->first();
 
-            if (!$nampanLama) {
-                throw new \Exception("Produk tidak ditemukan di nampan aktif.");
+            if ($nampanLama) {
+                DB::table('nampanproduk')->where('id', $nampanLama->id)->update(['status' => 2]);
+                DB::table('nampanproduk')->insert([
+                    'nampan_id'  => $nampanLama->nampan_id,
+                    'produk_id'  => $produk->id,
+                    'jenis'      => 'KELUAR',
+                    'tanggal'    => now(),
+                    'oleh'       => Auth::id(),
+                    'status'     => 2,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
             }
 
-            // 5. Update Header Transaksi
-            $transaksi->update([
-                'pelanggan_id' => $request->pelanggan,
-                'diskon_id'    => $request->diskon,
-                'total'        => $request->total,
-                'status'       => 2, // Lunas
-                'tanggal'      => now(),
-            ]);
-
-            // 6. Update Detail Transaksi
-            $detail->update(['status' => 2]);
-
-            // 7. Update Master Produk (Terjual)
-            $produk->update(['status' => 2]);
-
-            // 8. Update Mutasi Nampan (Keluar)
-            DB::table('nampanproduk')->where('id', $nampanLama->id)->update(['status' => 2]);
-            DB::table('nampanproduk')->insert([
-                'nampan_id' => $nampanLama->nampan_id,
-                'produk_id' => $produk->id,
-                'jenis'     => 'KELUAR',
-                'tanggal'   => now()->format('Y-m-d'),
-                'oleh'      => Auth::id(),
-                'status'    => 2,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // 9. INSERT MUTASI SALDO (Pemasukan Kas)
+            // 4. MUTASI SALDO
             DB::table('mutasisaldo')->insert([
-                'saldo_id'   => $saldoAktif->id, // ID dari rekening aktif yang dicari di atas
-                'tanggal'    => now()->format('Y-m-d'),
-                'keterangan' => "Penjualan produk: " . $produk->nama . " (" . $transaksi->kode . ")",
+                'saldo_id'   => $saldoAktif->id,
+                'tanggal'    => now(),
+                'keterangan' => "Penjualan " . $produk->nama . " (" . $transaksi->kode . ")",
                 'jenis'      => 'MASUK',
                 'jumlah'     => $request->total,
                 'oleh'       => Auth::id(),
@@ -289,33 +294,58 @@ class TransaksiController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-
-            // 10. UPDATE TOTAL SALDO (Opsional: Jika Anda ingin saldo di tabel 'saldo' ikut bertambah secara real-time)
             DB::table('saldo')->where('id', $saldoAktif->id)->increment('total', $request->total);
 
-            $jumlahPoin = floor($produk->berat);
+            // 5. EKSEKUSI MUTASI POIN KE PELANGGAN
 
-            // Pastikan poin hanya diinput jika berat >= 1 gram
-            if ($jumlahPoin > 0) {
+            // A. Simpan Log Tambah Poin
+            if ($jumlahPoinBaru > 0) {
                 DB::table('poinpelanggan')->insert([
                     'pelanggan_id' => $request->pelanggan,
-                    'kode'         => $request->kode, // Kode Transaksi
-                    'jumlah'       => $jumlahPoin,
+                    'kode'         => $request->kode,
+                    'jumlah'       => $jumlahPoinBaru,
                     'oleh'         => Auth::id(),
                     'status'       => 1,
+                    'created_at'   => now(),
+                    'updated_at'   => now(),
                 ]);
+
+                // Update Total Poin di Master Pelanggan
+                DB::table('pelanggan')->where('id', $request->pelanggan)->increment('point', $jumlahPoinBaru);
+            }
+
+            // B. Simpan Log Kurang Poin (Jika pakai poin)
+            if ($jumlahPoinPakai > 0) {
+                $currentPoint = DB::table('pelanggan')->where('id', $request->pelanggan)->value('point');
+
+                if ($currentPoint < $jumlahPoinPakai) {
+                    throw new \Exception("Saldo poin pelanggan tidak mencukupi untuk ditukarkan.");
+                }
+
+                DB::table('poinpelanggan')->insert([
+                    'pelanggan_id' => $request->pelanggan,
+                    'kode'         => $request->kode,
+                    'jumlah'       => -$jumlahPoinPakai, // Nilai negatif untuk audit
+                    'oleh'         => Auth::id(),
+                    'status'       => 1,
+                    'created_at'   => now(),
+                    'updated_at'   => now(),
+                ]);
+
+                // Potong Poin di Master Pelanggan
+                DB::table('pelanggan')->where('id', $request->pelanggan)->decrement('point', $jumlahPoinPakai);
             }
 
             DB::commit();
             return response()->json([
-                'status'  => true,
-                'message' => 'Pembayaran berhasil. Dana masuk ke rekening: ' . $saldoAktif->rekening
+                'status' => true,
+                'message' => 'Pembayaran Berhasil dan Poin telah diperbarui!'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'status'  => false,
-                'message' => 'Gagal memproses pembayaran: ' . $e->getMessage()
+                'status' => false,
+                'message' => $e->getMessage()
             ], 500);
         }
     }

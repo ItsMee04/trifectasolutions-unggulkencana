@@ -16,7 +16,7 @@ class Transaksi extends Model
     use HasFactory;
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
     protected $table = 'transaksi';
-    protected $fillable = ['kode', 'pelanggan_id', 'diskon_id',  'total',  'terbilang',  'tanggal',  'oleh',  'status'];
+    protected $fillable = ['kode', 'pelanggan_id', 'diskon_id',  'total', 'point_dapat', 'point_dipakai', 'terbilang',  'tanggal',  'oleh',  'status'];
 
     /**
      * Get the pelanggan that owns the Transaksi

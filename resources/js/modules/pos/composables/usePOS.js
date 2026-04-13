@@ -311,7 +311,20 @@ export function usePOS() {
             };
 
             const response = await transaksiService.paymentTransaksi(payload);
-            // ... sisa logic response
+
+            if (response.status) {
+
+                lastCompletedTransactionId.value = TransaksiID.value;
+
+                // 1. Tampilkan Modal Sukses menggunakan Bootstrap Instance
+
+                const modalElement = document.getElementById('paymentModal');
+
+                const modalInstance = new bootstrap.Modal(modalElement);
+
+                modalInstance.show();
+
+            }
         } catch (error) {
             console.log(error)
             toast.error(error.response?.data?.message || "Gagal memproses pembayaran");
