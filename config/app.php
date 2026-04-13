@@ -56,7 +56,7 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
-    'version' => exec('git describe --tags --abbrev=0') ?: 'v1.0.0',
+    'version' => trim(shell_exec('git describe --tags --abbrev=0')) ?: 'v1.0.0',
     'asset_url' => env('ASSET_URL'),
 
     /*

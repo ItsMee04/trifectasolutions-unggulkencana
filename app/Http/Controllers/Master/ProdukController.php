@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Milon\Barcode\DNS1D;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Imagick\Driver;
+use Intervention\Image\Interfaces\ImageInterface;
 
 class ProdukController extends Controller
 {
@@ -85,9 +88,22 @@ class ProdukController extends Controller
              * 4. Handle Image Produk
              */
             if ($request->hasFile('image')) {
-                $extension = $request->file('image')->getClientOriginalExtension();
-                $image = $kodeproduk . '.' . $extension;
-                $request->file('image')->storeAs('images/produk', $image, 'public');
+                $file = $request->file('image');
+                $imageNameForDb = $kodeproduk . '.' . $file->getClientOriginalExtension();
+
+                // Inisialisasi Manager dengan Imagick
+                $manager = new ImageManager(new Driver());
+
+                // Membaca gambar (Gunakan path asli)
+                /** @var ImageInterface $image */
+                $image = $manager->read($file->getRealPath());
+
+                // Kompresi & Resize
+                $image->scale(width: 800);
+                $encoded = $image->toJpeg(75);
+
+                // Simpan
+                Storage::disk('public')->put('images/produk/' . $imageNameForDb, $encoded->toString());
             }
 
             /**
@@ -163,15 +179,23 @@ class ProdukController extends Controller
              */
             $imageName = $produk->image; // Default ke nama file lama
             if ($request->hasFile('image')) {
-                // Hapus foto lama jika ada di storage
+                // Hapus lama
                 if ($produk->image && Storage::disk('public')->exists('images/produk/' . $produk->image)) {
                     Storage::disk('public')->delete('images/produk/' . $produk->image);
                 }
 
-                // Simpan foto baru dengan nama berdasarkan kodeproduk lama
-                $extension = $request->file('image')->getClientOriginalExtension();
-                $imageName = $kodeproduk . '.' . $extension;
-                $request->file('image')->storeAs('images/produk', $imageName, 'public');
+                $file = $request->file('image');
+                $imageName = $kodeproduk . '.' . $file->getClientOriginalExtension();
+
+                $manager = new ImageManager(new Driver());
+
+                /** @var ImageInterface $img */
+                $img = $manager->read($file->getRealPath());
+
+                $img->scale(width: 800);
+                $encoded = $img->toJpeg(75);
+
+                Storage::disk('public')->put('images/produk/' . $imageName, $encoded->toString());
             }
 
             /**

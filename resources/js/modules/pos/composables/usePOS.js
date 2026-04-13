@@ -24,8 +24,10 @@ const isLoadingProduk = ref(false);
 const searchProdukQuery = ref('');
 const currentPageProduk = ref(1);
 const itemsPerPageProduk = 8;
-// const isEdit = ref(false);
+const usePoint = ref(false);
+const inputPoint = ref(0);
 const errors = ref({});
+const scanQuery = ref('');
 
 const formPOS = reactive({
     id: null,
@@ -138,14 +140,26 @@ export function usePOS() {
     const fetchPelanggan = async () => {
         try {
             const response = await pelangganService.getPelanggan();
-            PelangganList.value = response.data.map(PelangganList => ({
-                value: PelangganList.id,
-                label: PelangganList.nama
-            }));
+            PelangganList.value = response.data.map(p => {
+                // Hitung total poin dari array 'poin'
+                const totalPoin = p.poin ? p.poin.reduce((sum, item) => sum + parseInt(item.jumlah), 0) : 0;
+
+                return {
+                    value: p.id,
+                    label: p.nama,
+                    point: totalPoin // Simpan hasil penjumlahan di sini
+                };
+            });
         } catch (error) {
-            toast.error("Gagal memuat Pelanggan:", error);
+            toast.error("Gagal memuat Pelanggan");
         }
     };
+
+    // Watcher untuk memantau perubahan pelanggan dan mengatur opsi point
+    watch(() => formPOS.pelanggan, (newPelanggan) => {
+        usePoint.value = false;
+        inputPoint.value = 0;
+    });
 
     const fetchDiskon = async () => {
         try {
@@ -176,6 +190,60 @@ export function usePOS() {
         }
     }
 
+    // Di dalam export function usePOS()
+    const handleBarcodeScan = async () => {
+        const barcode = scanQuery.value.trim();
+
+        if (barcode) {
+            // 1. Validasi awal: Pastikan Kode Transaksi sudah siap
+            if (!TransaksiID.value || TransaksiID.value.includes("Memuat")) {
+                toast.error("Tunggu kode transaksi selesai dimuat");
+                scanQuery.value = '';
+                return;
+            }
+
+            // 2. Cari detail produk dari state produk local (seperti handlePilihProduk)
+            const detailProduk = produk.value.find(p => p.kodeproduk === barcode);
+
+            if (detailProduk) {
+                isLoading.value = true;
+                try {
+                    // 3. Susun Payload (sama dengan standar backend Anda)
+                    const payload = {
+                        kode: TransaksiID.value,
+                        kodeproduk: detailProduk.kodeproduk,
+                        harga: detailProduk.harga,
+                        berat: detailProduk.berat,
+                        karat: detailProduk.karat,
+                        lingkar: detailProduk.lingkar ?? 0,
+                        panjang: detailProduk.panjang ?? 0
+                    };
+
+                    // 4. Kirim ke Backend (Route yang sama)
+                    const response = await transaksiService.storeProdukToTransaksiDetail(payload);
+
+                    if (response.data.status) {
+                        toast.success(`Berhasil: ${detailProduk.nama}`);
+
+                        // 5. Update UI: Refresh tabel keranjang
+                        await fetchTransaksiDetail();
+                    }
+                } catch (error) {
+                    const errorMsg = error.response?.data?.message || "Gagal memproses barcode";
+                    toast.error(errorMsg);
+                    console.error("Scan Error:", error);
+                } finally {
+                    isLoading.value = false;
+                    scanQuery.value = ''; // Reset input field
+                }
+            } else {
+                // Jika barcode tidak ada di daftar produk lokal
+                toast.error(`Barcode ${barcode} tidak terdaftar atau stok kosong`);
+                scanQuery.value = '';
+            }
+        }
+    };
+
     // 2. Fungsi Hapus Item dari Keranjang
     const handleDelete = async (id) => {
         const confirm = await Swal.fire({
@@ -204,11 +272,32 @@ export function usePOS() {
         }
     };
 
+    // Hitung nilai potongan poin (Misal: 1 poin = Rp 1.000, sesuaikan dengan logic bisnis Anda)
+    const calculatePotonganPoint = computed(() => {
+        // Hanya hitung jika switch diaktifkan dan input valid
+        if (usePoint.value && inputPoint.value >= 10) {
+            return inputPoint.value * 1000; // 1 poin = Rp 1.000
+        }
+        return 0;
+    });
+
     // Di dalam usePOS.js
     const paymentTransaksi = async (grandTotal) => {
         if (!formPOS.pelanggan) {
             toast.error("Pilih pelanggan terlebih dahulu");
             return;
+        }
+
+        // Validasi Poin Manual
+        if (usePoint.value) {
+            if (inputPoint.value < 10) {
+                toast.error("Minimal penggunaan poin adalah 10");
+                return;
+            }
+            if (inputPoint.value > formPOS.pelanggan.point) {
+                toast.error("Poin melebihi saldo yang dimiliki pelanggan");
+                return;
+            }
         }
 
         isLoading.value = true;
@@ -217,18 +306,12 @@ export function usePOS() {
                 kode: TransaksiID.value,
                 pelanggan: formPOS.pelanggan.value,
                 diskon: selectedDiskon.value ? selectedDiskon.value.value : null,
+                point_digunakan: usePoint.value ? inputPoint.value : 0, // Kirim input manual
                 total: grandTotal
             };
 
             const response = await transaksiService.paymentTransaksi(payload);
-
-            if (response.status) {
-                lastCompletedTransactionId.value = TransaksiID.value;
-                // 1. Tampilkan Modal Sukses menggunakan Bootstrap Instance
-                const modalElement = document.getElementById('paymentModal');
-                const modalInstance = new bootstrap.Modal(modalElement);
-                modalInstance.show();
-            }
+            // ... sisa logic response
         } catch (error) {
             console.log(error)
             toast.error(error.response?.data?.message || "Gagal memproses pembayaran");
@@ -346,5 +429,10 @@ export function usePOS() {
         paymentTransaksi,
         handleDelete,
         handlePrint,
+        usePoint,
+        inputPoint,
+        calculatePotonganPoint,
+        scanQuery,
+        handleBarcodeScan
     };
 }

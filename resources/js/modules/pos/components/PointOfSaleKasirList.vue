@@ -21,10 +21,14 @@
                     </a>
                 </div>
             </div>
+            <div class="scanner-container">
+                <input type="text" ref="barcodeInput" v-model="scanQuery" @keyup.enter="handleBarcodeScan"
+                    class="offscreen-input" placeholder="Scanner active..." />
+            </div>
             <div class="product-added block-section">
                 <div class="head-text d-flex align-items-center justify-content-between">
                     <h6 class="d-flex align-items-center mb-0">Produk Ditambahkan<span class="count">{{
-                            TransaksiDetail.length }}</span>
+                        TransaksiDetail.length }}</span>
                     </h6>
                     <a href="javascript:void(0);" class="d-flex align-items-center text-danger"><span class="me-1"><i
                                 data-feather="x" class="feather-16"></i></span>Clear all</a>
@@ -84,6 +88,20 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-12 mt-2" v-if="formPOS.pelanggan && formPOS.pelanggan.point >= 10">
+                            <div class="input-block">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" v-model="usePoint" id="switchPoint">
+                                    <label class="form-check-label" for="switchPoint">Gunakan Poin</label>
+                                </div>
+
+                                <div v-if="usePoint">
+                                    <input type="number" v-model.number="inputPoint" class="form-control"
+                                        :max="formPOS.pelanggan.point" min="10" placeholder="Masukan jumlah poin" />
+                                    <small class="text-muted">Tersedia: {{ formPOS.pelanggan.point }} Poin</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="order-total">
@@ -95,6 +113,10 @@
                         <tr>
                             <td class="danger">Diskon ({{ selectedDiskonNilai }}%)</td>
                             <td class="danger text-end">- {{ formatRupiah(calculateDiskon) }}</td>
+                        </tr>
+                        <tr v-if="calculatePotonganPoint > 0">
+                            <td class="danger">Potongan Poin</td>
+                            <td class="danger text-end">- {{ formatRupiah(calculatePotonganPoint) }}</td>
                         </tr>
                         <tr>
                             <td>Total</td>
@@ -121,7 +143,7 @@
     </div>
 </template>
 <script setup>
-import { onMounted, computed, watch, nextTick } from 'vue';
+import { onMounted, onUnmounted, computed, watch, nextTick, ref } from 'vue'; // Tambahkan onUnmounted
 import { usePOS } from '../composables/usePOS';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.css';
@@ -144,7 +166,41 @@ const {
     fetchTransaksiDetail,
     handleDelete,
     paymentTransaksi,
+    usePoint,
+    inputPoint,
+    calculatePotonganPoint,
+    scanQuery,
+    handleBarcodeScan
 } = usePOS();
+
+// 1. Deklarasi State (Pastikan tidak duplikat)
+const barcodeInput = ref(null);
+const modeScanner = ref(true); // Set true jika ingin default terbuka, atau sesuaikan logika Anda
+
+// 2. Fungsi Focus yang lebih cerdas (tidak mencuri fokus dari input lain)
+const ensureFocus = (event) => {
+    // 1. Cek apakah user sedang fokus ke input lain (seperti cari pelanggan atau isi poin)
+    const isUserTyping = event?.target.tagName === 'INPUT' ||
+        event?.target.tagName === 'TEXTAREA' ||
+        event?.target.closest('.multiselect'); // Hindari mencuri fokus dari Multiselect
+
+    if (isUserTyping) return;
+
+    // 2. Jika tidak sedang mengetik apapun, paksa fokus kembali ke input barcode
+    if (barcodeInput.value) {
+        barcodeInput.value.focus();
+    }
+};
+
+// 3. Watcher untuk mode scanner
+watch(modeScanner, async (newVal) => {
+    if (newVal) {
+        await nextTick();
+        if (barcodeInput.value) {
+            barcodeInput.value.focus();
+        }
+    }
+});
 
 const calculateSubtotal = computed(() => {
     return TransaksiDetail.value.reduce((acc, item) => acc + parseFloat(item.total), 0);
@@ -155,8 +211,13 @@ const calculateDiskon = computed(() => {
 });
 
 const calculateGrandTotal = computed(() => {
-    return calculateSubtotal.value - calculateDiskon.value;
+    const subtotal = calculateSubtotal.value;
+    const diskon = calculateDiskon.value;
+    const potonganPoin = calculatePotonganPoint.value;
+
+    return subtotal - diskon - potonganPoin;
 });
+
 const { initFeather } = useFeather();
 
 const handlePayment = () => {
@@ -164,21 +225,48 @@ const handlePayment = () => {
 };
 
 watch(
-    [TransaksiDetail, isLoading], // Pantau data detail DAN status loading
+    [TransaksiDetail, isLoading],
     async () => {
-        // Tunggu sampai Vue selesai memperbarui DOM (nextTick)
         await nextTick();
-
-        // Panggil feather replace jika library-nya tersedia
         initFeather();
     },
-    { deep: true } // Pastikan memantau perubahan di dalam array
+    { deep: true }
 );
 
+// 4. Lifecycle Hooks
 onMounted(() => {
     fetchPelanggan();
     fetchDiskon();
     fetchKodeTransaksi();
     fetchTransaksiDetail();
+
+    // Jalankan focus saat awal load
+    nextTick(() => {
+        ensureFocus();
+    });
+
+    // Pasang listener klik global
+    // Jalankan focus pertama kali
+    setTimeout(() => {
+        if (barcodeInput.value) barcodeInput.value.focus();
+    }, 500);
+
+    // Pasang listener klik global agar fokus kembali jika kasir klik sembarang tempat
+    document.addEventListener('click', ensureFocus);
+});
+
+// Bersihkan listener saat pindah halaman
+onUnmounted(() => {
+    document.removeEventListener('click', ensureFocus);
 });
 </script>
+<style scoped>
+.offscreen-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+    height: 0;
+    width: 0;
+}
+</style>

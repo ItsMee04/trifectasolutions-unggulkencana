@@ -141,7 +141,7 @@
 				<text><![CDATA[TANGGAL]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="81" y="0" width="149" height="19" forecolor="#FFFFFF" backcolor="#5CB9E0" uuid="1d3d2a2d-52c3-41a8-95a0-58a9f02cd725">
+				<reportElement mode="Opaque" x="81" y="0" width="189" height="19" forecolor="#FFFFFF" backcolor="#5CB9E0" uuid="1d3d2a2d-52c3-41a8-95a0-58a9f02cd725">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1d60acf6-f9f6-4f64-9ecb-1c5c632ffcff"/>
 				</reportElement>
 				<box>
@@ -156,7 +156,7 @@
 				<text><![CDATA[KETERANGAN]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="230" y="0" width="66" height="19" forecolor="#FFFFFF" backcolor="#5CB9E0" uuid="778dd24e-738e-4ed9-9541-d6e81c6daec1">
+				<reportElement mode="Opaque" x="270" y="0" width="66" height="19" forecolor="#FFFFFF" backcolor="#5CB9E0" uuid="778dd24e-738e-4ed9-9541-d6e81c6daec1">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bfcde518-68d7-4fa6-a7da-345bd40cad80"/>
 				</reportElement>
 				<box>
@@ -171,7 +171,7 @@
 				<text><![CDATA[JENIS]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="296" y="0" width="126" height="19" forecolor="#FFFFFF" backcolor="#5CB9E0" uuid="5b158663-6616-4b5c-b7d5-5c9d7fe18947">
+				<reportElement mode="Opaque" x="336" y="0" width="104" height="19" forecolor="#FFFFFF" backcolor="#5CB9E0" uuid="5b158663-6616-4b5c-b7d5-5c9d7fe18947">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="306b6729-7473-4cd9-98ae-486fb2808086"/>
 				</reportElement>
 				<box>
@@ -186,7 +186,7 @@
 				<text><![CDATA[JUMLAH]]></text>
 			</staticText>
 			<staticText>
-				<reportElement mode="Opaque" x="422" y="0" width="132" height="19" forecolor="#FFFFFF" backcolor="#5CB9E0" uuid="fefb0fbd-ad24-460c-b56a-d6b62ea88032">
+				<reportElement mode="Opaque" x="440" y="0" width="114" height="19" forecolor="#FFFFFF" backcolor="#5CB9E0" uuid="fefb0fbd-ad24-460c-b56a-d6b62ea88032">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="58a13c0c-ec72-4167-9d7e-8b23a62c73d0"/>
 				</reportElement>
 				<box>
@@ -203,9 +203,9 @@
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="18" splitType="Stretch">
+		<band height="30" splitType="Stretch">
 			<textField>
-				<reportElement x="2" y="0" width="18" height="18" uuid="712f0484-59f8-42be-9816-60aa9fcdb0ef">
+				<reportElement x="2" y="0" width="18" height="30" uuid="712f0484-59f8-42be-9816-60aa9fcdb0ef">
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<box>
@@ -218,7 +218,7 @@
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="20" y="0" width="61" height="18" uuid="230fdc0b-e8d3-49af-aae3-ca4b25d04aec">
+				<reportElement x="20" y="0" width="61" height="30" uuid="230fdc0b-e8d3-49af-aae3-ca4b25d04aec">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="55fc1d23-0ed6-40ea-9447-9bb121de866a"/>
 				</reportElement>
 				<box>
@@ -231,7 +231,7 @@
 				<textFieldExpression><![CDATA[new java.text.SimpleDateFormat("dd-MM-yyyy").format($F{tanggal})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="81" y="0" width="149" height="18" uuid="aa189188-ef70-4232-a706-e9f735848ecc">
+				<reportElement x="81" y="0" width="189" height="30" uuid="aa189188-ef70-4232-a706-e9f735848ecc">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1d60acf6-f9f6-4f64-9ecb-1c5c632ffcff"/>
 				</reportElement>
 				<box>
@@ -244,7 +244,7 @@
 				<textFieldExpression><![CDATA[$F{keterangan}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="230" y="0" width="66" height="18" uuid="b90874a8-8b03-44c8-8957-1761104cdda5">
+				<reportElement x="270" y="0" width="66" height="30" uuid="b90874a8-8b03-44c8-8957-1761104cdda5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bfcde518-68d7-4fa6-a7da-345bd40cad80"/>
 				</reportElement>
 				<box>
@@ -257,7 +257,7 @@
 				<textFieldExpression><![CDATA[$F{jenis}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="296" y="0" width="126" height="18" uuid="41dc47e1-1a5a-4293-9456-b326cac74219">
+				<reportElement x="336" y="0" width="104" height="30" uuid="41dc47e1-1a5a-4293-9456-b326cac74219">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="306b6729-7473-4cd9-98ae-486fb2808086"/>
 				</reportElement>
 				<box>
@@ -270,7 +270,7 @@
 				<textFieldExpression><![CDATA["Rp. " + new java.text.DecimalFormat("#,##0").format($F{jumlah}).replace(",", ".")]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="422" y="0" width="132" height="18" uuid="c7b6c18b-d02e-4e7a-9ca4-4b51b0aed81e">
+				<reportElement x="440" y="0" width="114" height="30" uuid="c7b6c18b-d02e-4e7a-9ca4-4b51b0aed81e">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="58a13c0c-ec72-4167-9d7e-8b23a62c73d0"/>
 				</reportElement>
 				<box>
