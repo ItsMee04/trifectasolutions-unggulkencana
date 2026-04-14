@@ -35,6 +35,8 @@ return new class extends Migration
                     kr.hargajual,
                     pr.image,
                     tr.total,
+                    tr.point_dapat,
+                    tr.point_dipakai,
                     tr.terbilang,
                     kr.total AS keranjangtotal
                 FROM produk pr
