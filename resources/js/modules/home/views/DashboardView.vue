@@ -127,10 +127,12 @@ const {
     displayTotalTransaksi,
     displayTotalPembelian,
     isLoading,
-    fetchDashboardData
+    fetchDashboardData,
+    fetchChartData,
 } = useHome();
 
 onMounted(() => {
     fetchDashboardData();
+    fetchChartData();
 });
 </script>
