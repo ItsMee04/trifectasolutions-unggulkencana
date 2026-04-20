@@ -94,7 +94,7 @@ export function useHome() {
     };
 
     const fetchChartData = async () => {
-        if (chartLabels.value.length > 0) return; // Jangan fetch lagi jika sudah ada
+        // if (chartLabels.value.length > 0 && !force) return;
         isLoadingChart.value = true;
         try {
             const [resSales, resPurchases] = await Promise.all([
