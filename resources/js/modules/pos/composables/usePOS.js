@@ -288,7 +288,7 @@ export function usePOS() {
             return;
         }
 
-        // Validasi Poin Manual
+        // Validasi Poin Manual (Tetap sama)
         if (usePoint.value) {
             if (inputPoint.value < 10) {
                 toast.error("Minimal penggunaan poin adalah 10");
@@ -306,27 +306,66 @@ export function usePOS() {
                 kode: TransaksiID.value,
                 pelanggan: formPOS.pelanggan.value,
                 diskon: selectedDiskon.value ? selectedDiskon.value.value : null,
-                point_digunakan: usePoint.value ? inputPoint.value : 0, // Kirim input manual
+                point_digunakan: usePoint.value ? inputPoint.value : 0,
                 total: grandTotal
             };
 
             const response = await transaksiService.paymentTransaksi(payload);
 
             if (response.status) {
-
                 lastCompletedTransactionId.value = TransaksiID.value;
 
-                // 1. Tampilkan Modal Sukses menggunakan Bootstrap Instance
+                // --- LOGIKA KIRIM TELEGRAM DENGAN DETAIL PRODUK ---
+
+                // 1. Ambil Nama Pelanggan (Gunakan label jika tersedia dari v-select/list)
+                const namaPelanggan = formPOS.pelanggan.label || 'Umum';
+
+                // 2. Susun Daftar Produk dari TransaksiDetail
+                // 2. Susun Daftar Produk dari TransaksiDetail
+                const daftarProduk = TransaksiDetail.value.map((item, index) => {
+                    // Cek apakah properti namanya 'nama', 'produk_nama', atau ada di dalam objek 'produk'
+                    const namaItem = item.nama || item.nama_produk || (item.produk ? item.produk.nama : 'Produk Tidak Diketahui');
+                    const beratItem = item.berat || 0;
+
+                    return `${index + 1}. ${namaItem} (${beratItem} g)`;
+                }).join('\n');
+
+                const token = "8084477106:AAEbnUkECjGihJOajb4Yv-81qNvNgTH5CMs";
+                const chatId = "918285773";
+
+                const pesan = `
+✅ *TRANSAKSI BERHASIL*
+━━━━━━━━━━━━━━━
+🆔 *Kode:* ${TransaksiID.value}
+👤 *Pelanggan:* ${namaPelanggan}
+📦 *Detail Barang:*
+${daftarProduk}
+━━━━━━━━━━━━━━━
+💰 *Total Bayar:* Rp ${grandTotal.toLocaleString('id-ID')}
+🪙 *Poin Digunakan:* ${payload.point_digunakan}
+━━━━━━━━━━━━━━━
+_Notifikasi Otomatis Sistem POS_
+            `;
+
+                // Kirim ke Telegram (Async)
+                fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: pesan,
+                        parse_mode: 'Markdown'
+                    })
+                }).catch(err => console.error("Gagal kirim notif Telegram:", err));
+
+                // --- AKHIR LOGIKA TELEGRAM ---
 
                 const modalElement = document.getElementById('paymentModal');
-
                 const modalInstance = new bootstrap.Modal(modalElement);
-
                 modalInstance.show();
-
             }
         } catch (error) {
-            console.log(error)
+            console.log(error);
             toast.error(error.response?.data?.message || "Gagal memproses pembayaran");
         } finally {
             isLoading.value = false;
