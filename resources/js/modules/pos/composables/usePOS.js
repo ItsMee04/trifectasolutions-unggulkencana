@@ -288,7 +288,6 @@ export function usePOS() {
             return;
         }
 
-        // Validasi Poin Manual (Tetap sama)
         if (usePoint.value) {
             if (inputPoint.value < 10) {
                 toast.error("Minimal penggunaan poin adalah 10");
@@ -315,9 +314,9 @@ export function usePOS() {
             if (response.status) {
                 lastCompletedTransactionId.value = TransaksiID.value;
 
-                // --- LOGIKA KIRIM TELEGRAM DENGAN DETAIL PRODUK ---
+                // --- LOGIKA KIRIM TELEGRAM ---
 
-                // 1. Ambil Waktu Transaksi
+                // 1. Ambil Waktu Real-time
                 const sekarang = new Date();
                 const waktu = sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
                 const tanggal = sekarang.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -325,15 +324,13 @@ export function usePOS() {
                 // 2. Ambil Nama Pelanggan
                 const namaPelanggan = formPOS.pelanggan.label || 'Umum';
 
-                // 3. Susun Daftar Produk dengan Detail Harga & Berat
+                // 3. Susun Daftar Produk (Menampilkan data apa adanya tanpa kalkulasi ulang)
                 const daftarProduk = TransaksiDetail.value.map((item, index) => {
                     const namaItem = item.nama || item.nama_produk || (item.produk ? item.produk.nama : 'Produk Tidak Diketahui');
                     const beratItem = item.berat || 0;
-                    const qty = item.qty || 1;
-                    const harga = item.harga || 0;
-                    const subtotal = harga * qty;
+                    const hargaPerGram = item.harga || 0; // Harga per gram sesuai payload store
 
-                    return `${index + 1}. *${namaItem}*\n    ${qty} x Rp ${harga.toLocaleString('id-ID')} (${beratItem}g) = *Rp ${subtotal.toLocaleString('id-ID')}*`;
+                    return `${index + 1}. *${namaItem}*\n    ${beratItem}g | Rp ${hargaPerGram.toLocaleString('id-ID')}/g`;
                 }).join('\n');
 
                 const token = "8084477106:AAEbnUkECjGihJOajb4Yv-81qNvNgTH5CMs";
@@ -347,16 +344,15 @@ export function usePOS() {
 🆔 *Kode:* ${TransaksiID.value}
 👤 *Pelanggan:* ${namaPelanggan}
 
-📦 *Rincian Barang:*
+📦 *Detail Barang:*
 ${daftarProduk}
 ━━━━━━━━━━━━━━━
-💰 *Total Akhir:* Rp ${grandTotal.toLocaleString('id-ID')}
+💰 *Grand Total:* Rp ${grandTotal.toLocaleString('id-ID')}
 🪙 *Poin Digunakan:* ${payload.point_digunakan}
 ━━━━━━━━━━━━━━━
 _Notifikasi Otomatis Sistem POS_
 `;
 
-                // Kirim ke Telegram (Async)
                 fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
