@@ -297,33 +297,74 @@ export function usePembelianDariToko() {
     };
 
     const paymentPembelian = async () => {
-        // Validasi dasar
         if (!formDariToko.pelanggan_id) {
             toast.error("Data pelanggan belum lengkap.");
             return;
         }
 
+        const grandTotalPembelian = pembeliandetail.value.reduce((acc, item) => acc + (Number(item.hargabeli) || 0), 0);
+
         isLoading.value = true;
         try {
-            const payload = {
-                kode: formDariToko.kode,
-            };
-
+            const payload = { kode: formDariToko.kode };
             const response = await pembeliandaritokoService.paymentPembelian(payload);
 
             if (response.status) {
                 lastCompletedPembelianKode.value = formDariToko.kode;
-                // Reset form atau arahkan ke halaman cetak nota
+
+                // --- LOGIKA KIRIM TELEGRAM ---
+                const sekarang = new Date();
+                const waktu = sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                const tanggal = sekarang.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+
+                const daftarProduk = pembeliandetail.value.map((item, index) => {
+                    const namaItem = item.produk?.nama || 'Produk Tidak Diketahui';
+                    const beratItem = item.produk?.berat || 0;
+                    const hargaBeli = item.hargabeli || 0;
+
+                    // Mapping label sesuai opsi di Component Modal
+                    const labelJenis = {
+                        'hargajual': 'Harga Jual',
+                        'potongan_4': 'Potongan 4%',
+                        'lebih_tinggi': 'Harga Manual/Tinggi'
+                    };
+                    const jenisHarga = labelJenis[item.jenis_hargabeli] || 'Harga Jual';
+
+                    return `${index + 1}. *${namaItem}*\n    ${beratItem}g | Rp ${hargaBeli.toLocaleString('id-ID')} (${jenisHarga})`;
+                }).join('\n');
+
+                const token = "8084477106:AAEbnUkECjGihJOajb4Yv-81qNvNgTH5CMs";
+                const chatId = "918285773";
+
+                const pesan = `
+📥 *PEMBELIAN DARI TOKO BERHASIL*
+━━━━━━━━━━━━━━━
+📅 *Tanggal:* ${tanggal}
+🕒 *Jam:* ${waktu} WIB
+🆔 *Kode:* ${formDariToko.kode}
+👤 *Dari Pelanggan:* ${formDariToko.pelanggan}
+
+📦 *Detail Barang Yang Dibeli:*
+${daftarProduk}
+━━━━━━━━━━━━━━━
+💰 *Total Bayar Ke Toko:* Rp ${grandTotalPembelian.toLocaleString('id-ID')}
+━━━━━━━━━━━━━━━
+_Notifikasi Otomatis Sistem Pembelian_`;
+
+                fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: chatId, text: pesan, parse_mode: 'Markdown' })
+                }).catch(err => console.error("Telegram Error:", err));
+
+                // Munculkan modal sukses
                 const modalElement = document.getElementById('paymentCompleteModal');
                 if (modalElement) {
                     const modalInstance = new bootstrap.Modal(modalElement);
                     modalInstance.show();
-                } else {
-                    toast.success("Pembayaran Berhasil");
                 }
             }
         } catch (error) {
-            console.log(error)
             toast.error(error.response?.data?.message || "Gagal memproses pembayaran");
         } finally {
             isLoading.value = false;
@@ -354,23 +395,28 @@ export function usePembelianDariToko() {
     };
 
     const handleNextOrder = async () => {
-        // 1. Reset State Header/Parent
-        // Kita kosongkan pelanggan tapi kode transaksi akan diisi ulang oleh fetchKodeTransaksi
+        // 1. Reset Header & Data Pelanggan
         formDariToko.pelanggan = '';
         formDariToko.pelanggan_id = null;
         formDariToko.keterangan = '';
+        formDariToko.kodetransaksi = ''; // Kosongkan input "PM-xxx" di form cari
 
-        // 2. Kosongkan State Keranjang/Detail
+        // 2. Kosongkan Keranjang Utama (Tabel Tengah)
         pembeliandetail.value = [];
 
-        // 3. Reset State Form Modal Edit (jika ada)
+        // 3. Reset Pencarian Produk Pelanggan (Modal Cari & Tabelnya)
+        transaksiPelanggan.value = []; // Ini yang bikin tabel produk pelanggan kosong
+        searchTransaksiPelanggan.value = ''; // Reset keyword search di modal
+        currentPageTransaksiPelanggan.value = 1; // Reset pagination
+
+        // 4. Reset Form Edit Produk (Logic Detail)
         formPembelianDetail.id = null;
         formPembelianDetail.hargabeli = 0;
-        formPembelianDetail.kondisi_id = null;
+        formPembelianDetail.hargajual = 0;
+        formPembelianDetail.kondisi = null;
+        formPembelianDetail.jenis_hargabeli = 'hargajual';
 
-        // 4. Ambil Kode Transaksi Baru (PM-xxxx) dari Backend
-        // Karena status transaksi sebelumnya sudah 2 (Lunas),
-        // maka backend akan otomatis men-generate kode baru.
+        // 5. Generate Kode Transaksi Baru
         await fetchKodeTransaksi();
 
         toast.info("Siap untuk transaksi pembelian baru");
