@@ -30,7 +30,7 @@ return new class extends Migration
                     jp.jenis AS kategori,
 
                     -- STOK & BERAT AWAL
-                    -- Logika: Barang yang masuk sebelum hari ini dan (belum terjual OR terjual setelah hari ini)
+                    -- Logika: Barang yang masuk sebelum hari ini dan (belum terjual OR terjual HARI INI atau nanti)
                     COALESCE((
                         SELECT COUNT(*)
                         FROM nampanproduk n2
@@ -66,7 +66,7 @@ return new class extends Migration
                           AND DATE(n3.tanggal) = dt.tgl
                     ), 0) AS berat_masuk,
 
-                    -- KELUAR HARI INI (Mengacu pada Transaksi Detail yang Valid/Status 2)
+                    -- KELUAR HARI INI
                     COALESCE((
                         SELECT COUNT(td.id)
                         FROM transaksidetail td
@@ -85,7 +85,9 @@ return new class extends Migration
                           AND td.status = 2
                     ), 0) AS berat_keluar,
 
-                    -- STOK & BERAT AKHIR
+                    -- STOK & BERAT AKHIR (REVISED LOGIC)
+                    -- Logika: Barang yang masuk sampai hari ini dan (belum terjual OR terjualnya baru BESOK)
+                    -- Menggunakan > dt.tgl agar yang terjual hari ini sudah tidak dihitung di stok akhir hari ini.
                     COALESCE((
                         SELECT COUNT(*)
                         FROM nampanproduk n_a
