@@ -384,13 +384,22 @@ _Notifikasi Otomatis Sistem POS_
     };
 
     const handleNextOrder = async () => {
-        // Reset semua state untuk transaksi baru
+        // 1. Reset state POS
         formPOS.pelanggan = null;
         selectedDiskon.value = null;
         TransaksiDetail.value = [];
+        usePoint.value = false;
+        inputPoint.value = 0;
 
+        // 2. Tutup modal payment secara manual
+        const payModal = document.getElementById('paymentModal');
+        const payInstance = bootstrap.Modal.getInstance(payModal);
+        if (payInstance) payInstance.hide();
+
+        // 3. Ambil data baru untuk transaksi selanjutnya
         await fetchKodeTransaksi();
         await fetchProduk();
+
         toast.info("Siap untuk transaksi baru");
     };
 
@@ -444,24 +453,34 @@ _Notifikasi Otomatis Sistem POS_
             return;
         }
 
-        // Cari data mentah pelanggan dari PelangganList berdasarkan ID yang dipilih
-        // Ini penting karena handleKirimPesanForm butuh object 'item' lengkap
         const selectedId = formPOS.pelanggan.value;
         const pelangganRaw = PelangganList.value.find(p => p.value === selectedId);
 
         if (pelangganRaw) {
-            // Tutup modal pembayaran terlebih dahulu agar tidak tumpang tindih (opsional)
+            // 1. Ambil instance modal payment yang sedang terbuka, lalu sembunyikan
             const payModal = document.getElementById('paymentModal');
-            const payModalInstance = bootstrap.Modal.getInstance(payModal);
-            if (payModalInstance) payModalInstance.hide();
+            const payInstance = bootstrap.Modal.getOrCreateInstance(payModal);
+            payInstance.hide();
 
-            // Panggil fungsi milik usePelanggan untuk buka modal kirim pesan
+            // 2. Buka modal kirim pesan dari usePelanggan
             handleKirimPesanForm({
                 id: pelangganRaw.value,
                 nama: pelangganRaw.label,
                 kontak: pelangganRaw.kontak
             });
         }
+    };
+
+    const backToPaymentModal = () => {
+        // 1. Sembunyikan modal kirim pesan
+        const msgModal = document.getElementById('formKirimPesanModal');
+        const msgInstance = bootstrap.Modal.getInstance(msgModal);
+        if (msgInstance) msgInstance.hide();
+
+        // 2. Munculkan kembali modal sukses (paymentModal)
+        const payModal = document.getElementById('paymentModal');
+        const payInstance = bootstrap.Modal.getOrCreateInstance(payModal);
+        payInstance.show();
     };
 
     const handleRefresh = async () => {
@@ -551,6 +570,7 @@ _Notifikasi Otomatis Sistem POS_
         scanQuery,
         handleBarcodeScan,
         openWhatsAppModal,
-        handleSendWhatsApp
+        handleSendWhatsApp,
+        backToPaymentModal
     };
 }

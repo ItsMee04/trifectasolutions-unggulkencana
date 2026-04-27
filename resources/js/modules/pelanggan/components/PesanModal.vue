@@ -46,7 +46,7 @@
                                         <div class="invalid-feedback" v-if="errors.pesan">{{ errors.pesan }}</div>
                                     </div>
                                     <div class="modal-footer-btn">
-                                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                        <button type="button" class="btn btn-secondary me-2" @click="handleCancel">
                                             CANCEL
                                         </button>
                                         <button type="submit" class="btn btn-submit" :disabled="isLoading">
@@ -67,11 +67,20 @@ import { onMounted } from 'vue';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.css';
 import { usePelanggan } from '../composables/usePelanggan';
+import { usePOS } from '../../pos/composables/usePOS';
 
 const { isLoading, formPelanggan, errors, submitKirimPesan, pesanList, fetchPesan } = usePelanggan();
+const { backToPaymentModal } = usePOS(); // Ambil fungsi backToPaymentModal
 
 const handleKirimPesanPelanggan = async () => {
-    await submitKirimPesan();
+    const success = await submitKirimPesan();
+    if (success) {
+        backToPaymentModal(); // Kembali ke modal payment jika sukses
+    }
+};
+
+const handleCancel = () => {
+    backToPaymentModal(); // Kembali ke modal payment jika cancel/close
 };
 
 onMounted(() => {
