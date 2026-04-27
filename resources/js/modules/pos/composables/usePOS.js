@@ -316,24 +316,25 @@ export function usePOS() {
 
                 // --- LOGIKA KIRIM TELEGRAM ---
 
-                // 1. Ambil Waktu Real-time
                 const sekarang = new Date();
                 const waktu = sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
                 const tanggal = sekarang.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 
-                // 2. Ambil Nama Pelanggan
                 const namaPelanggan = formPOS.pelanggan.label || 'Umum';
 
-                // 3. Susun Daftar Produk
+                // 1. Susun Rincian Barang
                 const daftarProduk = TransaksiDetail.value.map((item, index) => {
                     const namaItem = item.nama || item.nama_produk || (item.produk ? item.produk.nama : 'Produk Tidak Diketahui');
                     const beratItem = item.berat || 0;
-
-                    // PERBAIKAN DI SINI: Menggunakan item.hargajual sesuai data keranjang
                     const hargaPerGram = item.hargajual || 0;
 
                     return `${index + 1}. *${namaItem}*\n    ${beratItem}g | Rp ${hargaPerGram.toLocaleString('id-ID')}/g`;
                 }).join('\n');
+
+                // 2. Susun Baris Diskon (Jika ada)
+                const infoDiskon = selectedDiskon.value
+                    ? `\n🎁 *Diskon:* ${selectedDiskon.value.label} (-Rp ${selectedDiskon.value.nilai.toLocaleString('id-ID')})`
+                    : "";
 
                 const token = "8084477106:AAEbnUkECjGihJOajb4Yv-81qNvNgTH5CMs";
                 const chatId = "918285773";
@@ -348,7 +349,7 @@ export function usePOS() {
 
 📦 *Detail Barang:*
 ${daftarProduk}
-━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━${infoDiskon}
 💰 *Grand Total:* Rp ${grandTotal.toLocaleString('id-ID')}
 🪙 *Poin Digunakan:* ${payload.point_digunakan}
 ━━━━━━━━━━━━━━━
