@@ -9,6 +9,7 @@ import { nampanprodukService } from '../../nampanproduk/services/nampanprodukSer
 import { pelangganService } from '../../../modules/pelanggan/services/pelangganService'
 import { diskonService } from '../../../modules/diskon/services/diskonService'
 import { transaksiService } from '../../../modules/transaksi/services/transaksiService'
+import { usePelanggan } from '../../../modules/pelanggan/composables/usePelanggan';
 
 const jenisprodukList = ref([]);
 const selectedJenisProduk = ref('all');
@@ -36,6 +37,8 @@ const formPOS = reactive({
 });
 
 export function usePOS() {
+
+    const { handleKirimPesanForm } = usePelanggan();
 
     const fetchJenisProduk = async () => {
         isLoading.value = true;
@@ -141,13 +144,13 @@ export function usePOS() {
         try {
             const response = await pelangganService.getPelanggan();
             PelangganList.value = response.data.map(p => {
-                // Hitung total poin dari array 'poin'
                 const totalPoin = p.poin ? p.poin.reduce((sum, item) => sum + parseInt(item.jumlah), 0) : 0;
 
                 return {
                     value: p.id,
                     label: p.nama,
-                    point: totalPoin // Simpan hasil penjumlahan di sini
+                    point: totalPoin,
+                    kontak: p.kontak // Menggunakan properti 'kontak' dari JSON Anda
                 };
             });
         } catch (error) {
@@ -408,6 +411,59 @@ _Notifikasi Otomatis Sistem POS_
         }
     };
 
+    const handleSendWhatsApp = () => {
+        const pelanggan = formPOS.pelanggan;
+
+        if (!pelanggan || !pelanggan.kontak) {
+            toast.error("Nomor kontak pelanggan tidak ditemukan");
+            return;
+        }
+
+        // 1. Ambil pesan singkat (bisa dimodifikasi sesuai kebutuhan)
+        const pesan = `Halo Kak ${pelanggan.label}, terima kasih sudah berbelanja! Transaksi ${lastCompletedTransactionId.value} telah berhasil.`;
+
+        // 2. Bersihkan nomor (menghilangkan spasi, strip, dll)
+        let phone = pelanggan.kontak.replace(/\D/g, '');
+
+        // 3. Validasi format Internasional (ID: 62)
+        if (phone.startsWith('0')) {
+            phone = '62' + phone.slice(1);
+        } else if (!phone.startsWith('62')) {
+            // Jika nomor hanya "81..." tanpa 0 atau 62 di depan
+            phone = '62' + phone;
+        }
+
+        const url = `https://wa.me/${phone}?text=${encodeURIComponent(pesan)}`;
+        window.open(url, '_blank');
+    };
+
+    // Fungsi ini dipanggil saat tombol WA di Modal Pembayaran diklik
+    const openWhatsAppModal = () => {
+        if (!formPOS.pelanggan) {
+            toast.error("Pilih pelanggan terlebih dahulu");
+            return;
+        }
+
+        // Cari data mentah pelanggan dari PelangganList berdasarkan ID yang dipilih
+        // Ini penting karena handleKirimPesanForm butuh object 'item' lengkap
+        const selectedId = formPOS.pelanggan.value;
+        const pelangganRaw = PelangganList.value.find(p => p.value === selectedId);
+
+        if (pelangganRaw) {
+            // Tutup modal pembayaran terlebih dahulu agar tidak tumpang tindih (opsional)
+            const payModal = document.getElementById('paymentModal');
+            const payModalInstance = bootstrap.Modal.getInstance(payModal);
+            if (payModalInstance) payModalInstance.hide();
+
+            // Panggil fungsi milik usePelanggan untuk buka modal kirim pesan
+            handleKirimPesanForm({
+                id: pelangganRaw.value,
+                nama: pelangganRaw.label,
+                kontak: pelangganRaw.kontak
+            });
+        }
+    };
+
     const handleRefresh = async () => {
         await fetchProduk();
     }
@@ -493,6 +549,8 @@ _Notifikasi Otomatis Sistem POS_
         inputPoint,
         calculatePotonganPoint,
         scanQuery,
-        handleBarcodeScan
+        handleBarcodeScan,
+        openWhatsAppModal,
+        handleSendWhatsApp
     };
 }

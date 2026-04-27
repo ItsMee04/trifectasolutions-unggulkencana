@@ -20,6 +20,9 @@
                                 data-bs-dismiss="modal">
                                 Order Berikutnya <i data-feather="arrow-right-circle" class="feather-16 ms-1"></i>
                             </button>
+                            <button type="button" class="btn btn-success w-100" @click="openWhatsAppModal">
+                                <i class="fab fa-whatsapp me-2"></i> Kirim Notifikasi WA
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -32,5 +35,6 @@ import { usePOS } from '../composables/usePOS';
 const {
     handleNextOrder,
     handlePrint,
+    openWhatsAppModal
 } = usePOS();
 </script>
