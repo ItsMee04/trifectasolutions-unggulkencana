@@ -297,11 +297,13 @@ export function usePembelianDariToko() {
     };
 
     const paymentPembelian = async () => {
+        // 1. Validasi awal
         if (!formDariToko.pelanggan_id) {
             toast.error("Data pelanggan belum lengkap.");
             return;
         }
 
+        // Hitung total bayar dari seluruh item di keranjang
         const grandTotalPembelian = pembeliandetail.value.reduce((acc, item) => acc + (Number(item.hargabeli) || 0), 0);
 
         isLoading.value = true;
@@ -322,15 +324,22 @@ export function usePembelianDariToko() {
                     const beratItem = item.produk?.berat || 0;
                     const hargaBeli = item.hargabeli || 0;
 
-                    // Mapping label sesuai opsi di Component Modal
+                    // Mengambil Harga Jual dari data transaksi asal (jika ada relasinya)
+                    const hargaJual = item.kodetransaksi?.transaksidetail?.hargajual || 0;
+
+                    // Mapping label jenis harga sesuai dengan opsi di Modal
                     const labelJenis = {
                         'hargajual': 'Harga Jual',
                         'potongan_4': 'Potongan 4%',
-                        'lebih_tinggi': 'Harga Manual/Tinggi'
+                        'lebih_tinggi': 'Lebih Tinggi'
                     };
                     const jenisHarga = labelJenis[item.jenis_hargabeli] || 'Harga Jual';
 
-                    return `${index + 1}. *${namaItem}*\n    ${beratItem}g | Rp ${hargaBeli.toLocaleString('id-ID')} (${jenisHarga})`;
+                    // Format string detail produk per baris
+                    return `${index + 1}. *${namaItem}*\n` +
+                        `    Berat : ${beratItem}g\n` +
+                        `    Harga Jual : Rp ${hargaJual.toLocaleString('id-ID')}\n` +
+                        `    Harga Beli : Rp ${hargaBeli.toLocaleString('id-ID')} (${jenisHarga})`;
                 }).join('\n');
 
                 const token = "8084477106:AAEbnUkECjGihJOajb4Yv-81qNvNgTH5CMs";
@@ -354,17 +363,25 @@ _Notifikasi Otomatis Sistem Pembelian_`;
                 fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: chatId, text: pesan, parse_mode: 'Markdown' })
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: pesan,
+                        parse_mode: 'Markdown'
+                    })
                 }).catch(err => console.error("Telegram Error:", err));
+                // --- AKHIR LOGIKA TELEGRAM ---
 
                 // Munculkan modal sukses
                 const modalElement = document.getElementById('paymentCompleteModal');
                 if (modalElement) {
                     const modalInstance = new bootstrap.Modal(modalElement);
                     modalInstance.show();
+                } else {
+                    toast.success("Pembayaran Berhasil");
                 }
             }
         } catch (error) {
+            console.error(error);
             toast.error(error.response?.data?.message || "Gagal memproses pembayaran");
         } finally {
             isLoading.value = false;

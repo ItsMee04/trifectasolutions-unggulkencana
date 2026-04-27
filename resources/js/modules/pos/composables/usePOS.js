@@ -306,8 +306,8 @@ export function usePOS() {
         return 0;
     });
 
-    // Di dalam usePOS.js
     const paymentTransaksi = async (grandTotal) => {
+        // 1. Validasi Pelanggan & Poin
         if (!formPOS.pelanggan) {
             toast.error("Pilih pelanggan terlebih dahulu");
             return;
@@ -340,7 +340,6 @@ export function usePOS() {
                 lastCompletedTransactionId.value = TransaksiID.value;
 
                 // --- LOGIKA KIRIM TELEGRAM ---
-
                 const sekarang = new Date();
                 const waktu = sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
                 const tanggal = sekarang.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -352,20 +351,28 @@ export function usePOS() {
                     const namaItem = item.nama || item.nama_produk || (item.produk ? item.produk.nama : 'Produk Tidak Diketahui');
                     const beratItem = item.berat || 0;
                     const hargaPerGram = item.hargajual || 0;
+                    const subTotalItem = beratItem * hargaPerGram;
 
-                    return `${index + 1}. *${namaItem}*\n    ${beratItem}g | Rp ${hargaPerGram.toLocaleString('id-ID')}/g`;
+                    return `${index + 1}. *${namaItem}*\n` +
+                        `    Berat : ${beratItem}g\n` +
+                        `    Harga : Rp ${hargaPerGram.toLocaleString('id-ID')}/g\n` +
+                        `    Subtotal : Rp ${subTotalItem.toLocaleString('id-ID')}`;
                 }).join('\n');
 
-                // 2. Susun Baris Diskon (Jika ada)
-                const infoDiskon = selectedDiskon.value
-                    ? `\n🎁 *Diskon:* ${selectedDiskon.value.label} (-Rp ${selectedDiskon.value.nilai.toLocaleString('id-ID')})`
-                    : "";
+                // 2. Susun Baris Diskon & Poin (Jika ada)
+                let infoTambahan = "";
+                if (selectedDiskon.value) {
+                    infoTambahan += `\n🎁 *Diskon:* ${selectedDiskon.value.label} (-Rp ${selectedDiskon.value.nilai.toLocaleString('id-ID')})`;
+                }
+                if (payload.point_digunakan > 0) {
+                    infoTambahan += `\n🪙 *Poin Digunakan:* ${payload.point_digunakan}`;
+                }
 
                 const token = "8084477106:AAEbnUkECjGihJOajb4Yv-81qNvNgTH5CMs";
                 const chatId = "918285773";
 
                 const pesan = `
-✅ *TRANSAKSI BERHASIL*
+✅ *TRANSAKSI PENJUALAN BERHASIL*
 ━━━━━━━━━━━━━━━
 📅 *Tanggal:* ${tanggal}
 🕒 *Jam:* ${waktu} WIB
@@ -374,12 +381,10 @@ export function usePOS() {
 
 📦 *Detail Barang:*
 ${daftarProduk}
-━━━━━━━━━━━━━━━${infoDiskon}
+━━━━━━━━━━━━━━━${infoTambahan}
 💰 *Grand Total:* Rp ${grandTotal.toLocaleString('id-ID')}
-🪙 *Poin Digunakan:* ${payload.point_digunakan}
 ━━━━━━━━━━━━━━━
-_Notifikasi Otomatis Sistem POS_
-`;
+_Notifikasi Otomatis Sistem POS_`;
 
                 fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
                     method: 'POST',
@@ -390,15 +395,17 @@ _Notifikasi Otomatis Sistem POS_
                         parse_mode: 'Markdown'
                     })
                 }).catch(err => console.error("Gagal kirim notif Telegram:", err));
-
                 // --- AKHIR LOGIKA TELEGRAM ---
 
+                // Tampilkan Modal Pembayaran Selesai
                 const modalElement = document.getElementById('paymentModal');
-                const modalInstance = new bootstrap.Modal(modalElement);
-                modalInstance.show();
+                if (modalElement) {
+                    const modalInstance = new bootstrap.Modal(modalElement);
+                    modalInstance.show();
+                }
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             toast.error(error.response?.data?.message || "Gagal memproses pembayaran");
         } finally {
             isLoading.value = false;
