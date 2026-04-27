@@ -324,11 +324,13 @@ export function usePOS() {
                 // 2. Ambil Nama Pelanggan
                 const namaPelanggan = formPOS.pelanggan.label || 'Umum';
 
-                // 3. Susun Daftar Produk (Menampilkan data apa adanya tanpa kalkulasi ulang)
+                // 3. Susun Daftar Produk
                 const daftarProduk = TransaksiDetail.value.map((item, index) => {
                     const namaItem = item.nama || item.nama_produk || (item.produk ? item.produk.nama : 'Produk Tidak Diketahui');
                     const beratItem = item.berat || 0;
-                    const hargaPerGram = item.harga || 0; // Harga per gram sesuai payload store
+
+                    // PERBAIKAN DI SINI: Menggunakan item.hargajual sesuai data keranjang
+                    const hargaPerGram = item.hargajual || 0;
 
                     return `${index + 1}. *${namaItem}*\n    ${beratItem}g | Rp ${hargaPerGram.toLocaleString('id-ID')}/g`;
                 }).join('\n');
