@@ -317,17 +317,23 @@ export function usePOS() {
 
                 // --- LOGIKA KIRIM TELEGRAM DENGAN DETAIL PRODUK ---
 
-                // 1. Ambil Nama Pelanggan (Gunakan label jika tersedia dari v-select/list)
+                // 1. Ambil Waktu Transaksi
+                const sekarang = new Date();
+                const waktu = sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                const tanggal = sekarang.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+
+                // 2. Ambil Nama Pelanggan
                 const namaPelanggan = formPOS.pelanggan.label || 'Umum';
 
-                // 2. Susun Daftar Produk dari TransaksiDetail
-                // 2. Susun Daftar Produk dari TransaksiDetail
+                // 3. Susun Daftar Produk dengan Detail Harga & Berat
                 const daftarProduk = TransaksiDetail.value.map((item, index) => {
-                    // Cek apakah properti namanya 'nama', 'produk_nama', atau ada di dalam objek 'produk'
                     const namaItem = item.nama || item.nama_produk || (item.produk ? item.produk.nama : 'Produk Tidak Diketahui');
                     const beratItem = item.berat || 0;
+                    const qty = item.qty || 1;
+                    const harga = item.harga || 0;
+                    const subtotal = harga * qty;
 
-                    return `${index + 1}. ${namaItem} (${beratItem} g)`;
+                    return `${index + 1}. *${namaItem}*\n    ${qty} x Rp ${harga.toLocaleString('id-ID')} (${beratItem}g) = *Rp ${subtotal.toLocaleString('id-ID')}*`;
                 }).join('\n');
 
                 const token = "8084477106:AAEbnUkECjGihJOajb4Yv-81qNvNgTH5CMs";
@@ -336,16 +342,19 @@ export function usePOS() {
                 const pesan = `
 ✅ *TRANSAKSI BERHASIL*
 ━━━━━━━━━━━━━━━
+📅 *Tanggal:* ${tanggal}
+🕒 *Jam:* ${waktu} WIB
 🆔 *Kode:* ${TransaksiID.value}
 👤 *Pelanggan:* ${namaPelanggan}
-📦 *Detail Barang:*
+
+📦 *Rincian Barang:*
 ${daftarProduk}
 ━━━━━━━━━━━━━━━
-💰 *Total Bayar:* Rp ${grandTotal.toLocaleString('id-ID')}
+💰 *Total Akhir:* Rp ${grandTotal.toLocaleString('id-ID')}
 🪙 *Poin Digunakan:* ${payload.point_digunakan}
 ━━━━━━━━━━━━━━━
 _Notifikasi Otomatis Sistem POS_
-            `;
+`;
 
                 // Kirim ke Telegram (Async)
                 fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
