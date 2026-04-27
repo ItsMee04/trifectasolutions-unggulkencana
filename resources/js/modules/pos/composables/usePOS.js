@@ -14,6 +14,7 @@ import { usePelanggan } from '../../../modules/pelanggan/composables/usePelangga
 const jenisprodukList = ref([]);
 const selectedJenisProduk = ref('all');
 const produk = ref([]);
+const allProdukMaster = ref([]); // Tambahkan ini untuk master data hitungan
 const PelangganList = ref([]);
 const DiskonList = ref([]);
 const TransaksiID = ref('');
@@ -62,14 +63,35 @@ export function usePOS() {
         }
     };
 
+    const countItemsByJenis = computed(() => {
+        const counts = {};
+
+        // Gunakan allProdukMaster sebagai sumber hitungan tetap
+        counts['all'] = allProdukMaster.value.length;
+
+        allProdukMaster.value.forEach(p => {
+            const id = p.jenisproduk_id;
+            if (id) {
+                counts[id] = (counts[id] || 0) + 1;
+            }
+        });
+
+        return counts;
+    });
+
     const fetchProduk = async (jenisId = 'all') => {
         isLoadingProduk.value = true;
         try {
-            const payload = {
-                jenis: jenisId,
-            }
+            const payload = { jenis: jenisId };
             const response = await nampanprodukService.getProdukInNampanByJenis(payload);
-            produk.value = response.data || [];
+            const data = response.data || [];
+
+            produk.value = data;
+
+            // LOGIC BARU: Jika sedang memuat 'all', simpan juga ke master hitungan
+            if (jenisId === 'all') {
+                allProdukMaster.value = data;
+            }
         } catch (error) {
             produk.value = [];
             console.error("Gagal memuat produk:", error);
@@ -571,6 +593,7 @@ _Notifikasi Otomatis Sistem POS_
         handleBarcodeScan,
         openWhatsAppModal,
         handleSendWhatsApp,
-        backToPaymentModal
+        backToPaymentModal,
+        countItemsByJenis,
     };
 }

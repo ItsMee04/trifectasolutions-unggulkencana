@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
-use App\Models\Master\Nampan;
+// use App\Models\Master\Nampan;
 use App\Models\Master\NampanProduk;
 use App\Models\Master\Produk;
 use Carbon\Carbon;
@@ -272,6 +272,7 @@ class NampanProdukController extends Controller
 
             return [
                 'nampan'      => $nampan->nampan ?? '-',
+                'jenisproduk_id' => $nampan->jenisproduk_id ?? null,
                 'kodeproduk'  => $produk->kodeproduk ?? '-',
                 'nama'        => $produk->nama ?? '-',
                 'berat'       => $produk->berat ?? 0,

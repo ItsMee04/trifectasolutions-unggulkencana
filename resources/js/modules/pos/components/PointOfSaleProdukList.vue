@@ -19,6 +19,10 @@
                                 <i :data-feather="cat.id === 'all' ? 'grid' : 'shopping-bag'"></i>
                             </div>
                             <h6>{{ cat.jenis }}</h6>
+                            <span class="badge rounded-pill bg-secondary text-light mt-2"
+                                style="font-size: 10px;">
+                                {{ countItemsByJenis[cat.id] || 0 }} Items
+                            </span>
                         </div>
                     </swiper-slide>
                 </swiper>
@@ -42,7 +46,8 @@
                         <div class="row">
                             <div v-for="product in paginatedProduk" :key="product.kodeproduk"
                                 class="col-sm-12 col-md-6 col-lg-3 col-xl-3 mb-3">
-                                <div class="product-info default-cover card" @click="handlePilihProduk(product.kodeproduk)">
+                                <div class="product-info default-cover card"
+                                    @click="handlePilihProduk(product.kodeproduk)">
                                     <a href="javascript:void(0);" class="img-bg">
                                         <img :src="product.image ? `/storage/images/produk/${product.image}?t=${new Date().getTime()}` : BASE_DEFAULT_IMAGE_URL"
                                             :alt="product.nama"
@@ -52,7 +57,7 @@
 
                                     <h6 class="cat-name">
                                         <a href="javascript:void(0);">{{ product.nampan }} | {{ product.kodeproduk
-                                        }}</a>
+                                            }}</a>
                                     </h6>
 
                                     <h6 class="product-name">
@@ -151,6 +156,7 @@ const {
     fetchJenisProduk,
     fetchProduk,
     handlePilihProduk,
+    countItemsByJenis,
 } = usePOS();
 
 const { initFeather } = useFeather();
