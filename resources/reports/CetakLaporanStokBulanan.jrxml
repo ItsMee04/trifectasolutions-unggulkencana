@@ -478,20 +478,7 @@
 				<textFieldExpression><![CDATA[$F{berat_keluar}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="455" y="0" width="50" height="20" uuid="ce0ce2b0-6ae2-4466-a40c-392821ecfb32">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d6c8a85-f31c-49da-8bb5-d7745b267e0d"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{unit_akhir}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="505" y="0" width="50" height="20" uuid="2e5cf0a7-c797-48c5-a286-3018d15b6d4d">
+				<reportElement x="455" y="0" width="50" height="20" uuid="2e5cf0a7-c797-48c5-a286-3018d15b6d4d">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="80faa0c0-6f43-4ac8-87ec-0bde14dcd07e"/>
 				</reportElement>
 				<box>
@@ -502,6 +489,19 @@
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{berat_akhir}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="505" y="0" width="50" height="20" uuid="ce0ce2b0-6ae2-4466-a40c-392821ecfb32">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d6c8a85-f31c-49da-8bb5-d7745b267e0d"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{unit_akhir}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
