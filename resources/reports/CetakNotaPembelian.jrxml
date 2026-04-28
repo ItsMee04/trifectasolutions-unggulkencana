@@ -159,7 +159,7 @@
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[NOTA PENJUALAN]]></text>
+				<text><![CDATA[NOTA PEMBELIAN]]></text>
 			</staticText>
 			<image hAlign="Right" vAlign="Middle">
 				<reportElement x="70" y="0" width="279" height="84" uuid="d37c03e4-8997-4490-ada0-e5b0445e9fc5"/>
