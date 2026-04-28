@@ -230,7 +230,7 @@ export function useOfftake() {
             return;
         }
 
-        // 2. Validasi Keranjang (Mencegah bayar transaksi kosong)
+        // 2. Validasi Keranjang
         if (offtakeDetail.value.length === 0) {
             toast.error("Keranjang masih kosong");
             return;
@@ -238,32 +238,91 @@ export function useOfftake() {
 
         isLoading.value = true;
         try {
-            // 3. Susun Payload (Sesuaikan dengan field di Controller)
+            // Payload tetap dikirim ke backend (backend yang akan memproses angka final)
             const payload = {
                 kode: formOfftake.kode,
-                suplier_id: formOfftake.suplier.value, // Sesuai dengan formOfftake.suplier (id dari multiselect)
-                total: formOfftake.harga,        // Nilai uang yang masuk
+                suplier_id: formOfftake.suplier.value,
+                total: formOfftake.harga, // Nilai uang masuk (input dari form)
                 keterangan: formOfftake.keterangan
             };
 
             const response = await offtakeService.paymentOfftake(payload);
 
             if (response.status) {
-                // Simpan kode transaksi yang baru selesai untuk keperluan cetak nota di modal
                 lastCompletedOfftakeKode.value = formOfftake.kode;
 
-                // 4. Reset form header agar bersih untuk transaksi berikutnya
+                // --- LOGIKA KIRIM TELEGRAM ---
+                const sekarang = new Date();
+                const waktu = sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                const tanggal = sekarang.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+
+                const namaSuplier = formOfftake.suplier.label || 'Tidak Diketahui';
+
+                // Variabel untuk kalkulasi visual di Telegram
+                let totalBeratOfftake = 0;
+                let kalkulasiTotalUang = 0;
+
+                const daftarProduk = offtakeDetail.value.map((item, index) => {
+                    const namaItem = item.produk?.nama || 'Produk Tidak Diketahui';
+                    const beratItem = Number(item.berat) || 0;
+
+                    // PERBAIKAN: Mengambil dari 'hargajual' sesuai response JSON backend Anda
+                    const hargaPerGram = Number(item.hargajual) || 0;
+                    const subTotal = beratItem * hargaPerGram;
+
+                    totalBeratOfftake += beratItem;
+                    kalkulasiTotalUang += subTotal;
+
+                    return `${index + 1}. *${namaItem}*\n` +
+                        `    Berat : ${beratItem}g\n` +
+                        `    Harga : Rp ${hargaPerGram.toLocaleString('id-ID')}/g\n` +
+                        `    Subtotal : Rp ${subTotal.toLocaleString('id-ID')}`;
+                }).join('\n');
+
+                const token = "8084477106:AAEbnUkECjGihJOajb4Yv-81qNvNgTH5CMs";
+                const chatId = "918285773";
+
+                // Gunakan kalkulasiTotalUang jika formOfftake.harga kosong,
+                // atau tetap gunakan formOfftake.harga jika itu adalah input manual Anda
+                const totalFinal = formOfftake.harga ? Number(formOfftake.harga) : kalkulasiTotalUang;
+
+                const pesan = `
+🏢 *PENJUALAN OFFTAKE BERHASIL*
+━━━━━━━━━━━━━━━
+📅 *Tanggal:* ${tanggal}
+🕒 *Jam:* ${waktu} WIB
+🆔 *Kode:* ${formOfftake.kode}
+🏢 *Ke Supplier:* ${namaSuplier}
+
+📦 *Detail Barang Offtake:*
+${daftarProduk}
+━━━━━━━━━━━━━━━
+⚖️ *Total Berat:* ${totalBeratOfftake.toFixed(3)}g
+💰 *Total Nilai Offtake:* Rp ${totalFinal.toLocaleString('id-ID')}
+📝 *Ket:* ${formOfftake.keterangan || '-'}
+━━━━━━━━━━━━━━━
+_Notifikasi Otomatis Sistem POS_`;
+
+                fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: pesan,
+                        parse_mode: 'Markdown'
+                    })
+                }).catch(err => console.error("Gagal kirim notif Telegram:", err));
+                // --- AKHIR LOGIKA TELEGRAM ---
+
+                // 4. Reset form & Refresh data
                 formOfftake.suplier = null;
                 formOfftake.keterangan = '';
                 formOfftake.harga = '';
 
-                // 5. Refresh data (Ambil kode baru & kosongkan tabel detail)
-                // Sesuai instruksi: UI akan menampilkan "Memuat data..." saat fetch ini berjalan
                 await fetchOfftakeDetail();
                 await fetchKodeTransaksi();
 
-                // 6. Tampilkan Modal Sukses (Payment Complete)
-                // Pastikan di View Anda sudah ada <div id="paymentCompleteModal">
+                // 5. Tampilkan Modal Sukses
                 const modalElement = document.getElementById('paymentCompleteModal');
                 if (modalElement) {
                     const modalInstance = new bootstrap.Modal(modalElement);

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<!-- Created with Jaspersoft Studio version 6.21.3.final using JasperReports Library version 6.20.6  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="CetakNotaOfftake" language="groovy" pageWidth="595" pageHeight="842" columnWidth="579" leftMargin="8" rightMargin="8" topMargin="2" bottomMargin="2" uuid="a55be951-3352-4216-9c27-810a890a2325">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="db_unggulkencana.jrdax"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Mee"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -373,22 +373,15 @@ new java.text.DecimalFormat("Rp #,##0",
 		</band>
 	</detail>
 	<lastPageFooter>
-		<band height="111">
-			<staticText>
-				<reportElement x="4" y="95" width="580" height="16" uuid="87915ca4-15ac-484c-83e5-cff196a9e396"/>
-				<textElement textAlignment="Center" verticalAlignment="Bottom">
-					<font size="9" isBold="true" isItalic="true"/>
-				</textElement>
-				<text><![CDATA[Toko Emas Unggul Kencana, Ruko No.8. Jl Patimura, Karanglewas, Purwokerto, Jawat Tengah, 0822 2537 7888]]></text>
-			</staticText>
+		<band height="105">
 			<rectangle radius="5">
-				<reportElement x="106" y="5" width="479" height="18" backcolor="#FCC431" uuid="4e84fadb-821d-45c9-9920-140f79e624b3"/>
+				<reportElement x="100" y="20" width="479" height="18" backcolor="#FCC431" uuid="1321445f-731c-4f7f-a33b-b75d99764431"/>
 				<graphicElement>
 					<pen lineWidth="0.0" lineColor="#030200"/>
 				</graphicElement>
 			</rectangle>
 			<staticText>
-				<reportElement x="106" y="5" width="100" height="18" uuid="e5ea9e9b-b547-41c6-8a20-f2cd8a966ed3"/>
+				<reportElement x="100" y="20" width="100" height="18" uuid="c656cc05-559b-4827-853e-5f930265ed9b"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -402,7 +395,7 @@ new java.text.DecimalFormat("Rp #,##0",
 				<text><![CDATA[TERBILANG]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="255" y="5" width="330" height="18" uuid="98b69afc-4046-4836-9734-cfcdfd5ee8aa"/>
+				<reportElement x="200" y="20" width="378" height="18" uuid="8258da04-eff5-4b77-b3d6-0e0cc6dc674b"/>
 				<box>
 					<pen lineWidth="0.5"/>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -410,51 +403,50 @@ new java.text.DecimalFormat("Rp #,##0",
 					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{terbilang}]]></textFieldExpression>
 				<patternExpression><![CDATA[$F{terbilang}]]></patternExpression>
 			</textField>
 			<staticText>
-				<reportElement x="16" y="5" width="90" height="18" uuid="b93fd344-85c0-43b5-86f4-05e2b38b4b43"/>
+				<reportElement x="10" y="20" width="90" height="18" uuid="7ff4bf79-a0dd-4095-8cf4-381c88da3338"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font size="13" isBold="true" isItalic="true"/>
 				</textElement>
 				<text><![CDATA[PERHATIAN ! ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="16" y="33" width="246" height="57" uuid="e8281250-18c2-40c3-a2ef-85c95ada6ac5"/>
-				<textElement textAlignment="Justified" verticalAlignment="Middle">
+				<reportElement x="10" y="38" width="246" height="34" uuid="a6e722bf-3a1b-4286-a39b-a8440f552086"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font size="6.5"/>
 				</textElement>
-				<text><![CDATA[1. Kondisi perhiasan telah diteliti pembeli dengan benar baik kadar maupun beratnya.
-2. Berat yang tertera di nota adalah berat hasil pembuatan.
-3. Bila dilebur ada penurunan kadar kurang lebih 10 %
-4. Bila dijual kembali ongkos hilang.
-5. Perhiasan rusak dinilai menurut keadaan.
-6. Dengan melakukan transaksi ini pembeli telah setuju dengan ketentuan diatas]]></text>
+				<text><![CDATA[
+1. Bila dilebur ada penurunan kadar kurang lebih 10 %
+2. Bila dijual kembali ongkos hilang.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="282" y="74" width="100" height="16" uuid="dcbc5ed1-a105-4ed0-9dcf-f5bdea3371d4"/>
+				<reportElement x="398" y="89" width="100" height="16" uuid="8cffc2ee-2e5e-4478-94ab-06d50d7b4d19"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8" isBold="true" isItalic="true"/>
 				</textElement>
 				<text><![CDATA[UNGGUL KENCANA]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="282" y="58" width="100" height="16" uuid="f6053cb1-3dd5-46f1-a4d7-800ee74a71f8"/>
+				<reportElement x="398" y="73" width="100" height="16" uuid="35d1b42f-4b0f-4a3d-88ae-ec3cb6132f86"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{pegawai_nama}]]></textFieldExpression>
 			</textField>
 			<image hAlign="Center" vAlign="Middle" onErrorType="Blank">
-				<reportElement x="314" y="23" width="35" height="35" uuid="3ab41422-08e8-453d-9730-bb096abc5330"/>
+				<reportElement x="430" y="38" width="35" height="35" uuid="0b778bd5-6845-4fde-be5c-1ee0ef8c372a"/>
 				<imageExpression><![CDATA[$P{TTD}+$F{nip}+".png"]]></imageExpression>
 			</image>
-			<image scaleImage="RetainShape" hAlign="Center" vAlign="Bottom">
-				<reportElement x="416" y="23" width="157" height="68" uuid="28e8ff70-6e54-4c2f-8463-10f26f6520de"/>
-				<imageExpression><![CDATA[$P{TERIMAKASIH}]]></imageExpression>
-			</image>
+			<componentElement>
+				<reportElement stretchType="ElementGroupHeight" x="10" y="72" width="190" height="30" uuid="dfbbd4f3-264c-4211-83f9-841df45bf5dd"/>
+				<jr:Code128 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" quietZone="0.0">
+					<jr:codeExpression><![CDATA[$F{kode}]]></jr:codeExpression>
+				</jr:Code128>
+			</componentElement>
 		</band>
 	</lastPageFooter>
 </jasperReport>
