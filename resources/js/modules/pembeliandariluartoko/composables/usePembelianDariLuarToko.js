@@ -489,25 +489,22 @@ export function usePembelianDariLuarToko() {
     };
 
     const paymentPembelian = async () => {
-        // 1. Validasi awal
         if (!formDariLuarToko.selectedId) {
-            const tipe = formDariLuarLuarToko.sumber === 'supplier' ? "Suplier" : "Pelanggan";
+            const tipe = formDariLuarToko.sumber === 'supplier' ? "Suplier" : "Pelanggan";
             toast.error(`Silakan pilih ${tipe} terlebih dahulu sebelum bayar.`);
             return;
         }
 
         if (pembeliandetail.value.length === 0) {
-            toast.error("Keranjang masih kosong. Tambahkan produk terlebih dahulu.");
+            toast.error("Keranjang masih kosong.");
             return;
         }
-
-        // Hitung Grand Total untuk notifikasi
-        const grandTotalLuarToko = pembeliandetail.value.reduce((acc, item) => acc + (Number(item.hargabeli) || 0), 0);
 
         isLoading.value = true;
         try {
             const actualId = formDariLuarToko.selectedId?.value || formDariLuarToko.selectedId;
 
+            // Payload tetap sesuai kontrak awal dengan Backend
             const payload = {
                 kode: formDariLuarToko.kode,
                 sumber: formDariLuarToko.sumber,
@@ -520,23 +517,29 @@ export function usePembelianDariLuarToko() {
             if (response.status) {
                 lastCompletedPembelianKode.value = formDariLuarToko.kode;
 
-                // --- LOGIKA KIRIM TELEGRAM ---
+                // --- LOGIKA NOTIFIKASI TELEGRAM ---
                 const sekarang = new Date();
                 const waktu = sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
                 const tanggal = sekarang.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 
-                // Identifikasi Sumber (Supplier / Pelanggan)
                 const labelSumber = formDariLuarToko.sumber === 'supplier' ? '🏢 Supplier' : '👤 Pelanggan';
                 const namaSumber = formDariLuarToko.selectedId?.label || 'Tidak Diketahui';
 
+                // Variabel lokal untuk kalkulasi tampilan total di Telegram
+                let totalBayarTelegram = 0;
+
                 const daftarProduk = pembeliandetail.value.map((item, index) => {
                     const namaItem = item.produk?.nama || item.nama_barang || 'Produk Baru';
-                    const beratItem = item.berat || item.produk?.berat || 0;
-                    const hargaBeli = item.hargabeli || 0;
+                    const beratItem = Number(item.berat || item.produk?.berat) || 0;
+                    const hargaPerGram = Number(item.hargabeli) || 0;
+
+                    const subTotalItem = hargaPerGram * beratItem;
+                    totalBayarTelegram += subTotalItem;
 
                     return `${index + 1}. *${namaItem}*\n` +
                         `    Berat : ${beratItem}g\n` +
-                        `    Harga Beli : Rp ${hargaBeli.toLocaleString('id-ID')}`;
+                        `    Harga : Rp ${hargaPerGram.toLocaleString('id-ID')}/g\n` +
+                        `    Subtotal : Rp ${subTotalItem.toLocaleString('id-ID')}`;
                 }).join('\n');
 
                 const token = "8084477106:AAEbnUkECjGihJOajb4Yv-81qNvNgTH5CMs";
@@ -554,7 +557,7 @@ export function usePembelianDariLuarToko() {
 📜 *Rincian Barang:*
 ${daftarProduk}
 ━━━━━━━━━━━━━━━
-💰 *Total Bayar Keluar:* Rp ${grandTotalLuarToko.toLocaleString('id-ID')}
+💰 *Total Bayar Keluar:* Rp ${totalBayarTelegram.toLocaleString('id-ID')}
 📝 *Ket:* ${formDariLuarToko.keterangan || '-'}
 ━━━━━━━━━━━━━━━
 _Notifikasi Otomatis Sistem Pembelian_`;
@@ -562,18 +565,13 @@ _Notifikasi Otomatis Sistem Pembelian_`;
                 fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: pesan,
-                        parse_mode: 'Markdown'
-                    })
+                    body: JSON.stringify({ chat_id: chatId, text: pesan, parse_mode: 'Markdown' })
                 }).catch(err => console.error("Telegram Error:", err));
                 // --- AKHIR LOGIKA TELEGRAM ---
 
-                // Reset Form & Trigger Modal
+                // Reset UI State
                 formDariLuarToko.selectedId = null;
                 formDariLuarToko.keterangan = '';
-
                 await fetchKodeTransaksi();
                 await fetchPembelianDetail();
 
@@ -584,7 +582,6 @@ _Notifikasi Otomatis Sistem Pembelian_`;
                 }
             }
         } catch (error) {
-            console.error("Payment Error:", error);
             toast.error(error.response?.data?.message || "Gagal memproses pembayaran");
         } finally {
             isLoading.value = false;
