@@ -49,11 +49,11 @@ class PembelianService
         } elseif ($angka < 100) {
             $hasil = $this->terbilang(floor($angka / 10)) . " PULUH " . $this->terbilang($angka % 10);
         } elseif ($angka < 200) {
-            $hasil = "seratus " . $this->terbilang($angka - 100);
+            $hasil = "SERATUS " . $this->terbilang($angka - 100);
         } elseif ($angka < 1000) {
             $hasil = $this->terbilang(floor($angka / 100)) . " RATUS " . $this->terbilang($angka % 100);
         } elseif ($angka < 2000) {
-            $hasil = "seribu " . $this->terbilang($angka - 1000);
+            $hasil = "SERIBU " . $this->terbilang($angka - 1000);
         } elseif ($angka < 1000000) {
             $hasil = $this->terbilang(floor($angka / 1000)) . " RIBU " . $this->terbilang($angka % 1000);
         } elseif ($angka < 1000000000) {
