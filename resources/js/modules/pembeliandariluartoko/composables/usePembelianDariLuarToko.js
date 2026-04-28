@@ -489,49 +489,94 @@ export function usePembelianDariLuarToko() {
     };
 
     const paymentPembelian = async () => {
-        // 1. Validasi: Pastikan ID Supplier/Pelanggan sudah dipilih
+        // 1. Validasi awal
         if (!formDariLuarToko.selectedId) {
-            const tipe = formDariLuarToko.sumber === 'supplier' ? "Suplier" : "Pelanggan";
+            const tipe = formDariLuarLuarToko.sumber === 'supplier' ? "Suplier" : "Pelanggan";
             toast.error(`Silakan pilih ${tipe} terlebih dahulu sebelum bayar.`);
             return;
         }
 
-        // 2. Validasi: Pastikan ada barang di tabel (keranjang)
         if (pembeliandetail.value.length === 0) {
             toast.error("Keranjang masih kosong. Tambahkan produk terlebih dahulu.");
             return;
         }
 
+        // Hitung Grand Total untuk notifikasi
+        const grandTotalLuarToko = pembeliandetail.value.reduce((acc, item) => acc + (Number(item.hargabeli) || 0), 0);
+
         isLoading.value = true;
         try {
-            // --- PERBAIKAN DI SINI ---
-            // Kita ekstrak ID-nya saja. Jika terpilih objek, ambil .value-nya.
             const actualId = formDariLuarToko.selectedId?.value || formDariLuarToko.selectedId;
 
-            // 3. Siapkan Payload untuk Backend
             const payload = {
                 kode: formDariLuarToko.kode,
                 sumber: formDariLuarToko.sumber,
-                selectedId: actualId, // Sekarang bernilai integer (misal: 1)
+                selectedId: actualId,
                 keterangan: formDariLuarToko.keterangan
             };
-            // -------------------------
 
             const response = await pembeliandariluartokoService.paymentPembelian(payload);
 
             if (response.status) {
                 lastCompletedPembelianKode.value = formDariLuarToko.kode;
-                toast.success("Transaksi Berhasil Disimpan!");
 
-                // 4. Reset Form & Refresh State
+                // --- LOGIKA KIRIM TELEGRAM ---
+                const sekarang = new Date();
+                const waktu = sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                const tanggal = sekarang.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+
+                // Identifikasi Sumber (Supplier / Pelanggan)
+                const labelSumber = formDariLuarToko.sumber === 'supplier' ? '🏢 Supplier' : '👤 Pelanggan';
+                const namaSumber = formDariLuarToko.selectedId?.label || 'Tidak Diketahui';
+
+                const daftarProduk = pembeliandetail.value.map((item, index) => {
+                    const namaItem = item.produk?.nama || item.nama_barang || 'Produk Baru';
+                    const beratItem = item.berat || item.produk?.berat || 0;
+                    const hargaBeli = item.hargabeli || 0;
+
+                    return `${index + 1}. *${namaItem}*\n` +
+                        `    Berat : ${beratItem}g\n` +
+                        `    Harga Beli : Rp ${hargaBeli.toLocaleString('id-ID')}`;
+                }).join('\n');
+
+                const token = "8084477106:AAEbnUkECjGihJOajb4Yv-81qNvNgTH5CMs";
+                const chatId = "918285773";
+
+                const pesan = `
+📦 *PEMBELIAN LUAR TOKO BERHASIL*
+━━━━━━━━━━━━━━━
+📅 *Tanggal:* ${tanggal}
+🕒 *Jam:* ${waktu} WIB
+🆔 *Kode:* ${formDariLuarToko.kode}
+📂 *Sumber:* ${labelSumber}
+📛 *Nama:* ${namaSumber}
+
+📜 *Rincian Barang:*
+${daftarProduk}
+━━━━━━━━━━━━━━━
+💰 *Total Bayar Keluar:* Rp ${grandTotalLuarToko.toLocaleString('id-ID')}
+📝 *Ket:* ${formDariLuarToko.keterangan || '-'}
+━━━━━━━━━━━━━━━
+_Notifikasi Otomatis Sistem Pembelian_`;
+
+                fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: pesan,
+                        parse_mode: 'Markdown'
+                    })
+                }).catch(err => console.error("Telegram Error:", err));
+                // --- AKHIR LOGIKA TELEGRAM ---
+
+                // Reset Form & Trigger Modal
                 formDariLuarToko.selectedId = null;
                 formDariLuarToko.keterangan = '';
 
-                // Generate Kode Baru & Bersihkan Tabel
                 await fetchKodeTransaksi();
                 await fetchPembelianDetail();
 
-                // 5. Trigger Modal Selesai
                 const modalElement = document.getElementById('paymentCompleteModal');
                 if (modalElement) {
                     const modalInstance = new bootstrap.Modal(modalElement);
