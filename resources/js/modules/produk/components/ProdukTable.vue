@@ -44,8 +44,9 @@
                                 <td scope="row">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
                                 <td class="barcode-column text-center">
                                     <div class="d-flex flex-column align-items-center justify-content-center">
-                                        <img :src="item.kodeproduk ? `/storage/images/barcode/${item.kodeproduk}.png?t=${new Date().getTime()}` : BASE_DEFAULT_IMAGE_URL"
-                                            class="barcode-style" :alt="item.kodeproduk">
+                                        <img :src="item.kodeproduk ? getBarcodeImage(item.kodeproduk) : BASE_DEFAULT_IMAGE_URL"
+                                            class="barcode-style" :alt="item.kodeproduk"
+                                            @error="(e) => handleBarcodeFallback(e, item.kodeproduk)">
 
                                         <span class="barcode-text fw-bold">{{ item.kodeproduk }}</span>
                                     </div>
@@ -184,6 +185,30 @@ watch(isLoading, (status) => {
 onMounted(() => {
     initFeather();
 });
+
+const getBarcodeImage = (kode) => {
+    const timestamp = new Date().getTime()
+    return `/storage/images/barcode/${kode}.png?t=${timestamp}`
+}
+
+const handleBarcodeFallback = (event, kode) => {
+    const timestamp = new Date().getTime()
+
+    // kalau PNG gagal → coba JPG
+    if (event.target.src.includes('.png')) {
+        event.target.src = `/storage/images/barcode/${kode}.jpg?t=${timestamp}`
+    } else {
+        // kalau JPG juga gagal → fallback default
+        event.target.src = BASE_DEFAULT_IMAGE_URL
+    }
+}
+
+const handleImageError = (event) => {
+    const img = event.target;
+    if (img.src.includes('.png')) {
+        img.src = img.src.replace('.png', '.jpg') + `?t=${new Date().getTime()}`;
+    }
+};
 </script>
 
 <style>
