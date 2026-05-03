@@ -15,7 +15,7 @@ use Intervention\Image\Interfaces\ImageInterface;
 
 class ProdukController extends Controller
 {
-    protected $productService;
+    protected ProductService $productService;
 
     // Inject service ke controller
     public function __construct(ProductService $productService)
