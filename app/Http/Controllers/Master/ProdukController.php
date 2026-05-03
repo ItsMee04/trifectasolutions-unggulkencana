@@ -44,8 +44,6 @@ class ProdukController extends Controller
 
     public function storeProduk(Request $request)
     {
-        // 1. Validasi dilakukan di awal.
-        // Jika gagal di sini, fungsi generateUniqueCode() belum sempat dipanggil.
         $request->validate([
             'nama'          => 'required',
             'berat'         => ['required', 'regex:/^\d+\.\d{1,}$/'],
@@ -54,61 +52,49 @@ class ProdukController extends Controller
             'jeniskarat'    => 'required|exists:jeniskarat,id',
             'lingkar'       => 'nullable|integer',
             'panjang'       => 'nullable|integer',
-            'harga'         => 'required|exists:harga,id', // Sesuai diskusi, ini harga_id
+            'harga'         => 'required|exists:harga,id',
             'keterangan'    => 'nullable|string',
-            'image'         => 'image|mimes:jpeg,png,jpg|max:2048',
+            'image'         => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // 2. Gunakan Transaction untuk memastikan atomisitas
         DB::beginTransaction();
 
-        // Inisialisasi variabel untuk keperluan cleanup di blok catch
         $barcodePath = null;
-        $image = '';
+        $imageNameForDb = null;
 
         try {
-            // Generate kode hanya dilakukan SETELAH validasi request berhasil
+            // 🔹 Generate kode produk
             $kodeproduk = $this->productService->generateUniqueCode();
 
-            /**
-             * 3. Generate BARCODE
-             * Optimasi: Menggunakan PNG, skala lebar 2, dan tinggi 40 agar mudah di-scan.
-             */
+            // 🔹 Generate barcode
             $barcodeGenerator = new DNS1D();
-
-            // Menggunakan getBarcodePNG karena PNG lebih tajam (lossless) daripada JPG untuk barcode
             $barcodeBase64 = $barcodeGenerator->getBarcodePNG($kodeproduk, 'C128', 2, 40);
             $barcodeData = base64_decode($barcodeBase64);
-            $barcodePath = 'images/barcode/' . $kodeproduk . '.png';
 
-            // Simpan Barcode ke Storage
+            $barcodePath = 'images/barcode/' . $kodeproduk . '.png';
             Storage::disk('public')->put($barcodePath, $barcodeData);
 
-            /**
-             * 4. Handle Image Produk
-             */
+            // 🔹 Handle image upload
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
+
                 $imageNameForDb = $kodeproduk . '.' . $file->getClientOriginalExtension();
 
-                // Inisialisasi Manager dengan Imagick
                 $manager = new ImageManager(new Driver());
 
-                // Membaca gambar (Gunakan path asli)
-                /** @var ImageInterface $image */
-                $image = $manager->read($file->getRealPath());
+                $img = $manager->read($file->getRealPath());
 
-                // Kompresi & Resize
-                $image->scale(width: 800);
-                $encoded = $image->toJpeg(75);
+                // resize + compress
+                $img->scale(width: 800);
+                $encoded = $img->toJpeg(75);
 
-                // Simpan
-                Storage::disk('public')->put('images/produk/' . $imageNameForDb, $encoded->toString());
+                Storage::disk('public')->put(
+                    'images/produk/' . $imageNameForDb,
+                    $encoded->toString()
+                );
             }
 
-            /**
-             * 5. Simpan ke Database
-             */
+            // 🔹 Simpan ke DB (PASTIKAN STRING, BUKAN OBJECT)
             $produk = Produk::create([
                 'kodeproduk'      => $kodeproduk,
                 'nama'            => strtoupper($request->nama),
@@ -120,10 +106,9 @@ class ProdukController extends Controller
                 'panjang'         => $request->panjang ?? 0,
                 'harga_id'        => $request->harga,
                 'keterangan'      => strtoupper($request->keterangan),
-                'image'           => $image,
+                'image'           => $imageNameForDb, // ✅ FIX DI SINI
             ]);
 
-            // Jika sampai sini tidak ada error, simpan permanen
             DB::commit();
 
             return response()->json([
@@ -132,16 +117,16 @@ class ProdukController extends Controller
                 'data' => $produk
             ], 201);
         } catch (\Exception $e) {
-            // Jika ada error apa pun (DB error, Disk full, dll), batalkan semua
             DB::rollBack();
 
-            // Hapus file yang terlanjur diupload jika ada
+            // 🔹 rollback file barcode
             if ($barcodePath && Storage::disk('public')->exists($barcodePath)) {
                 Storage::disk('public')->delete($barcodePath);
             }
 
-            if ($image && Storage::disk('public')->exists('images/produk/' . $image)) {
-                Storage::disk('public')->delete('images/produk/' . $image);
+            // 🔹 rollback image
+            if ($imageNameForDb && Storage::disk('public')->exists('images/produk/' . $imageNameForDb)) {
+                Storage::disk('public')->delete('images/produk/' . $imageNameForDb);
             }
 
             return response()->json([
