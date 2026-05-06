@@ -41,6 +41,7 @@ return new class extends Migration
                     SELECT
                         dt.tgl AS tanggal,
                         jp.jenis AS kategori,
+                        jp.urutan AS urutan_kategori,
 
                         -- UNIT AWAL: Akumulasi Masuk vs Keluar di masa lalu
                         COALESCE((
@@ -102,7 +103,7 @@ return new class extends Migration
                     FROM deret_tanggal dt
                     CROSS JOIN jenisproduk jp
                 ) AS main
-                ORDER BY main.tanggal ASC, main.kategori ASC;
+                ORDER BY main.tanggal ASC, main.urutan_kategori ASC;
             END
         ");
     }

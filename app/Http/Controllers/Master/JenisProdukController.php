@@ -14,7 +14,7 @@ class JenisProdukController extends Controller
 {
     public function getJenisProduk()
     {
-        $data = JenisProduk::where('status', 1)->get();
+        $data = JenisProduk::where('status', 1)->orderBy('urutan','asc')->get();
 
         if ($data->isEmpty()) {
             return response()->json([
