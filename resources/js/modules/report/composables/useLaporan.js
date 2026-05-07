@@ -129,6 +129,34 @@ export function useLaporan() {
         }
     }
 
+    const cetakLaporanNampan = async () => {
+        if (!validateForm()) return false;
+
+        const payload = {
+            periodedari: formLaporan.tanggaldari,
+            periodesampai: formLaporan.tanggalsampai
+        }
+
+        try {
+            const { url } = await laporanService.cetakLaporanNampan(payload)
+            window.open(url, '_blank')
+        } catch (e) {
+            console.log(e)
+            toast.error('Gagal mencetak laporan nampan')
+        }
+    }
+
+    const cetakLaporanProduk = async () => {
+
+        try {
+            const { url } = await laporanService.cetakLaporanProduk()
+            window.open(url, '_blank')
+        } catch (e) {
+            console.log(e)
+            toast.error('Gagal mencetak laporan produk')
+        }
+    }
+
     return {
         errors,
         formLaporan,
@@ -137,6 +165,8 @@ export function useLaporan() {
         cetakLaporanOfftake,
         cetakLaporanPerbaikan,
         cetakLaporanStokBulanan,
-        cetakLaporanMutasiSaldo
+        cetakLaporanMutasiSaldo,
+        cetakLaporanNampan,
+        cetakLaporanProduk,
     }
 }

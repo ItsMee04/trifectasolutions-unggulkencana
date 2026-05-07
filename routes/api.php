@@ -222,6 +222,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('laporan/getsignedurl-cetaklaporanperbaikan', [LaporanController::class, 'getSignedCetakLaporanPerbaikanUrl'])->middleware('check.permission:laporan,can_view');
     Route::post('laporan/getsignedurl-cetaklaporanmutasisaldo', [LaporanController::class, 'getSignedCetakLaporanMutasiSaldoUrl'])->middleware('check.permission:laporan,can_view');
     Route::post('laporan/getsignedurl-cetaklaporanstokbulanan', [LaporanController::class, 'getSignedCetakLaporanStokBulananUrl'])->middleware('check.permission:laporan,can_view');
+    Route::post('laporan/getsignedurl-cetaklaporannampan', [LaporanController::class, 'getSignedCetakLaporanNampanUrl'])->middleware('check.permission:laporan,can_view');
+    Route::post('laporan/getsignedurl-cetaklaporanproduk', [LaporanController::class, 'getSignedCetakLaporanProdukUrl'])->middleware('check.permission:laporan,can_view');
 });
 
 Route::get('/transaksi/CetakNotaPenjualan', [TransaksiController::class, 'CetakNotaPenjualan'])->name('produk.cetak_notapenjualan');
@@ -235,5 +237,7 @@ Route::get('/laporan/cetaklaporanofftake', [LaporanController::class, 'CetakLapo
 Route::get('/laporan/cetaklaporanperbaikan', [LaporanController::class, 'CetakLaporanPerbaikan'])->name('produk.cetak_laporanperbaikan');
 Route::get('/laporan/cetaklaporanmutasisaldo', [LaporanController::class, 'CetakLaporanMutasiSaldo'])->name('produk.cetak_laporanmutasisaldo');
 Route::get('/laporan/cetaklaporanstokbulanan', [LaporanController::class, 'CetakLaporanStokBulanan'])->name('produk.cetak_laporanstokbulanan');
+Route::get('/laporan/cetaklaporannampan', [LaporanController::class, 'CetakLaporanNampan'])->name('produk.cetak_laporannampan');
+Route::get('/laporan/cetaklaporanproduk', [LaporanController::class, 'CetakLaporanProduk'])->name('produk.cetak_laporanproduk');
 
 Route::post('laporan/CompileReports', [CompailReportController::class, 'CompileReports']);

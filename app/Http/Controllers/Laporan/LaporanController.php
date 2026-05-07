@@ -506,4 +506,151 @@ class LaporanController extends Controller
             return response()->json(['error' => 'Gagal membuat laporan: ' . $e->getMessage()], 500);
         }
     }
+
+    public function getSignedCetakLaporanNampanUrl(Request $request)
+    {
+        $route_name = 'produk.cetak_laporannampan';
+        $expiration = now()->addMinutes(5);
+
+        $signedUrl = URL::temporarySignedRoute(
+            $route_name,
+            $expiration,
+            [
+                'TANGGAL_AWAL' => $request->periodedari,
+                'TANGGAL_AKHIR' => $request->periodesampai
+            ]
+        );
+
+        return response()->json(['url' => $signedUrl]);
+    }
+
+    public function CetakLaporanNampan(Request $request)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '512M');
+
+        if (!$request->hasValidSignature()) {
+            abort(401, 'Invalid signature.');
+        }
+
+        $TANGGAL_AWAL  = $request->query('TANGGAL_AWAL');
+        $TANGGAL_AKHIR = $request->query('TANGGAL_AKHIR');
+
+        if (!$TANGGAL_AWAL) {
+            abort(400, 'Tanggal awal tidak ditemukan');
+        }
+
+        if (!$TANGGAL_AKHIR) {
+            abort(400, 'Tanggal akhir tidak ditemukan');
+        }
+
+        $jasper_file = resource_path('reports/CetakLaporanNampan.jasper');
+
+        $db = config('database.connections.mysql');
+
+        $parameters = [
+            'TANGGAL_AWAL' => $TANGGAL_AWAL,
+            'TANGGAL_AKHIR' => $TANGGAL_AKHIR
+        ];
+
+        try {
+            $tempDir = storage_path('app/temp');
+            if (!file_exists($tempDir)) mkdir($tempDir, 0777, true);
+
+            $outputFile = $tempDir . '/LaporanNampan-' . $TANGGAL_AWAL . ' _sd_ ' . $TANGGAL_AKHIR;
+
+            $jasper = new \PHPJasper\PHPJasper;
+            $jasper->process(
+                $jasper_file,
+                $outputFile,
+                [
+                    'format' => ['pdf'],
+                    'params' => $parameters,
+                    'db_connection' => [
+                        'driver' => 'mysql',
+                        'host' => $db['host'],
+                        'port' => $db['port'],
+                        'database' => $db['database'],
+                        'username' => $db['username'],
+                        'password' => $db['password'],
+                    ],
+                ]
+            )->execute();
+
+            $pdfPath = $outputFile . '.pdf';
+            $pdfContent = file_get_contents($pdfPath);
+            unlink($pdfPath);
+
+            return response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="LAPORAN-NAMPAN-' . $TANGGAL_AWAL . ' _sd_ ' . $TANGGAL_AKHIR . '.pdf"',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Gagal membuat laporan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getSignedCetakLaporanProdukUrl(Request $request)
+    {
+        $route_name = 'produk.cetak_laporanproduk';
+        $expiration = now()->addMinutes(5);
+
+        $signedUrl = URL::temporarySignedRoute(
+            $route_name,
+            $expiration,
+            []
+        );
+
+        return response()->json(['url' => $signedUrl]);
+    }
+
+    public function CetakLaporanProduk(Request $request)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '512M');
+
+        if (!$request->hasValidSignature()) {
+            abort(401, 'Invalid signature.');
+        }
+
+        $jasper_file = resource_path('reports/CetakLaporanProduk.jasper');
+
+        $db = config('database.connections.mysql');
+
+        try {
+            $tempDir = storage_path('app/temp');
+            if (!file_exists($tempDir)) mkdir($tempDir, 0777, true);
+
+            $outputFile = $tempDir . '/LaporanProduk';
+
+            $jasper = new \PHPJasper\PHPJasper;
+            $jasper->process(
+                $jasper_file,
+                $outputFile,
+                [
+                    'format' => ['pdf'],
+                    'params' => [],
+                    'db_connection' => [
+                        'driver' => 'mysql',
+                        'host' => $db['host'],
+                        'port' => $db['port'],
+                        'database' => $db['database'],
+                        'username' => $db['username'],
+                        'password' => $db['password'],
+                    ],
+                ]
+            )->execute();
+
+            $pdfPath = $outputFile . '.pdf';
+            $pdfContent = file_get_contents($pdfPath);
+            unlink($pdfPath);
+
+            return response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="LAPORAN-PRODUK-' . '.pdf"',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Gagal membuat laporan: ' . $e->getMessage()], 500);
+        }
+    }
 }

@@ -25,4 +25,12 @@ export const laporanService = {
         const response = await apiClient.post('/laporan/getsignedurl-cetaklaporanmutasisaldo', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
+    async cetakLaporanNampan(payload) {
+        const response = await apiClient.post('/laporan/getsignedurl-cetaklaporannampan', payload);
+        return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
+    },
+    async cetakLaporanProduk(payload) {
+        const response = await apiClient.post('/laporan/getsignedurl-cetaklaporanproduk', payload);
+        return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
+    },
 }
