@@ -22,68 +22,42 @@ return new class extends Migration
             )
             BEGIN
                 SELECT
-                    tanggal,
-                    nama_baki,
-                    kategori,
-                    kodeproduk,
-                    nama_produk,
-                    berat,
-                    kadar,
-                    pergerakan,
-                    status_data
-                FROM (
-                    -- 1. BAGIAN DETAIL PRODUK
-                    -- Menampilkan semua riwayat masuk, keluar, atau pindah
-                    SELECT
-                        n.tanggal AS tanggal,
-                        n.nampan AS nama_baki,
-                        jp.jenis AS kategori,
-                        p.kodeproduk AS kodeproduk,
-                        p.nama AS nama_produk,
-                        p.berat AS berat,
-                        k.karat AS kadar,
-                        np.jenis AS pergerakan,   -- MASUK / KELUAR / PINDAH
-                        np.status AS status_data,  -- 1: Aktif, 2: Terjual, 0: Dihapus
-                        jp.urutan AS urutan_kat,   -- Sesuai urutan master jenisproduk
-                        1 AS tipe_baris            -- Prioritas tampilan pertama
-                    FROM nampan n
-                    JOIN nampanproduk np ON n.id = np.nampan_id
-                    JOIN produk p ON np.produk_id = p.id
-                    JOIN jenisproduk jp ON p.jenisproduk_id = jp.id
-                    JOIN karat k ON p.karat_id = k.id
-                    WHERE n.tanggal BETWEEN TANGGAL_AWAL AND TANGGAL_AKHIR
+                    n.tanggal,
+                    n.nampan AS nama_baki,
+                    jp.jenis AS kategori,
+                    p.kodeproduk,
+                    p.nama AS nama_produk,
+                    p.berat,
+                    k.karat AS kadar,
+                    np.jenis AS pergerakan,
+                    np.status AS status_data,
 
-                    UNION ALL
+                    -- Kolom Baru: Total Unit Aktif dalam Nampan ini
+                    (SELECT COUNT(np2.produk_id)
+                     FROM nampanproduk np2
+                     WHERE np2.nampan_id = n.id
+                       AND np2.jenis = 'MASUK'
+                       AND np2.status = 1) AS total_unit_nampan,
 
-                    -- 2. BAGIAN RINGKASAN (TOTAL PER BAKI)
-                    -- Hanya menghitung barang yang MASUK dan STATUS 1 (Tersedia)
-                    SELECT
-                        n.tanggal AS tanggal,
-                        n.nampan AS nama_baki,
-                        jp.jenis AS kategori,
-                        '>> TOTAL' AS kodeproduk,
-                        CONCAT(COUNT(p.id), ' Unit Aktif') AS nama_produk,
-                        SUM(p.berat) AS berat,
-                        NULL AS kadar,
-                        'RINGKASAN' AS pergerakan,
-                        1 AS status_data,
-                        jp.urutan AS urutan_kat,
-                        2 AS tipe_baris            -- Muncul tepat di bawah detail produk
-                    FROM nampan n
-                    JOIN nampanproduk np ON n.id = np.nampan_id
-                    JOIN produk p ON np.produk_id = p.id
-                    JOIN jenisproduk jp ON p.jenisproduk_id = jp.id
-                    WHERE n.tanggal BETWEEN TANGGAL_AWAL AND TANGGAL_AKHIR
-                      AND np.jenis = 'MASUK'
-                      AND np.status = 1            -- KUNCI: Hanya yang masih di nampan
-                    GROUP BY n.tanggal, n.id, n.nampan, jp.jenis, jp.urutan
-                ) AS gabungan
+                    -- Kolom Baru: Total Berat Aktif dalam Nampan ini
+                    (SELECT SUM(p2.berat)
+                     FROM nampanproduk np3
+                     JOIN produk p2 ON np3.produk_id = p2.id
+                     WHERE np3.nampan_id = n.id
+                       AND np3.jenis = 'MASUK'
+                       AND np3.status = 1) AS total_berat_nampan
+
+                FROM nampan n
+                JOIN nampanproduk np ON n.id = np.nampan_id
+                JOIN produk p ON np.produk_id = p.id
+                JOIN jenisproduk jp ON p.jenisproduk_id = jp.id
+                JOIN karat k ON p.karat_id = k.id
+                WHERE n.tanggal BETWEEN TANGGAL_AWAL AND TANGGAL_AKHIR
                 ORDER BY
-                    tanggal ASC,
-                    nama_baki ASC,
-                    urutan_kat ASC,
-                    tipe_baris ASC,
-                    kodeproduk ASC;
+                    n.tanggal ASC,
+                    n.nampan ASC,
+                    jp.urutan ASC,
+                    p.kodeproduk ASC;
             END
         ");
     }
