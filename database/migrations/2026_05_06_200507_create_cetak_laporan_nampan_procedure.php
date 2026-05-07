@@ -21,43 +21,82 @@ return new class extends Migration
                 IN TANGGAL_AKHIR DATE
             )
             BEGIN
+                WITH RECURSIVE tanggal_range AS (
+                SELECT DATE(TANGGAL_AWAL) AS tanggal
+
+                UNION ALL
+
+                SELECT DATE_ADD(tanggal, INTERVAL 1 DAY)
+                FROM tanggal_range
+                WHERE tanggal < TANGGAL_AKHIR
+            ),
+
+            last_log AS (
                 SELECT
-                    n.tanggal,
-                    n.nampan AS nama_baki,
-                    jp.jenis AS kategori,
-                    p.kodeproduk,
-                    p.nama AS nama_produk,
-                    p.berat,
-                    k.karat AS kadar,
-                    np.jenis AS pergerakan,
-                    np.status AS status_data,
+                    tr.tanggal AS tanggal_laporan,
+                    np.produk_id,
+                    MAX(np.id) AS last_id
+                FROM tanggal_range tr
+                JOIN nampanproduk np
+                    ON np.tanggal <= tr.tanggal
+                GROUP BY
+                    tr.tanggal,
+                    np.produk_id
+            ),
 
-                    -- Kolom Baru: Total Unit Aktif dalam Nampan ini
-                    (SELECT COUNT(np2.produk_id)
-                     FROM nampanproduk np2
-                     WHERE np2.nampan_id = n.id
-                       AND np2.jenis = 'MASUK'
-                       AND np2.status = 1) AS total_unit_nampan,
+            stok_aktif AS (
+                SELECT
+                    ll.tanggal_laporan,
+                    np.nampan_id,
+                    np.produk_id,
+                    np.jenis,
+                    np.status
+                FROM last_log ll
+                JOIN nampanproduk np
+                    ON np.id = ll.last_id
+                WHERE
+                    np.jenis = 'MASUK'
+            )
 
-                    -- Kolom Baru: Total Berat Aktif dalam Nampan ini
-                    (SELECT SUM(p2.berat)
-                     FROM nampanproduk np3
-                     JOIN produk p2 ON np3.produk_id = p2.id
-                     WHERE np3.nampan_id = n.id
-                       AND np3.jenis = 'MASUK'
-                       AND np3.status = 1) AS total_berat_nampan
+            SELECT
+                sa.tanggal_laporan AS tanggal,
 
-                FROM nampan n
-                JOIN nampanproduk np ON n.id = np.nampan_id
-                JOIN produk p ON np.produk_id = p.id
-                JOIN jenisproduk jp ON p.jenisproduk_id = jp.id
-                JOIN karat k ON p.karat_id = k.id
-                WHERE n.tanggal BETWEEN TANGGAL_AWAL AND TANGGAL_AKHIR
-                ORDER BY
-                    n.tanggal ASC,
-                    n.nampan ASC,
-                    jp.urutan ASC,
-                    p.kodeproduk ASC;
+                n.nampan,
+
+                p.kodeproduk,
+                p.nama,
+                p.berat,
+
+                kr.karat,
+
+                sa.jenis,
+                sa.status,
+
+                COUNT(sa.produk_id)
+                OVER (
+                    PARTITION BY sa.tanggal_laporan, n.id
+                ) AS total_item,
+
+                SUM(p.berat)
+                OVER (
+                    PARTITION BY sa.tanggal_laporan, n.id
+                ) AS total_berat
+
+            FROM stok_aktif sa
+
+            JOIN nampan n
+                ON sa.nampan_id = n.id
+
+            JOIN produk p
+                ON sa.produk_id = p.id
+
+            JOIN karat kr
+                ON p.karat_id = kr.id
+
+            ORDER BY
+                sa.tanggal_laporan,
+                n.nampan,
+                p.nama;
             END
         ");
     }

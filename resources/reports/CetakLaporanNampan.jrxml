@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.21.3.final using JasperReports Library version 6.20.6  -->
+<!-- Created with Jaspersoft Studio version 6.21.3.final using JasperReports Library version 6.21.3-4a3078d20785ebe464f18037d738d12fc98c13cf  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="CetakLaporanNampan" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0bd958f3-0bf3-4c09-9391-264cc2b5bce9">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Mee"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="localhost"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -38,26 +38,21 @@
 	<field name="tanggal" class="java.sql.Date">
 		<property name="com.jaspersoft.studio.field.name" value="tanggal"/>
 		<property name="com.jaspersoft.studio.field.label" value="tanggal"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="nampan"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="tanggal_range"/>
 	</field>
-	<field name="nama_baki" class="java.lang.String">
+	<field name="nampan" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="nampan"/>
-		<property name="com.jaspersoft.studio.field.label" value="nama_baki"/>
+		<property name="com.jaspersoft.studio.field.label" value="nampan"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="nampan"/>
-	</field>
-	<field name="kategori" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="jenis"/>
-		<property name="com.jaspersoft.studio.field.label" value="kategori"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="jenisproduk"/>
 	</field>
 	<field name="kodeproduk" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="kodeproduk"/>
 		<property name="com.jaspersoft.studio.field.label" value="kodeproduk"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="produk"/>
 	</field>
-	<field name="nama_produk" class="java.lang.String">
+	<field name="nama" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="nama"/>
-		<property name="com.jaspersoft.studio.field.label" value="nama_produk"/>
+		<property name="com.jaspersoft.studio.field.label" value="nama"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="produk"/>
 	</field>
 	<field name="berat" class="java.math.BigDecimal">
@@ -65,28 +60,28 @@
 		<property name="com.jaspersoft.studio.field.label" value="berat"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="produk"/>
 	</field>
-	<field name="kadar" class="java.lang.Integer">
+	<field name="karat" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.name" value="karat"/>
-		<property name="com.jaspersoft.studio.field.label" value="kadar"/>
+		<property name="com.jaspersoft.studio.field.label" value="karat"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="karat"/>
 	</field>
-	<field name="pergerakan" class="java.lang.String">
+	<field name="jenis" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="jenis"/>
-		<property name="com.jaspersoft.studio.field.label" value="pergerakan"/>
+		<property name="com.jaspersoft.studio.field.label" value="jenis"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="nampanproduk"/>
 	</field>
-	<field name="status_data" class="java.lang.Long">
+	<field name="status" class="java.lang.Long">
 		<property name="com.jaspersoft.studio.field.name" value="status"/>
-		<property name="com.jaspersoft.studio.field.label" value="status_data"/>
+		<property name="com.jaspersoft.studio.field.label" value="status"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="nampanproduk"/>
 	</field>
-	<field name="total_unit_nampan" class="java.lang.Long">
-		<property name="com.jaspersoft.studio.field.name" value="total_unit_nampan"/>
-		<property name="com.jaspersoft.studio.field.label" value="total_unit_nampan"/>
+	<field name="total_item" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="total_item"/>
+		<property name="com.jaspersoft.studio.field.label" value="total_item"/>
 	</field>
-	<field name="total_berat_nampan" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.name" value="total_berat_nampan"/>
-		<property name="com.jaspersoft.studio.field.label" value="total_berat_nampan"/>
+	<field name="total_berat" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="total_berat"/>
+		<property name="com.jaspersoft.studio.field.label" value="total_berat"/>
 	</field>
 	<group name="Group1">
 		<groupExpression><![CDATA[$F{tanggal}]]></groupExpression>
@@ -126,7 +121,7 @@
 		</groupHeader>
 	</group>
 	<group name="Group Nampan">
-		<groupExpression><![CDATA[$F{tanggal} + $F{nama_baki}]]></groupExpression>
+		<groupExpression><![CDATA[$F{tanggal} + $F{nampan}]]></groupExpression>
 		<groupHeader>
 			<band height="20">
 				<textField>
@@ -141,7 +136,7 @@
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle"/>
-					<textFieldExpression><![CDATA[$F{total_unit_nampan}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{total_item}]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement mode="Opaque" x="2" y="0" width="153" height="20" forecolor="#FFFFFF" backcolor="#5CB9E0" uuid="7d89791a-526b-4862-a80e-b3665a28c07d">
@@ -171,7 +166,7 @@
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle"/>
-					<textFieldExpression><![CDATA[$F{total_berat_nampan}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{total_berat}]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
@@ -329,7 +324,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{nama_baki}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{nampan}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="155" y="0" width="104" height="20" uuid="ce0ce2b0-6ae2-4466-a40c-392821ecfb32">
@@ -355,7 +350,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{nama_produk}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{nama}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="390" y="0" width="55" height="20" uuid="a29fb680-084e-4307-99a5-e1858014eb9d">
@@ -381,7 +376,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{kadar}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{karat}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="500" y="0" width="55" height="20" uuid="eb15bd85-2d2c-47cc-aeda-67d8dfd88365">
@@ -394,7 +389,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{pergerakan}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{jenis}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
