@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.21.3.final using JasperReports Library version 6.21.3-4a3078d20785ebe464f18037d738d12fc98c13cf  -->
+<!-- Created with Jaspersoft Studio version 6.21.3.final using JasperReports Library version 6.20.6  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="CetakLaporanNampan" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0bd958f3-0bf3-4c09-9391-264cc2b5bce9">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="localhost"/>
@@ -174,22 +174,22 @@
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<title>
-		<band height="86" splitType="Stretch">
+	<pageHeader>
+		<band height="89">
 			<staticText>
-				<reportElement x="132" y="10" width="291" height="30" uuid="df191360-73f6-4f8a-a3a2-f47027abc5b1"/>
+				<reportElement x="137" y="15" width="291" height="30" uuid="4568d1f4-56f4-4870-9f7c-5080480732f2"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="22" isBold="true"/>
 				</textElement>
 				<text><![CDATA[LAPORAN NAMPAN / BAKI]]></text>
 			</staticText>
 			<line>
-				<reportElement x="2" y="80" width="550" height="1" uuid="69b48686-d638-45d5-b499-6a5a922b1199">
+				<reportElement x="7" y="85" width="550" height="1" uuid="799c51e9-8a20-4d13-9b4c-e7f15642e646">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 			</line>
 			<textField>
-				<reportElement x="209" y="40" width="186" height="20" uuid="6fa63fdc-e248-4c1f-a300-705bac5b579d"/>
+				<reportElement x="214" y="45" width="186" height="20" uuid="6a381726-9d82-421e-aa90-8bd9378135eb"/>
 				<box>
 					<pen lineWidth="1.0" lineStyle="Dotted"/>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -203,14 +203,14 @@
 				<textFieldExpression><![CDATA[$P{TANGGAL_AWAL}  + " s/d " +  $P{TANGGAL_AKHIR}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="159" y="40" width="50" height="20" uuid="a555e420-ad60-4df0-9e18-123cfec0380f"/>
+				<reportElement x="164" y="45" width="50" height="20" uuid="9975fb43-ef6a-4f1a-823e-c32a2548fbc6"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[Tanggal :]]></text>
 			</staticText>
 		</band>
-	</title>
+	</pageHeader>
 	<columnHeader>
 		<band height="19" splitType="Stretch">
 			<staticText>
