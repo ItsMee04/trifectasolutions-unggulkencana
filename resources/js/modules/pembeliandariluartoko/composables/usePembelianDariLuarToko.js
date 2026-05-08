@@ -542,8 +542,8 @@ export function usePembelianDariLuarToko() {
                         `    Subtotal : Rp ${subTotalItem.toLocaleString('id-ID')}`;
                 }).join('\n');
 
-                const token = "8084477106:AAEbnUkECjGihJOajb4Yv-81qNvNgTH5CMs";
-                const chatId = "918285773";
+                const token = "8084477106:AAGwZGbis8-g7l7m5l2jspFKqwHoXcWL9Tw";
+                const chatId = "-1003885534469";
 
                 const pesan = `
 📦 *PEMBELIAN LUAR TOKO BERHASIL*

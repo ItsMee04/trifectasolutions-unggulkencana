@@ -342,8 +342,8 @@ export function usePembelianDariToko() {
                         `    Harga Beli : Rp ${hargaBeli.toLocaleString('id-ID')} (${jenisHarga})`;
                 }).join('\n');
 
-                const token = "8084477106:AAEbnUkECjGihJOajb4Yv-81qNvNgTH5CMs";
-                const chatId = "918285773";
+                const token = "8084477106:AAGwZGbis8-g7l7m5l2jspFKqwHoXcWL9Tw";
+                const chatId = "-1003885534469";
 
                 const pesan = `
 📥 *PEMBELIAN DARI TOKO BERHASIL*
