@@ -171,7 +171,7 @@ const router = createRouter({
 // Navigation Guard
 router.beforeEach((to, from, next) => {
     // Ambil token langsung dari sessionStorage untuk validasi cepat
-    const isAuthenticated = sessionStorage.getItem('auth_token');
+    const isAuthenticated = localStorage.getItem('auth_token');
 
     // 1. Jika pengguna sudah login dan mencoba akses halaman login
     if (to.meta.guestOnly && isAuthenticated) {
