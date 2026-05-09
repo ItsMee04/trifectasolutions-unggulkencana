@@ -318,6 +318,7 @@ export function usePOS() {
                 toast.error("Minimal penggunaan poin adalah 10");
                 return;
             }
+
             if (inputPoint.value > formPOS.pelanggan.point) {
                 toast.error("Poin melebihi saldo yang dimiliki pelanggan");
                 return;
@@ -325,12 +326,17 @@ export function usePOS() {
         }
 
         isLoading.value = true;
+
         try {
             const payload = {
                 kode: TransaksiID.value,
                 pelanggan: formPOS.pelanggan.value,
-                diskon: selectedDiskon.value ? selectedDiskon.value.value : null,
-                point_digunakan: usePoint.value ? inputPoint.value : 0,
+                diskon: selectedDiskon.value
+                    ? selectedDiskon.value.value
+                    : null,
+                point_digunakan: usePoint.value
+                    ? inputPoint.value
+                    : 0,
                 total: grandTotal
             };
 
@@ -339,38 +345,66 @@ export function usePOS() {
             if (response.status) {
                 lastCompletedTransactionId.value = TransaksiID.value;
 
-                // --- LOGIKA KIRIM TELEGRAM ---
+                // ===============================
+                // TELEGRAM NOTIFICATION
+                // ===============================
+
                 const sekarang = new Date();
-                const waktu = sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                const tanggal = sekarang.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 
-                const namaPelanggan = formPOS.pelanggan.label || 'Umum';
+                const waktu = sekarang.toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
 
-                // 1. Susun Rincian Barang
-                const daftarProduk = TransaksiDetail.value.map((item, index) => {
-                    const namaItem = item.nama || item.nama_produk || (item.produk ? item.produk.nama : 'Produk Tidak Diketahui');
-                    const beratItem = item.berat || 0;
-                    const hargaPerGram = item.hargajual || 0;
-                    const subTotalItem = beratItem * hargaPerGram;
+                const tanggal = sekarang.toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                });
 
-                    return `${index + 1}. *${namaItem}*\n` +
-                        `    Berat : ${beratItem}g\n` +
-                        `    Harga : Rp ${hargaPerGram.toLocaleString('id-ID')}/g\n` +
-                        `    Subtotal : Rp ${subTotalItem.toLocaleString('id-ID')}`;
-                }).join('\n');
+                const namaPelanggan =
+                    formPOS.pelanggan.label || 'Umum';
 
-                // 2. Susun Baris Diskon & Poin (Jika ada)
+                // Detail Produk
+                const daftarProduk = TransaksiDetail.value
+                    .map((item, index) => {
+
+                        const namaItem =
+                            item.nama ||
+                            item.nama_produk ||
+                            (item.produk
+                                ? item.produk.nama
+                                : 'Produk Tidak Diketahui');
+
+                        const beratItem = item.berat || 0;
+
+                        const hargaPerGram =
+                            item.hargajual || 0;
+
+                        const subTotalItem =
+                            beratItem * hargaPerGram;
+
+                        return `${index + 1}. *${namaItem}*\n` +
+                            `    Berat : ${beratItem}g\n` +
+                            `    Harga : Rp ${hargaPerGram.toLocaleString('id-ID')}/g\n` +
+                            `    Subtotal : Rp ${subTotalItem.toLocaleString('id-ID')}`;
+                    })
+                    .join('\n');
+
+                // Diskon & Point
                 let infoTambahan = "";
+
                 if (selectedDiskon.value) {
-                    infoTambahan += `\n🎁 *Diskon:* ${selectedDiskon.value.label} (-Rp ${selectedDiskon.value.nilai.toLocaleString('id-ID')})`;
+                    infoTambahan +=
+                        `\n🎁 *Diskon:* ${selectedDiskon.value.label} (-Rp ${selectedDiskon.value.nilai.toLocaleString('id-ID')})`;
                 }
+
                 if (payload.point_digunakan > 0) {
-                    infoTambahan += `\n🪙 *Poin Digunakan:* ${payload.point_digunakan}`;
+                    infoTambahan +=
+                        `\n🪙 *Poin Digunakan:* ${payload.point_digunakan}`;
                 }
 
-                const token = "8084477106:AAGwZGbis8-g7l7m5l2jspFKqwHoXcWL9Tw";
-                const chatId = "-1003885534469";
-
+                // Pesan Telegram
                 const pesan = `
 ✅ *TRANSAKSI PENJUALAN BERHASIL*
 ━━━━━━━━━━━━━━━
@@ -382,31 +416,44 @@ export function usePOS() {
 📦 *Detail Barang:*
 ${daftarProduk}
 ━━━━━━━━━━━━━━━${infoTambahan}
+
 💰 *Grand Total:* Rp ${grandTotal.toLocaleString('id-ID')}
 ━━━━━━━━━━━━━━━
 _Notifikasi Otomatis Sistem POS_`;
 
-                fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: pesan,
-                        parse_mode: 'Markdown'
-                    })
-                }).catch(err => console.error("Gagal kirim notif Telegram:", err));
-                // --- AKHIR LOGIKA TELEGRAM ---
+                // Kirim ke Backend Laravel
+                try {
+                    await transaksiService.sendTelegramNotification({
+                        pesan
+                    });
+                } catch (telegramError) {
+                    console.error(
+                        'Gagal mengirim notifikasi Telegram:',
+                        telegramError
+                    );
+                }
 
-                // Tampilkan Modal Pembayaran Selesai
-                const modalElement = document.getElementById('paymentModal');
+                // ===============================
+                // SHOW MODAL
+                // ===============================
+
+                const modalElement =
+                    document.getElementById('paymentModal');
+
                 if (modalElement) {
-                    const modalInstance = new bootstrap.Modal(modalElement);
+                    const modalInstance =
+                        new bootstrap.Modal(modalElement);
+
                     modalInstance.show();
                 }
             }
         } catch (error) {
             console.error(error);
-            toast.error(error.response?.data?.message || "Gagal memproses pembayaran");
+
+            toast.error(
+                error.response?.data?.message ||
+                "Gagal memproses pembayaran"
+            );
         } finally {
             isLoading.value = false;
         }

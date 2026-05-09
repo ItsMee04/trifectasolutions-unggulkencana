@@ -10,11 +10,12 @@ use App\Services\TransaksiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
 
 class TransaksiController extends Controller
 {
-    protected $transaksiService;
+    protected TransaksiService $transaksiService;
 
     // Inject service melalui constructor
     public function __construct(TransaksiService $transaksiService)
@@ -514,6 +515,56 @@ class TransaksiController extends Controller
             return response()->json([
                 'status'  => false,
                 'message' => 'Gagal membatalkan transaksi: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function sendTelegramNotification(Request $request)
+    {
+        $request->validate([
+            'pesan' => 'required|string',
+        ]);
+
+        try {
+            $botToken = config('services.telegram.bot_token');
+            $chatId   = config('services.telegram.chat_id');
+
+            // Local bypass SSL, production tetap verify SSL
+            $httpClient = app()->environment('local')
+                ? Http::withoutVerifying()
+                : Http::withOptions([]);
+
+            $response = $httpClient->post(
+                "https://api.telegram.org/bot{$botToken}/sendMessage",
+                [
+                    'chat_id'    => $chatId,
+                    'text'       => $request->pesan,
+                    'parse_mode' => 'Markdown',
+                ]
+            );
+
+            if (!$response->successful()) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Gagal mengirim notifikasi Telegram',
+                    'data'    => [
+                        'telegram_response' => $response->json()
+                    ]
+                ], 500);
+            }
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Notifikasi Telegram berhasil dikirim',
+                'data'    => $response->json()
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Terjadi kesalahan saat mengirim notifikasi Telegram',
+                'data'    => [
+                    'error' => $e->getMessage()
+                ]
             ], 500);
         }
     }

@@ -33,4 +33,8 @@ export const transaksiService = {
         const response = await apiClient.post('/transaksipenjualan/batalTransaksi', payload);
         return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
     },
+    async sendTelegramNotification(payload) {
+        const response = await apiClient.post('/telegram/sendnotification', payload);
+        return response.data; // Sesuaikan dengan struktur JSON Laravel Anda
+    },
 }

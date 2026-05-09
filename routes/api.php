@@ -140,7 +140,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('nampanproduk/deleteNampanProduk', [NampanProdukController::class, 'deleteNampanProduk'])->middleware('check.permission:nampanproduk,can_delete');
     Route::post('nampanproduk/getProdukInNampanByJenis', [NampanProdukController::class, 'getProdukInNampanByJenis'])->middleware('check.permission:nampanproduk,can_view');
 
-
     Route::get('pelanggan/getPelanggan', [PelangganController::class, 'getPelanggan'])->middleware('check.permission:pelanggan,can_view');
     Route::post('pelanggan/storePelanggan', [PelangganController::class, 'storePelanggan'])->middleware('check.permission:pelanggan,can_create');
     Route::post('pelanggan/updatePelanggan', [PelangganController::class, 'updatePelanggan'])->middleware('check.permission:pelanggan,can_edit');
@@ -173,6 +172,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('transaksi/batalTransaksiDetail', [TransaksiController::class, 'batalTransaksiDetail'])->middleware('check.permission:transaksi,can_edit');
     Route::post('transaksi/paymentTransaksi', [TransaksiController::class, 'paymentTransaksi'])->middleware('check.permission:transaksi,can_create');
     Route::post('/transaksi/getSignedNotaPenjualanUrl', [TransaksiController::class, 'getSignedNotaPenjualanUrl'])->middleware('check.permission:transaksi,can_view');
+    Route::post('telegram/sendnotification', [TransaksiController::class, 'sendTelegramNotification'])->middleware('check.permission:transaksi,can_create');
 
     Route::get('offtake/getKodeTransaksi', [OfftakeController::class, 'getKodeTransaksi'])->middleware('check.permission:offtake,can_view');
     Route::post('offtake/storeProdukToOfftakeDetail', [OfftakeController::class, 'storeProdukToOfftakeDetail'])->middleware('check.permission:offtake,can_create');

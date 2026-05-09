@@ -1,29 +1,30 @@
-import { ref, computed, reactive } from 'vue';
-import toast from '../../../helper/toast';
-import Swal from 'sweetalert2';
+import { ref, computed, reactive } from "vue";
+import toast from "../../../helper/toast";
+import Swal from "sweetalert2";
 
-import { pembeliandaritokoService } from '../services/pembeliandaritokoService'
-import { kondisiService } from '../../../modules/kondisi/services/kondisiService'
+import { pembeliandaritokoService } from "../services/pembeliandaritokoService";
+import { kondisiService } from "../../../modules/kondisi/services/kondisiService";
+import { transaksiService } from "../../../modules/transaksi/services/transaksiService";
 
 const isLoading = ref(false);
 const errors = ref({});
-const lastCompletedPembelianKode = ref('');
+const lastCompletedPembelianKode = ref("");
 
-const searchPembelianDariTokoProduk = ref('');
+const searchPembelianDariTokoProduk = ref("");
 const currentPagePembelianDariTokoProduk = ref(1);
 const itemsPerPagePembelianDariTokoProduk = 5;
 const PembelianDariToko = ref([]);
 
 // STATE TRANSAKSI
 const isLoadingTransaksiPelanggan = ref(false);
-const searchTransaksiPelanggan = ref('');
+const searchTransaksiPelanggan = ref("");
 const currentPageTransaksiPelanggan = ref(1);
 const itemsPerPageTransaksiPelanggan = 5;
 const transaksiPelanggan = ref([]);
 
 // STATE PEMBELIAN DETAIL
 const isLoadingPembelianDetail = ref(false);
-const searchPembelianDetail = ref('')
+const searchPembelianDetail = ref("");
 const currentPagePembelianDetail = ref(1);
 const itemsPerPagePembelianDetail = 5;
 const pembeliandetail = ref([]);
@@ -34,36 +35,40 @@ const kondisiList = ref([]);
 const formDariToko = reactive({
     id: null,
     kode: null,
-    kodetransaksi: '',
-    pelanggan: '',
+    kodetransaksi: "",
+    pelanggan: "",
     pelanggan_id: null, // Untuk database (ID)
-    keterangan: '',
-})
+    keterangan: "",
+});
 
 const formPembelianDetail = reactive({
     id: null,
-    kodeproduk: '',
+    kodeproduk: "",
     hargajual: 0,
     hargabeli: 0,
     berat: 0,
     kondisi: null,
-    jenis_hargabeli: 'harga_jual'
-})
+    jenis_hargabeli: "harga_jual",
+});
 
 export function usePembelianDariToko() {
-
     const validateFormCariTransaksiPelanggan = () => {
         errors.value = {}; // Reset error
-        if (!formDariToko.kodetransaksi || formDariToko.kodetransaksi.trim() === '') {
-            errors.value.kodetransaksi = 'Kode Transaksi tidak boleh kosong.';
+        if (
+            !formDariToko.kodetransaksi ||
+            formDariToko.kodetransaksi.trim() === ""
+        ) {
+            errors.value.kodetransaksi = "Kode Transaksi tidak boleh kosong.";
         }
         return Object.keys(errors.value).length === 0;
     };
 
     const handleCariTransaksiPelanggan = () => {
-        formDariToko.kodetransaksi = '';
+        formDariToko.kodetransaksi = "";
         errors.value = {};
-        const modal = new bootstrap.Modal(document.getElementById('carikodetransaksiModal'));
+        const modal = new bootstrap.Modal(
+            document.getElementById("carikodetransaksiModal"),
+        );
         modal.show();
     };
 
@@ -91,27 +96,32 @@ export function usePembelianDariToko() {
         isLoadingTransaksiPelanggan.value = true;
         try {
             const payload = { kode: formDariToko.kodetransaksi };
-            const response = await pembeliandaritokoService.getTransaksiByKode(payload);
+            const response =
+                await pembeliandaritokoService.getTransaksiByKode(payload);
             const dataRes = response.data || [];
             transaksiPelanggan.value = dataRes;
 
             if (dataRes.length > 0) {
                 // Simpan Nama untuk UI
-                formDariToko.pelanggan = dataRes[0].pelanggan?.nama || '';
+                formDariToko.pelanggan = dataRes[0].pelanggan?.nama || "";
                 // Simpan ID untuk dikirim ke Backend nanti
                 formDariToko.pelanggan_id = dataRes[0].pelanggan?.id || null;
             }
 
-            toast.success(response.message || 'Data berhasil ditemukan');
+            toast.success(response.message || "Data berhasil ditemukan");
 
             // Tutup Modal
-            const modalElement = document.getElementById('carikodetransaksiModal');
+            const modalElement = document.getElementById(
+                "carikodetransaksiModal",
+            );
             const modalInstance = bootstrap.Modal.getInstance(modalElement);
             if (modalInstance) modalInstance.hide();
 
             return true;
         } catch (error) {
-            const errorMessage = error.response?.data?.message || "Terjadi kesalahan saat menyimpan data";
+            const errorMessage =
+                error.response?.data?.message ||
+                "Terjadi kesalahan saat menyimpan data";
             toast.error(errorMessage);
         } finally {
             isLoadingTransaksiPelanggan.value = false;
@@ -123,9 +133,8 @@ export function usePembelianDariToko() {
             kode: formDariToko.kode,
             kodetransaksi: formDariToko.kodetransaksi,
             produk: item.transaksidetail?.produk_id,
-            pelanggan_id: formDariToko.pelanggan_id
-        }
-
+            pelanggan_id: formDariToko.pelanggan_id,
+        };
 
         if (!payload.produk) {
             toast.error("ID Produk tidak ditemukan");
@@ -134,7 +143,10 @@ export function usePembelianDariToko() {
 
         try {
             // 2. Kirim ke Service
-            const response = await pembeliandaritokoService.storeProdukToPembelianDetail(payload);
+            const response =
+                await pembeliandaritokoService.storeProdukToPembelianDetail(
+                    payload,
+                );
 
             if (response.status) {
                 toast.success(response.message);
@@ -142,16 +154,17 @@ export function usePembelianDariToko() {
                 // 3. REFRESH TABEL UTAMA
                 // Panggil fungsi untuk mengambil data keranjang terbaru
                 // agar item yang baru dipilih muncul di View Parent
-                if (typeof fetchPembelianDetail === 'function') {
+                if (typeof fetchPembelianDetail === "function") {
                     await fetchPembelianDetail();
                 }
             }
         } catch (error) {
             // Menampilkan pesan error dari backend (misal: "Produk sedang dalam proses transaksi aktif")
-            const errorMessage = error.response?.data?.message || "Gagal menambahkan produk";
+            const errorMessage =
+                error.response?.data?.message || "Gagal menambahkan produk";
             toast.error(errorMessage);
         }
-    }
+    };
 
     const fetchPembelianDetail = async () => {
         isLoadingPembelianDetail.value = true;
@@ -159,8 +172,11 @@ export function usePembelianDariToko() {
         formDariToko.pelanggan = "Memuat data...";
 
         try {
-            const response = await pembeliandaritokoService.getPembelianDetail();
-            const dataRes = Array.isArray(response) ? response : (response.data || []);
+            const response =
+                await pembeliandaritokoService.getPembelianDetail();
+            const dataRes = Array.isArray(response)
+                ? response
+                : response.data || [];
             pembeliandetail.value = dataRes;
 
             if (dataRes.length > 0) {
@@ -169,8 +185,10 @@ export function usePembelianDariToko() {
                 // LOGIKASINKRONISASI NAMA PELANGGAN
                 // Kita ambil dari objek pembelian -> relasi pelanggan
                 if (itemPertama.pembelian && itemPertama.pembelian.pelanggan) {
-                    formDariToko.pelanggan = itemPertama.pembelian.pelanggan.nama;
-                    formDariToko.pelanggan_id = itemPertama.pembelian.pelanggan_id;
+                    formDariToko.pelanggan =
+                        itemPertama.pembelian.pelanggan.nama;
+                    formDariToko.pelanggan_id =
+                        itemPertama.pembelian.pelanggan_id;
                 } else {
                     // Jika relasi pelanggan belum di-load backend, atau pelanggan_id null
                     formDariToko.pelanggan = "Pelanggan Tidak Diketahui";
@@ -194,9 +212,9 @@ export function usePembelianDariToko() {
         try {
             const response = await kondisiService.getKondisi();
             // Map data agar formatnya { value: id, label: 'nama' } sesuai standar Multiselect
-            kondisiList.value = response.data.map(kondisiList => ({
+            kondisiList.value = response.data.map((kondisiList) => ({
                 value: kondisiList.id,
-                label: kondisiList.kondisi // Sesuaikan field 'role' dengan nama kolom di tabel roles Anda
+                label: kondisiList.kondisi, // Sesuaikan field 'role' dengan nama kolom di tabel roles Anda
             }));
         } catch (error) {
             console.error("Gagal memuat Kondisi:", error);
@@ -205,12 +223,15 @@ export function usePembelianDariToko() {
 
     const handleEdit = async (item) => {
         errors.value = {};
-        formPembelianDetail.id = item.id
+        formPembelianDetail.id = item.id;
         formPembelianDetail.kodeproduk = item.produk?.kodeproduk;
-        formPembelianDetail.hargajual = item.kodetransaksi?.transaksidetail?.hargajual;
-        const modal = new bootstrap.Modal(document.getElementById('pembeliandetaileditModal'));
+        formPembelianDetail.hargajual =
+            item.kodetransaksi?.transaksidetail?.hargajual;
+        const modal = new bootstrap.Modal(
+            document.getElementById("pembeliandetaileditModal"),
+        );
         modal.show();
-    }
+    };
 
     const handleSubmitEdit = async () => {
         // 1. Reset Errors
@@ -220,13 +241,23 @@ export function usePembelianDariToko() {
         let valid = true;
         const newErrors = {};
 
-        if (!formPembelianDetail.hargabeli || formPembelianDetail.hargabeli <= 0) {
-            newErrors.hargabeli = ["Harga beli harus diisi dan lebih besar dari 0."];
+        if (
+            !formPembelianDetail.hargabeli ||
+            formPembelianDetail.hargabeli <= 0
+        ) {
+            newErrors.hargabeli = [
+                "Harga beli harus diisi dan lebih besar dari 0.",
+            ];
             valid = false;
         }
 
-        if (formPembelianDetail.jenis_hargabeli === 'lebih_tinggi' && !formPembelianDetail.hargabeli) {
-            newErrors.hargabeli = ["Silakan masukkan harga manual dengan benar."];
+        if (
+            formPembelianDetail.jenis_hargabeli === "lebih_tinggi" &&
+            !formPembelianDetail.hargabeli
+        ) {
+            newErrors.hargabeli = [
+                "Silakan masukkan harga manual dengan benar.",
+            ];
             valid = false;
         }
 
@@ -246,13 +277,16 @@ export function usePembelianDariToko() {
                 jenis_hargabeli: formPembelianDetail.jenis_hargabeli,
             };
 
-            const response = await pembeliandaritokoService.updatePembelianDetail(payload);
+            const response =
+                await pembeliandaritokoService.updatePembelianDetail(payload);
 
             if (response.status) {
                 toast.success(response.message);
 
                 // Tutup Modal
-                const modalElement = document.getElementById('pembeliandetaileditModal');
+                const modalElement = document.getElementById(
+                    "pembeliandetaileditModal",
+                );
                 const modalInstance = bootstrap.Modal.getInstance(modalElement);
                 if (modalInstance) modalInstance.hide();
 
@@ -260,25 +294,24 @@ export function usePembelianDariToko() {
                 await fetchPembelianDetail();
                 await fetchKodeTransaksi();
             }
-
         } catch (err) {
             // ... (Error handling)
-            toast.error(err)
+            toast.error(err);
         } finally {
             isLoadingPembelianDetail.value = false;
         }
-    }
+    };
 
     const handleDelete = async (item) => {
         const result = await Swal.fire({
-            title: 'Apakah Anda yakin?',
+            title: "Apakah Anda yakin?",
             text: `Data produk "${item.produk?.nama}" yang dihapus tidak dapat dikembalikan!`,
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#092139',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal',
-            reverseButtons: true
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#092139",
+            confirmButtonText: "Ya, hapus!",
+            cancelButtonText: "Batal",
+            reverseButtons: true,
         });
 
         if (result.isConfirmed) {
@@ -287,11 +320,11 @@ export function usePembelianDariToko() {
                     id: item.id,
                 };
                 await pembeliandaritokoService.batalPembelianDetail(payload);
-                toast.success('Data Pembelian berhasil dihapus.');
+                toast.success("Data Pembelian berhasil dihapus.");
                 fetchPembelianDetail();
             } catch (error) {
-                console.log('Gagal menghapus data Pembelian:', error);
-                toast.error(error.response?.message || 'Gagal menghapus data.');
+                console.log("Gagal menghapus data Pembelian:", error);
+                toast.error(error.response?.message || "Gagal menghapus data.");
             }
         }
     };
@@ -303,48 +336,120 @@ export function usePembelianDariToko() {
             return;
         }
 
-        // Hitung total bayar dari seluruh item di keranjang
-        const grandTotalPembelian = pembeliandetail.value.reduce((acc, item) => acc + (Number(item.hargabeli) || 0), 0);
-
         isLoading.value = true;
+
         try {
-            const payload = { kode: formDariToko.kode };
-            const response = await pembeliandaritokoService.paymentPembelian(payload);
+            const payload = {
+                kode: formDariToko.kode,
+            };
+
+            const response =
+                await pembeliandaritokoService.paymentPembelian(payload);
 
             if (response.status) {
                 lastCompletedPembelianKode.value = formDariToko.kode;
 
-                // --- LOGIKA KIRIM TELEGRAM ---
+                // ===============================
+                // HITUNG GRAND TOTAL PEMBELIAN
+                // ===============================
+
+                const grandTotalPembelian = pembeliandetail.value.reduce(
+                    (acc, item) => {
+                        const berat = Number(item.produk?.berat || 0);
+
+                        const hargaJual = Number(
+                            item.kodetransaksi?.transaksidetail?.hargajual || 0,
+                        );
+
+                        // Harga dasar
+                        const totalHargaJual = hargaJual * berat;
+
+                        let totalAkhir = totalHargaJual;
+
+                        // Potongan 4%
+                        if (item.jenis_hargabeli === "potongan_4") {
+                            const potongan = totalHargaJual * 0.04;
+
+                            totalAkhir = totalHargaJual - potongan;
+                        }
+
+                        // Harga custom / lebih tinggi
+                        if (item.jenis_hargabeli === "lebih_tinggi") {
+                            totalAkhir = Number(item.hargabeli || 0);
+                        }
+
+                        return acc + totalAkhir;
+                    },
+                    0,
+                );
+
+                // ===============================
+                // TELEGRAM NOTIFICATION
+                // ===============================
+
                 const sekarang = new Date();
-                const waktu = sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                const tanggal = sekarang.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 
-                const daftarProduk = pembeliandetail.value.map((item, index) => {
-                    const namaItem = item.produk?.nama || 'Produk Tidak Diketahui';
-                    const beratItem = item.produk?.berat || 0;
-                    const hargaBeli = item.hargabeli || 0;
+                const waktu = sekarang.toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                });
 
-                    // Mengambil Harga Jual dari data transaksi asal (jika ada relasinya)
-                    const hargaJual = item.kodetransaksi?.transaksidetail?.hargajual || 0;
+                const tanggal = sekarang.toLocaleDateString("id-ID", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                });
 
-                    // Mapping label jenis harga sesuai dengan opsi di Modal
-                    const labelJenis = {
-                        'hargajual': 'Harga Jual',
-                        'potongan_4': 'Potongan 4%',
-                        'lebih_tinggi': 'Lebih Tinggi'
-                    };
-                    const jenisHarga = labelJenis[item.jenis_hargabeli] || 'Harga Jual';
+                // Detail Produk
+                const daftarProduk = pembeliandetail.value
+                    .map((item, index) => {
+                        const namaItem =
+                            item.produk?.nama || "Produk Tidak Diketahui";
 
-                    // Format string detail produk per baris
-                    return `${index + 1}. *${namaItem}*\n` +
-                        `    Berat : ${beratItem}g\n` +
-                        `    Harga Jual : Rp ${hargaJual.toLocaleString('id-ID')}\n` +
-                        `    Harga Beli : Rp ${hargaBeli.toLocaleString('id-ID')} (${jenisHarga})`;
-                }).join('\n');
+                        const beratItem = Number(item.produk?.berat || 0);
 
-                const token = "8084477106:AAGwZGbis8-g7l7m5l2jspFKqwHoXcWL9Tw";
-                const chatId = "-1003885534469";
+                        const hargaJual = Number(
+                            item.kodetransaksi?.transaksidetail?.hargajual || 0,
+                        );
 
+                        // Harga dasar
+                        const totalHargaJual = hargaJual * beratItem;
+
+                        let hargaBeli = totalHargaJual;
+
+                        // Potongan 4%
+                        if (item.jenis_hargabeli === "potongan_4") {
+                            const potongan = totalHargaJual * 0.04;
+
+                            hargaBeli = totalHargaJual - potongan;
+                        }
+
+                        // Harga custom / lebih tinggi
+                        if (item.jenis_hargabeli === "lebih_tinggi") {
+                            hargaBeli = Number(item.hargabeli || 0);
+                        }
+
+                        // Label jenis harga
+                        const labelJenis = {
+                            hargajual: "Harga Jual",
+                            potongan_4: "Potongan 4%",
+                            lebih_tinggi: "Lebih Tinggi",
+                        };
+
+                        const jenisHarga =
+                            labelJenis[item.jenis_hargabeli] || "Harga Jual";
+
+                        return (
+                            `${index + 1}. *${namaItem}*\n` +
+                            `    Berat : ${beratItem}g\n` +
+                            `    Harga Jual : Rp ${hargaJual.toLocaleString("id-ID")}/g\n` +
+                            `    Total Harga Jual : Rp ${totalHargaJual.toLocaleString("id-ID")}\n` +
+                            `    Harga Beli : Rp ${hargaBeli.toLocaleString("id-ID")} (${jenisHarga})`
+                        );
+                    })
+                    .join("\n");
+
+                // Pesan Telegram
                 const pesan = `
 📥 *PEMBELIAN DARI TOKO BERHASIL*
 ━━━━━━━━━━━━━━━
@@ -356,25 +461,30 @@ export function usePembelianDariToko() {
 📦 *Detail Barang Yang Dibeli:*
 ${daftarProduk}
 ━━━━━━━━━━━━━━━
-💰 *Total Bayar Ke Toko:* Rp ${grandTotalPembelian.toLocaleString('id-ID')}
+💰 *Grand Total Pembelian:* Rp ${grandTotalPembelian.toLocaleString("id-ID")}
 ━━━━━━━━━━━━━━━
 _Notifikasi Otomatis Sistem Pembelian_`;
 
-                fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: pesan,
-                        parse_mode: 'Markdown'
-                    })
-                }).catch(err => console.error("Telegram Error:", err));
-                // --- AKHIR LOGIKA TELEGRAM ---
+                // Kirim Telegram via Backend Laravel
+                try {
+                    await transaksiService.sendTelegramNotification({
+                        pesan,
+                    });
+                } catch (telegramError) {
+                    console.error("Telegram Error:", telegramError);
+                }
 
-                // Munculkan modal sukses
-                const modalElement = document.getElementById('paymentCompleteModal');
+                // ===============================
+                // MODAL SUCCESS
+                // ===============================
+
+                const modalElement = document.getElementById(
+                    "paymentCompleteModal",
+                );
+
                 if (modalElement) {
                     const modalInstance = new bootstrap.Modal(modalElement);
+
                     modalInstance.show();
                 } else {
                     toast.success("Pembayaran Berhasil");
@@ -382,7 +492,10 @@ _Notifikasi Otomatis Sistem Pembelian_`;
             }
         } catch (error) {
             console.error(error);
-            toast.error(error.response?.data?.message || "Gagal memproses pembayaran");
+
+            toast.error(
+                error.response?.data?.message || "Gagal memproses pembayaran",
+            );
         } finally {
             isLoading.value = false;
         }
@@ -401,29 +514,30 @@ _Notifikasi Otomatis Sistem Pembelian_`;
 
         try {
             // Memanggil service cetak
-            const response = await pembeliandaritokoService.CetakNotaPembelian(payload);
+            const response =
+                await pembeliandaritokoService.CetakNotaPembelian(payload);
             if (response.url) {
-                window.open(response.url, '_blank');
+                window.open(response.url, "_blank");
             }
         } catch (e) {
             console.error(e);
-            toast.error('Gagal mencetak nota pembelian');
+            toast.error("Gagal mencetak nota pembelian");
         }
     };
 
     const handleNextOrder = async () => {
         // 1. Reset Header & Data Pelanggan
-        formDariToko.pelanggan = '';
+        formDariToko.pelanggan = "";
         formDariToko.pelanggan_id = null;
-        formDariToko.keterangan = '';
-        formDariToko.kodetransaksi = ''; // Kosongkan input "PM-xxx" di form cari
+        formDariToko.keterangan = "";
+        formDariToko.kodetransaksi = ""; // Kosongkan input "PM-xxx" di form cari
 
         // 2. Kosongkan Keranjang Utama (Tabel Tengah)
         pembeliandetail.value = [];
 
         // 3. Reset Pencarian Produk Pelanggan (Modal Cari & Tabelnya)
         transaksiPelanggan.value = []; // Ini yang bikin tabel produk pelanggan kosong
-        searchTransaksiPelanggan.value = ''; // Reset keyword search di modal
+        searchTransaksiPelanggan.value = ""; // Reset keyword search di modal
         currentPageTransaksiPelanggan.value = 1; // Reset pagination
 
         // 4. Reset Form Edit Produk (Logic Detail)
@@ -431,7 +545,7 @@ _Notifikasi Otomatis Sistem Pembelian_`;
         formPembelianDetail.hargabeli = 0;
         formPembelianDetail.hargajual = 0;
         formPembelianDetail.kondisi = null;
-        formPembelianDetail.jenis_hargabeli = 'hargajual';
+        formPembelianDetail.jenis_hargabeli = "hargajual";
 
         // 5. Generate Kode Transaksi Baru
         await fetchKodeTransaksi();
@@ -440,33 +554,61 @@ _Notifikasi Otomatis Sistem Pembelian_`;
     };
 
     const totalPagesTransaksiPelanggan = computed(() => {
-        const query = String(searchTransaksiPelanggan.value || '').toLowerCase();
+        const query = String(
+            searchTransaksiPelanggan.value || "",
+        ).toLowerCase();
 
-        const filteredCount = (transaksiPelanggan.value || []).filter(item => {
-            return String(item.transaksidetail?.produk?.kodeproduk || '').toLowerCase().includes(query) ||
-                String(item.transaksidetail?.produk?.nama || '').toLowerCase().includes(query)
-        }).length;
+        const filteredCount = (transaksiPelanggan.value || []).filter(
+            (item) => {
+                return (
+                    String(item.transaksidetail?.produk?.kodeproduk || "")
+                        .toLowerCase()
+                        .includes(query) ||
+                    String(item.transaksidetail?.produk?.nama || "")
+                        .toLowerCase()
+                        .includes(query)
+                );
+            },
+        ).length;
 
-        return Math.ceil(filteredCount / itemsPerPagePembelianDariTokoProduk) || 1;
+        return (
+            Math.ceil(filteredCount / itemsPerPagePembelianDariTokoProduk) || 1
+        );
     });
 
     const totalPagesPembelianDariTokoProduk = computed(() => {
-        const query = String(searchPembelianDariTokoProduk.value || '').toLowerCase();
+        const query = String(
+            searchPembelianDariTokoProduk.value || "",
+        ).toLowerCase();
 
-        const filteredCount = (PembelianDariToko.value || []).filter(item => {
-            return String(item.produk?.kodeproduk || '').toLowerCase().includes(query) ||
-                String(item.produk?.nama || '').toLowerCase().includes(query)
+        const filteredCount = (PembelianDariToko.value || []).filter((item) => {
+            return (
+                String(item.produk?.kodeproduk || "")
+                    .toLowerCase()
+                    .includes(query) ||
+                String(item.produk?.nama || "")
+                    .toLowerCase()
+                    .includes(query)
+            );
         }).length;
 
-        return Math.ceil(filteredCount / itemsPerPagePembelianDariTokoProduk) || 1;
+        return (
+            Math.ceil(filteredCount / itemsPerPagePembelianDariTokoProduk) || 1
+        );
     });
 
     const totalPagesPembelianDetail = computed(() => {
-        const query = String(searchPembelianDetail.value || '').toLowerCase();
+        const query = String(searchPembelianDetail.value || "").toLowerCase();
 
-        const filteredCount = (pembeliandetail.value || []).filter(item => {
-            return String(item.produk?.kodeproduk || '').toLowerCase().includes(query) ||
-                String(item.produk?.nama || '').toLowerCase().includes(query)
+        const filteredCount = (pembeliandetail.value || []).filter((item) => {
+            return (
+                String(item.produk?.kodeproduk || "")
+                    .toLowerCase()
+                    .includes(query) ||
+                String(item.produk?.nama || "")
+                    .toLowerCase()
+                    .includes(query)
+            );
         }).length;
 
         return Math.ceil(filteredCount / itemsPerPagePembelianDetail) || 1;
@@ -485,9 +627,11 @@ _Notifikasi Otomatis Sistem Pembelian_`;
         }
 
         const pages = [];
-        for (let i = start; i <= end; i++) { pages.push(i) }
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
         return pages;
-    })
+    });
 
     const displayedPagesPembelianDetail = computed(() => {
         const total = totalPagesPembelianDetail.value;
@@ -502,9 +646,11 @@ _Notifikasi Otomatis Sistem Pembelian_`;
         }
 
         const pages = [];
-        for (let i = start; i <= end; i++) { pages.push(i) }
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
         return pages;
-    })
+    });
 
     const displayedPagesPembelianDariTokoProduk = computed(() => {
         const total = totalPagesPembelianDariTokoProduk.value;
@@ -519,9 +665,11 @@ _Notifikasi Otomatis Sistem Pembelian_`;
         }
 
         const pages = [];
-        for (let i = start; i <= end; i++) { pages.push(i) }
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
         return pages;
-    })
+    });
 
     return {
         formDariToko,
@@ -545,26 +693,45 @@ _Notifikasi Otomatis Sistem Pembelian_`;
         submitTransaksiPelanggan,
         handlePilihTransaksiPelanggan,
         paginatedTransaksiPelanggan: computed(() => {
-            const query = String(searchTransaksiPelanggan.value || '').toLowerCase();
+            const query = String(
+                searchTransaksiPelanggan.value || "",
+            ).toLowerCase();
 
             // 1. Filter dulu
-            const filtered = (transaksiPelanggan.value || []).filter(item =>
-                String(item.transaksidetail?.produk?.kodeproduk || '').toLowerCase().includes(query) ||
-                String(item.transaksidetail?.produk?.nama || '').toLowerCase().includes(query)
+            const filtered = (transaksiPelanggan.value || []).filter(
+                (item) =>
+                    String(item.transaksidetail?.produk?.kodeproduk || "")
+                        .toLowerCase()
+                        .includes(query) ||
+                    String(item.transaksidetail?.produk?.nama || "")
+                        .toLowerCase()
+                        .includes(query),
             );
 
             // 2. Hitung start index
-            const start = (currentPageTransaksiPelanggan.value - 1) * itemsPerPageTransaksiPelanggan;
+            const start =
+                (currentPageTransaksiPelanggan.value - 1) *
+                itemsPerPageTransaksiPelanggan;
 
             // 3. WAJIB RETURN hasil slice
-            return filtered.slice(start, start + itemsPerPageTransaksiPelanggan);
+            return filtered.slice(
+                start,
+                start + itemsPerPageTransaksiPelanggan,
+            );
         }),
 
         filteredTransaksiPelanggan: computed(() => {
-            const query = String(searchTransaksiPelanggan.value || '').toLowerCase();
-            return (transaksiPelanggan.value || []).filter(item =>
-                String(item.transaksidetail?.produk?.kodeproduk || '').toLowerCase().includes(query) ||
-                String(item.transaksidetail?.produk?.nama || '').toLowerCase().includes(query)
+            const query = String(
+                searchTransaksiPelanggan.value || "",
+            ).toLowerCase();
+            return (transaksiPelanggan.value || []).filter(
+                (item) =>
+                    String(item.transaksidetail?.produk?.kodeproduk || "")
+                        .toLowerCase()
+                        .includes(query) ||
+                    String(item.transaksidetail?.produk?.nama || "")
+                        .toLowerCase()
+                        .includes(query),
             );
         }),
 
@@ -585,50 +752,85 @@ _Notifikasi Otomatis Sistem Pembelian_`;
         handleNextOrder,
         handlePrintNota,
         paginatedPembelianDetail: computed(() => {
-            const query = String(searchPembelianDetail.value || '').toLowerCase();
+            const query = String(
+                searchPembelianDetail.value || "",
+            ).toLowerCase();
 
             // 1. Filter dulu
-            const filtered = (pembeliandetail.value || []).filter(item =>
-                String(item.produk?.kodeproduk || '').toLowerCase().includes(query) ||
-                String(item.produk?.nama || '').toLowerCase().includes(query)
+            const filtered = (pembeliandetail.value || []).filter(
+                (item) =>
+                    String(item.produk?.kodeproduk || "")
+                        .toLowerCase()
+                        .includes(query) ||
+                    String(item.produk?.nama || "")
+                        .toLowerCase()
+                        .includes(query),
             );
 
             // 2. Hitung start index
-            const start = (currentPagePembelianDetail.value - 1) * itemsPerPagePembelianDetail;
+            const start =
+                (currentPagePembelianDetail.value - 1) *
+                itemsPerPagePembelianDetail;
 
             // 3. WAJIB RETURN hasil slice
             return filtered.slice(start, start + itemsPerPagePembelianDetail);
         }),
 
         filteredPembelianDetail: computed(() => {
-            const query = String(searchPembelianDetail.value || '').toLowerCase();
-            return (pembeliandetail.value || []).filter(item =>
-                String(item.produk?.kodeproduk || '').toLowerCase().includes(query) ||
-                String(item.produk?.nama || '').toLowerCase().includes(query)
+            const query = String(
+                searchPembelianDetail.value || "",
+            ).toLowerCase();
+            return (pembeliandetail.value || []).filter(
+                (item) =>
+                    String(item.produk?.kodeproduk || "")
+                        .toLowerCase()
+                        .includes(query) ||
+                    String(item.produk?.nama || "")
+                        .toLowerCase()
+                        .includes(query),
             );
         }),
 
         // PERBAIKAN: Tambahkan return dan logic slice
         paginatedPembelianDariToko: computed(() => {
-            const query = String(searchPembelianDariTokoProduk.value || '').toLowerCase();
+            const query = String(
+                searchPembelianDariTokoProduk.value || "",
+            ).toLowerCase();
 
-            const filtered = (PembelianDariToko.value || []).filter(item =>
-                String(item.produk?.kodeproduk || '').toLowerCase().includes(query) ||
-                String(item.produk?.nama || '').toLowerCase().includes(query)
+            const filtered = (PembelianDariToko.value || []).filter(
+                (item) =>
+                    String(item.produk?.kodeproduk || "")
+                        .toLowerCase()
+                        .includes(query) ||
+                    String(item.produk?.nama || "")
+                        .toLowerCase()
+                        .includes(query),
             );
 
-            const start = (currentPagePembelianDariTokoProduk.value - 1) * itemsPerPagePembelianDariTokoProduk;
+            const start =
+                (currentPagePembelianDariTokoProduk.value - 1) *
+                itemsPerPagePembelianDariTokoProduk;
 
             // 3. WAJIB RETURN hasil slice
-            return filtered.slice(start, start + itemsPerPagePembelianDariTokoProduk);
+            return filtered.slice(
+                start,
+                start + itemsPerPagePembelianDariTokoProduk,
+            );
         }),
 
         filteredPembelianDariToko: computed(() => {
-            const query = String(searchPembelianDariTokoProduk.value || '').toLowerCase();
-            return (PembelianDariToko.value || []).filter(item =>
-                String(item.produk?.kodeproduk || '').toLowerCase().includes(query) ||
-                String(item.produk?.nama || '').toLowerCase().includes(query)
+            const query = String(
+                searchPembelianDariTokoProduk.value || "",
+            ).toLowerCase();
+            return (PembelianDariToko.value || []).filter(
+                (item) =>
+                    String(item.produk?.kodeproduk || "")
+                        .toLowerCase()
+                        .includes(query) ||
+                    String(item.produk?.nama || "")
+                        .toLowerCase()
+                        .includes(query),
             );
         }),
-    }
+    };
 }
