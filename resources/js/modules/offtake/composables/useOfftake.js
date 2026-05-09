@@ -224,67 +224,113 @@ export function useOfftake() {
     };
 
     const paymentOfftake = async () => {
-        // 1. Validasi Suplier
+
+        // 1. Validasi Supplier
         if (!formOfftake.suplier) {
+
             toast.error("Pilih suplier terlebih dahulu");
+
             return;
         }
 
         // 2. Validasi Keranjang
         if (offtakeDetail.value.length === 0) {
+
             toast.error("Keranjang masih kosong");
+
             return;
         }
 
         isLoading.value = true;
+
         try {
-            // Payload tetap dikirim ke backend (backend yang akan memproses angka final)
+
+            // Payload Backend
             const payload = {
                 kode: formOfftake.kode,
                 suplier_id: formOfftake.suplier.value,
-                total: formOfftake.harga, // Nilai uang masuk (input dari form)
+                total: formOfftake.harga,
                 keterangan: formOfftake.keterangan
             };
 
-            const response = await offtakeService.paymentOfftake(payload);
+            const response =
+                await offtakeService.paymentOfftake(payload);
 
             if (response.status) {
-                lastCompletedOfftakeKode.value = formOfftake.kode;
 
-                // --- LOGIKA KIRIM TELEGRAM ---
+                lastCompletedOfftakeKode.value =
+                    formOfftake.kode;
+
+                // ===============================
+                // TELEGRAM NOTIFICATION
+                // ===============================
+
                 const sekarang = new Date();
-                const waktu = sekarang.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                const tanggal = sekarang.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 
-                const namaSuplier = formOfftake.suplier.label || 'Tidak Diketahui';
+                const waktu =
+                    sekarang.toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
 
-                // Variabel untuk kalkulasi visual di Telegram
+                const tanggal =
+                    sekarang.toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+
+                const namaSuplier =
+                    formOfftake.suplier.label ||
+                    'Tidak Diketahui';
+
+                // ===============================
+                // KALKULASI DATA OFFTAKE
+                // ===============================
+
                 let totalBeratOfftake = 0;
                 let kalkulasiTotalUang = 0;
 
-                const daftarProduk = offtakeDetail.value.map((item, index) => {
-                    const namaItem = item.produk?.nama || 'Produk Tidak Diketahui';
-                    const beratItem = Number(item.berat) || 0;
+                const daftarProduk =
+                    offtakeDetail.value
+                        .map((item, index) => {
 
-                    // PERBAIKAN: Mengambil dari 'hargajual' sesuai response JSON backend Anda
-                    const hargaPerGram = Number(item.hargajual) || 0;
-                    const subTotal = beratItem * hargaPerGram;
+                            const namaItem =
+                                item.produk?.nama ||
+                                'Produk Tidak Diketahui';
 
-                    totalBeratOfftake += beratItem;
-                    kalkulasiTotalUang += subTotal;
+                            const beratItem =
+                                Number(item.berat || 0);
 
-                    return `${index + 1}. *${namaItem}*\n` +
-                        `    Berat : ${beratItem}g\n` +
-                        `    Harga : Rp ${hargaPerGram.toLocaleString('id-ID')}/g\n` +
-                        `    Subtotal : Rp ${subTotal.toLocaleString('id-ID')}`;
-                }).join('\n');
+                            const hargaPerGram =
+                                Number(item.hargajual || 0);
 
-                const token = "8084477106:AAEbnUkECjGihJOajb4Yv-81qNvNgTH5CMs";
-                const chatId = "918285773";
+                            const subTotal =
+                                beratItem * hargaPerGram;
 
-                // Gunakan kalkulasiTotalUang jika formOfftake.harga kosong,
-                // atau tetap gunakan formOfftake.harga jika itu adalah input manual Anda
-                const totalFinal = formOfftake.harga ? Number(formOfftake.harga) : kalkulasiTotalUang;
+                            totalBeratOfftake +=
+                                beratItem;
+
+                            kalkulasiTotalUang +=
+                                subTotal;
+
+                            return `${index + 1}. *${namaItem}*\n` +
+                                `    Berat : ${beratItem}g\n` +
+                                `    Harga : Rp ${hargaPerGram.toLocaleString('id-ID')}/g\n` +
+                                `    Subtotal : Rp ${subTotal.toLocaleString('id-ID')}`;
+
+                        })
+                        .join('\n');
+
+                // Gunakan input manual jika ada
+                const totalFinal =
+                    formOfftake.harga
+                        ? Number(formOfftake.harga)
+                        : kalkulasiTotalUang;
+
+                // ===============================
+                // FORMAT PESAN TELEGRAM
+                // ===============================
 
                 const pesan = `
 🏢 *PENJUALAN OFFTAKE BERHASIL*
@@ -303,18 +349,29 @@ ${daftarProduk}
 ━━━━━━━━━━━━━━━
 _Notifikasi Otomatis Sistem POS_`;
 
-                fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: pesan,
-                        parse_mode: 'Markdown'
-                    })
-                }).catch(err => console.error("Gagal kirim notif Telegram:", err));
-                // --- AKHIR LOGIKA TELEGRAM ---
+                // ===============================
+                // KIRIM TELEGRAM VIA BACKEND
+                // ===============================
 
-                // 4. Reset form & Refresh data
+                try {
+
+                    await transaksiService.sendTelegramNotification({
+                        pesan
+                    });
+
+                } catch (telegramError) {
+
+                    console.error(
+                        "Gagal kirim notif Telegram:",
+                        telegramError
+                    );
+
+                }
+
+                // ===============================
+                // RESET FORM & REFRESH DATA
+                // ===============================
+
                 formOfftake.suplier = null;
                 formOfftake.keterangan = '';
                 formOfftake.harga = '';
@@ -322,20 +379,43 @@ _Notifikasi Otomatis Sistem POS_`;
                 await fetchOfftakeDetail();
                 await fetchKodeTransaksi();
 
-                // 5. Tampilkan Modal Sukses
-                const modalElement = document.getElementById('paymentCompleteModal');
+                // ===============================
+                // MODAL SUCCESS
+                // ===============================
+
+                const modalElement =
+                    document.getElementById('paymentCompleteModal');
+
                 if (modalElement) {
-                    const modalInstance = new bootstrap.Modal(modalElement);
+
+                    const modalInstance =
+                        new bootstrap.Modal(modalElement);
+
                     modalInstance.show();
+
                 } else {
+
                     toast.success("Pembayaran Berhasil");
+
                 }
             }
+
         } catch (error) {
-            console.error("Error Payment Offtake:", error);
-            toast.error(error.response?.data?.message || "Gagal memproses pembayaran offtake");
+
+            console.error(
+                "Error Payment Offtake:",
+                error
+            );
+
+            toast.error(
+                error.response?.data?.message ||
+                "Gagal memproses pembayaran offtake"
+            );
+
         } finally {
+
             isLoading.value = false;
+
         }
     };
 
