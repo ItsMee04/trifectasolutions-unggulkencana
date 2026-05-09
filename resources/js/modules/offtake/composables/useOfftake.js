@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { offtakeService } from '../services/offtakeService';
 import { suplierService } from '../../../modules/suplier/services/suplierService';
 import { nampanprodukService } from '../../nampanproduk/services/nampanprodukService';
+import { transaksiService } from '../../transaksi/services/transaksiService';
 
 const offtake = ref([]);
 const offtakeDetail = ref([]);
