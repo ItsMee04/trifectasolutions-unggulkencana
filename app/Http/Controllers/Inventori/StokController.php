@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\URL;
 
 class StokController extends Controller
 {
-    protected $stokService;
+    protected StokService $stokService;
 
     public function __construct(StokService $stokService)
     {

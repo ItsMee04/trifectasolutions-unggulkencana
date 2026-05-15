@@ -62,7 +62,7 @@
                         <ul class="notification-list">
                             <li v-for="p in pelangganUltah" :key="p.id" class="notification-message">
                                 <a :href="`https://wa.me/${formatPhone(p.kontak)}?text=Halo+${p.nama},+Selamat+Ulang+Tahun!`"
-                                    target="_blank" class="py-2 px-3 w-100 d-block">
+                                    target="_blank" class="notification-link">
                                     <div class="d-flex align-items-center w-100">
                                         <div class="flex-shrink-0 me-3">
                                             <div class="bg-warning-light rounded-circle d-flex align-items-center justify-content-center"
@@ -84,7 +84,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="flex-shrink-0 ms-2">
+                                        <div class="flex-shrink-0">
                                             <i class="fab fa-whatsapp text-success"
                                                 style="font-size: 18px; opacity: 0.6;"></i>
                                         </div>
@@ -335,19 +335,31 @@ onBeforeUnmount(() => {
 }
 
 .notification-message {
-    padding: 0 !important;
     border-bottom: 1px solid #f1f1f1;
-    transition: background 0.2s;
 }
 
 .notification-message:last-child {
     border-bottom: none;
 }
 
-.notification-message a:hover {
-    background-color: #f4fff7 !important;
+/* LINK AREA */
+.notification-link {
+    display: block;
+    padding: 10px 14px;
+    text-decoration: none;
+    transition: background 0.2s ease;
 }
 
+.notification-link:hover {
+    background-color: #f4fff7;
+}
+
+/* ICON ULTAH */
+.bg-warning-light {
+    background-color: #fff9e6;
+}
+
+/* CONTENT */
 .text-truncate {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -358,6 +370,20 @@ onBeforeUnmount(() => {
     line-height: 1.2;
 }
 
+/* ICON WA */
+.whatsapp-icon {
+    font-size: 18px;
+    color: #22c55e;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+}
+
+.notification-link:hover .whatsapp-icon {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+/* DROPDOWN */
 .main-drop .dropdown-menu.show,
 .nav-item.dropdown .dropdown-menu.notifications.show {
     display: block !important;
@@ -375,21 +401,21 @@ onBeforeUnmount(() => {
     width: 320px !important;
 }
 
+/* CONTENT AREA */
 .noti-content {
     max-height: 350px;
     overflow-y: auto !important;
 }
 
-.bg-warning-light {
-    background-color: #fff9e6;
-}
-
+/* HEADER */
 .header-left.active {
     display: flex;
     align-items: center;
 }
 
+/* DROPDOWN */
 .dropdown-menu.notifications {
     padding: 0 !important;
+    overflow: hidden;
 }
 </style>

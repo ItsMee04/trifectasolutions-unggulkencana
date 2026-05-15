@@ -20,9 +20,9 @@ use Illuminate\Support\Facades\URL;
 
 class PembelianController extends Controller
 {
-    protected $pembelianService;
-    protected $productService;
-    protected $perbaikanService;
+    protected PembelianService $pembelianService;
+    protected ProductService $productService;
+    protected PerbaikanService $perbaikanService;
 
     // Inject service melalui constructor
     public function __construct(

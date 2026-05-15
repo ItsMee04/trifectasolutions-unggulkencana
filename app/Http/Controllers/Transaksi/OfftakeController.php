@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\URL;
 
 class OfftakeController extends Controller
 {
-    protected $offtakeService;
+    protected OfftakeService $offtakeService;
 
     // Inject service melalui constructor
     public function __construct(OfftakeService $offtakeService)
