@@ -45,7 +45,9 @@ return new class extends Migration
                 JOIN jenisproduk jp ON pr.jenisproduk_id = jp.id
                 JOIN karat k ON pr.karat_id = k.id
                 WHERE tr.status = 2
-                AND DATE(tr.tanggal) BETWEEN TANGGAL_AWAL AND TANGGAL_AKHIR;
+                AND kr.status = 2
+                AND DATE(tr.tanggal) BETWEEN TANGGAL_AWAL AND TANGGAL_AKHIR
+                ORDER BY tr.kode ASC;
             END
         ");
     }
