@@ -58,7 +58,8 @@ export function useOfftake() {
             if (response?.data) {
                 suplierList.value = response.data.map(item => ({
                     value: item.id,
-                    label: item.nama
+                    label: item.nama,
+                    kontak: item.kontak
                 }));
             }
         } catch (error) {
@@ -285,6 +286,26 @@ export function useOfftake() {
                     formOfftake.suplier.label ||
                     'Tidak Diketahui';
 
+                const kontakSuplier =
+                    formOfftake.suplier.kontak ||
+                    'Tidak Diketahui';
+
+                // --- PROSES PEMBUATAN WA LINK ---
+                let waLinkInfo = "";
+                if (kontakSuplier && kontakSuplier !== "Tidak Diketahui") {
+                    let formattedNo = String(kontakSuplier).replace(/\D/g, ''); // bersihkan simbol non-angka
+
+                    if (formattedNo.startsWith('0')) {
+                        formattedNo = '62' + formattedNo.slice(1);
+                    } else if (formattedNo.length > 0 && !formattedNo.startsWith('62')) {
+                        formattedNo = '62' + formattedNo;
+                    }
+
+                    if (formattedNo) {
+                        waLinkInfo = `\n📲 [Chat WhatsApp](https://wa.me/${formattedNo}?text=)`;
+                    }
+                }
+
                 // ===============================
                 // KALKULASI DATA OFFTAKE
                 // ===============================
@@ -339,7 +360,7 @@ export function useOfftake() {
 📅 *Tanggal:* ${tanggal}
 🕒 *Jam:* ${waktu} WIB
 🆔 *Kode:* ${formOfftake.kode}
-🏢 *Ke Supplier:* ${namaSuplier}
+🏢 *Ke Supplier:* ${namaSuplier}${waLinkInfo}
 
 📦 *Detail Barang Offtake:*
 ${daftarProduk}

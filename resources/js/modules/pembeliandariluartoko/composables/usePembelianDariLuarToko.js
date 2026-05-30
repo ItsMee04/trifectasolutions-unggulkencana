@@ -609,7 +609,7 @@ export function usePembelianDariLuarToko() {
                     }
 
                     if (formattedNo) {
-                        waLinkInfo = `\n📲 [Chat WhatsApp](https://wa.me/${formattedNo})`;
+                        waLinkInfo = `\n📲 [Chat WhatsApp](https://wa.me/${formattedNo}?text=)`;
                     }
                 }
 

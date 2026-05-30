@@ -383,7 +383,7 @@ export function usePOS() {
 
                     if (formattedNo) {
                         // Menggunakan format link Markdown [Teks](Link) karena template pesan menggunakan markdown (*Bold*)
-                        waLinkInfo = `\n📲 [Chat WhatsApp](https://wa.me/${formattedNo})`;
+                        waLinkInfo = `\n📲 [Chat WhatsApp](https://wa.me/${formattedNo}?text=)`;
                     }
                 }
                 // ------------------------------------------------------------------
