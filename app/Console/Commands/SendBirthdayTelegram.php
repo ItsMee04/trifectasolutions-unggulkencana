@@ -29,10 +29,14 @@ class SendBirthdayTelegram extends Command
         $message = "🎉 <b>Ulang Tahun Pelanggan Hari Ini</b>\n\n";
 
         foreach ($pelanggan as $p) {
-
+            // Membersihkan nomor hp
             $phone = preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $p->kontak));
 
-            $waLink = "https://wa.me/{$phone}";
+            // Membuat teks template ucapan otomatis (di-encode agar aman untuk URL)
+            $textTemplate = urlencode("Halo {$p->nama}, Selamat Ulang Tahun! 🎉");
+
+            // SUDAH DIPERBAIKI: Menggunakan parameter ?text= agar strukturnya valid dan tidak ditambahkan tanda tanya rusak oleh Telegram
+            $waLink = "https://wa.me/{$phone}?text={$textTemplate}";
 
             $message .= "👤 <b>{$p->nama}</b>\n";
             $message .= "📞 {$p->kontak}\n";

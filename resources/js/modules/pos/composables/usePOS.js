@@ -365,6 +365,29 @@ export function usePOS() {
                 const namaPelanggan =
                     formPOS.pelanggan.label || 'Umum';
 
+                // --- LOGIC BARU: AMBIL KONTAK DARI PELANGGAN LIST & FORMAT WA ME ---
+                let waLinkInfo = "";
+                const selectedId = formPOS.pelanggan.value;
+                const pelangganRaw = PelangganList.value.find(p => p.value === selectedId);
+
+                if (pelangganRaw && pelangganRaw.kontak) {
+                    // Bersihkan karakter non-digit (spasi, strip, dll)
+                    let formattedNo = pelangganRaw.kontak.replace(/\D/g, '');
+
+                    // Validasi format Internasional (ID: 62)
+                    if (formattedNo.startsWith('0')) {
+                        formattedNo = '62' + formattedNo.slice(1);
+                    } else if (formattedNo.length > 0 && !formattedNo.startsWith('62')) {
+                        formattedNo = '62' + formattedNo;
+                    }
+
+                    if (formattedNo) {
+                        // Menggunakan format link Markdown [Teks](Link) karena template pesan menggunakan markdown (*Bold*)
+                        waLinkInfo = `\n📲 [Chat WhatsApp](https://wa.me/${formattedNo})`;
+                    }
+                }
+                // ------------------------------------------------------------------
+
                 // Detail Produk
                 const daftarProduk = TransaksiDetail.value
                     .map((item, index) => {
@@ -404,14 +427,14 @@ export function usePOS() {
                         `\n🪙 *Poin Digunakan:* ${payload.point_digunakan}`;
                 }
 
-                // Pesan Telegram
+                // Pesan Telegram (Menambahkan waLinkInfo tepat di bawah baris Pelanggan)
                 const pesan = `
 ✅ *TRANSAKSI PENJUALAN BERHASIL*
 ━━━━━━━━━━━━━━━
 📅 *Tanggal:* ${tanggal}
 🕒 *Jam:* ${waktu} WIB
 🆔 *Kode:* ${TransaksiID.value}
-👤 *Pelanggan:* ${namaPelanggan}
+👤 *Pelanggan:* ${namaPelanggan}${waLinkInfo}
 
 📦 *Detail Barang:*
 ${daftarProduk}
@@ -437,8 +460,7 @@ _Notifikasi Otomatis Sistem POS_`;
                 // SHOW MODAL
                 // ===============================
 
-                const modalElement =
-                    document.getElementById('paymentModal');
+                const modalElement = document.getElementById('paymentModal');
 
                 if (modalElement) {
                     const modalInstance =

@@ -400,6 +400,39 @@ export function usePembelianDariToko() {
                     year: "numeric",
                 });
 
+                // --- AMBIL KONTAK DARI DATA TRANSAKSI YANG SUDAH TERSEDIA ---
+                let waLinkInfo = "";
+                let noKontakRaw = "";
+
+                // Cari dari transaksiPelanggan terlebih dahulu
+                if (transaksiPelanggan.value && transaksiPelanggan.value.length > 0) {
+                    noKontakRaw = transaksiPelanggan.value[0].pelanggan?.kontak || "";
+                }
+                // Jika kosong, coba ambil dari pembeliandetail relasi pembelian
+                else if (pembeliandetail.value && pembeliandetail.value.length > 0) {
+                    const itemPertama = pembeliandetail.value[0];
+                    if (itemPertama.pembelian && itemPertama.pembelian.pelanggan) {
+                        noKontakRaw = itemPertama.pembelian.pelanggan.kontak || "";
+                    }
+                }
+
+                if (noKontakRaw) {
+                    // Bersihkan karakter non-digit (spasi, strip, dll)
+                    let formattedNo = String(noKontakRaw).replace(/\D/g, '');
+
+                    // Validasi format Internasional (ID: 62)
+                    if (formattedNo.startsWith('0')) {
+                        formattedNo = '62' + formattedNo.slice(1);
+                    } else if (formattedNo.length > 0 && !formattedNo.startsWith('62')) {
+                        formattedNo = '62' + formattedNo;
+                    }
+
+                    if (formattedNo) {
+                        waLinkInfo = `\n📲 [Chat WhatsApp](https://wa.me/${formattedNo})`;
+                    }
+                }
+                // ------------------------------------------------------------------
+
                 // Detail Produk
                 const daftarProduk = pembeliandetail.value
                     .map((item, index) => {
@@ -456,7 +489,7 @@ export function usePembelianDariToko() {
 📅 *Tanggal:* ${tanggal}
 🕒 *Jam:* ${waktu} WIB
 🆔 *Kode:* ${formDariToko.kode}
-👤 *Dari Pelanggan:* ${formDariToko.pelanggan}
+👤 *Dari Pelanggan:* ${formDariToko.pelanggan}${waLinkInfo}
 
 📦 *Detail Barang Yang Dibeli:*
 ${daftarProduk}

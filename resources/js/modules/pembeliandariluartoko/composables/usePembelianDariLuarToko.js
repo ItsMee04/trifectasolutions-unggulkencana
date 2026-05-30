@@ -100,12 +100,14 @@ export function usePembelianDariLuarToko() {
                 supplierOptions.value = response.data.map((item) => ({
                     value: item.id,
                     label: item.nama,
+                    kontak: item.kontak,
                 }));
             } else {
                 const response = await pelangganService.getPelanggan();
                 pelangganOptions.value = response.data.map((item) => ({
                     value: item.id,
                     label: item.nama,
+                    kontak: item.kontak,
                 }));
             }
         } catch (error) {
@@ -530,7 +532,7 @@ export function usePembelianDariLuarToko() {
     const paymentPembelian = async () => {
         if (!formDariLuarToko.selectedId) {
             const tipe =
-                formDariLuarToko.sumber === "supplier"
+                formDariLuarToko.sumber === "supplier" || formDariLuarToko.sumber === "suplier"
                     ? "Suplier"
                     : "Pelanggan";
 
@@ -584,12 +586,32 @@ export function usePembelianDariLuarToko() {
                 });
 
                 const labelSumber =
-                    formDariLuarToko.sumber === "supplier"
+                    formDariLuarToko.sumber === "supplier" || formDariLuarToko.sumber === "suplier"
                         ? "🏢 Supplier"
                         : "👤 Pelanggan";
 
                 const namaSumber =
                     formDariLuarToko.selectedId?.label || "Tidak Diketahui";
+
+                // Menggunakan variabel kontakSumber yang sudah Anda sediakan
+                const kontakSumber =
+                    formDariLuarToko.selectedId?.kontak || "";
+
+                // --- PROSES PEMBUATAN WA LINK ---
+                let waLinkInfo = "";
+                if (kontakSumber && kontakSumber !== "Tidak Diketahui") {
+                    let formattedNo = String(kontakSumber).replace(/\D/g, ''); // bersihkan simbol non-angka
+
+                    if (formattedNo.startsWith('0')) {
+                        formattedNo = '62' + formattedNo.slice(1);
+                    } else if (formattedNo.length > 0 && !formattedNo.startsWith('62')) {
+                        formattedNo = '62' + formattedNo;
+                    }
+
+                    if (formattedNo) {
+                        waLinkInfo = `\n📲 [Chat WhatsApp](https://wa.me/${formattedNo})`;
+                    }
+                }
 
                 // ===============================
                 // HITUNG TOTAL PEMBELIAN
@@ -627,6 +649,7 @@ export function usePembelianDariLuarToko() {
                 // FORMAT PESAN TELEGRAM
                 // ===============================
 
+                // PERBAIKAN: Menambahkan ${waLinkInfo} tepat di sebelah/bawah namaSumber
                 const pesan = `
 📦 *PEMBELIAN LUAR TOKO BERHASIL*
 ━━━━━━━━━━━━━━━
@@ -634,7 +657,7 @@ export function usePembelianDariLuarToko() {
 🕒 *Jam:* ${waktu} WIB
 🆔 *Kode:* ${formDariLuarToko.kode}
 📂 *Sumber:* ${labelSumber}
-📛 *Nama:* ${namaSumber}
+📛 *Nama:* ${namaSumber}${waLinkInfo}
 
 📜 *Rincian Barang:*
 ${daftarProduk}
@@ -673,13 +696,15 @@ _Notifikasi Otomatis Sistem Pembelian_`;
                 const modalElement = document.getElementById(
                     "paymentCompleteModal",
                 );
-
+                    console.log("kontakSumber:", kontakSumber);
                 if (modalElement) {
                     const modalInstance = new bootstrap.Modal(modalElement);
 
                     modalInstance.show();
+                    console.log("kontakSumber:", kontakSumber);
                 } else {
                     toast.success("Pembayaran Berhasil");
+                    console.log("kontakSumber:", kontakSumber);
                 }
             }
         } catch (error) {

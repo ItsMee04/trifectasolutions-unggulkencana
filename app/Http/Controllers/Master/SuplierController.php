@@ -26,7 +26,7 @@ class SuplierController extends Controller
                 'status'    => false,
                 'message'   => 'Data suplier tidak ditemukan',
                 'data'      => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -58,7 +58,7 @@ class SuplierController extends Controller
                 'status' => true,
                 'message' => 'Suplier berhasil ditambahkan',
                 'data' => $suplier
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
@@ -77,7 +77,7 @@ class SuplierController extends Controller
                 'status'    => false,
                 'message'   => 'Data suplier tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $suplier->update([
@@ -102,7 +102,7 @@ class SuplierController extends Controller
                 'status'    => false,
                 'message'   => 'Data suplier tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $suplier->update([
