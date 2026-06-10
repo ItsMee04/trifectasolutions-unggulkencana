@@ -49,4 +49,16 @@ export const homeService = {
         const response = await apiClient.get('/dashboard/getProdukPerbaikan');
         return response.data;
     },
+    async getTotalProduk() {
+        const response = await apiClient.get('/dashboard/getProduk');
+        return response.data;
+    },
+    async getTotalPenjualanHariIni() {
+        const response = await apiClient.get('/dashboard/getTotalPenjualanHariIni');
+        return response.data;
+    },
+    async getTotalPembelianHariIni() {
+        const response = await apiClient.get('/dashboard/getTotalPembelianHariIni');
+        return response.data;
+    }
 }

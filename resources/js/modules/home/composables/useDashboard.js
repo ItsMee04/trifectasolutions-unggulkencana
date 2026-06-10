@@ -19,7 +19,10 @@ export function useHome() {
     const displayTotalPelanggan = ref(0);
     const displayTotalSuplier = ref(0);
     const displayTotalTransaksi = ref(0);
-    const displayTotalPembelian = ref(0)
+    const displayTotalPembelian = ref(0);
+    const displayTotalProduk = ref(0);
+    const displayTotalPenjualanHariIni = ref(0);
+    const displayTotalPembelianHariIni = ref(0);
 
     const isLoading = ref(false);
 
@@ -53,6 +56,9 @@ export function useHome() {
                 resSuplier,
                 resTotalTransaksi,
                 resTotalPembelian,
+                resTotalProduk,
+                resTotalPenjualanHariIni,
+                resTotalPembelianHariIni
             ] = await Promise.all([
                 homeService.getTotalSaldoMasuk(),
                 homeService.getTotalSaldoKeluar(),
@@ -62,6 +68,9 @@ export function useHome() {
                 homeService.getTotalSuplier(),
                 homeService.getTotalPenjualan(),
                 homeService.getTotalPembelian(),
+                homeService.getTotalProduk(),
+                homeService.getTotalPenjualanHariIni(),
+                homeService.getTotalPembelianHariIni(),
             ]);
 
             // Ekstrak nilai (asumsi response.data berisi angka)
@@ -74,6 +83,9 @@ export function useHome() {
                 suplier: Number(resSuplier?.data || 0),
                 penjualan: Number(resTotalTransaksi?.data || 0),
                 pembelian: Number(resTotalPembelian?.data || 0),
+                produk: Number(resTotalProduk?.data || 0),
+                penjualanHariIni: Number(resTotalPenjualanHariIni?.data || 0),
+                pembelianHariIni: Number(resTotalPembelianHariIni?.data || 0),
             };
 
             // Jalankan semua animasi di waktu yang sama
@@ -85,6 +97,9 @@ export function useHome() {
             animateValue(displayTotalSuplier, 0, data.suplier);
             animateValue(displayTotalTransaksi, 0, data.penjualan);
             animateValue(displayTotalPembelian, 0, data.pembelian);
+            animateValue(displayTotalProduk, 0, data.produk);
+            animateValue(displayTotalPenjualanHariIni, 0, data.penjualanHariIni);
+            animateValue(displayTotalPembelianHariIni, 0, data.pembelianHariIni);
 
         } catch (error) {
             console.error("Gagal mengambil data dashboard:", error);
@@ -156,6 +171,9 @@ export function useHome() {
         displayTotalSuplier,
         displayTotalTransaksi,
         displayTotalPembelian,
+        displayTotalProduk,
+        displayTotalPenjualanHariIni,
+        displayTotalPembelianHariIni,
         isLoading,
         hargaEmas,
         produkPerbaikan,

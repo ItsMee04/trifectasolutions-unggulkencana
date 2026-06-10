@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Keuangan\MutasiSaldo;
 use App\Models\Master\Harga;
 use App\Models\Master\Pelanggan;
+use App\Models\Master\Produk;
 use App\Models\Master\Suplier;
 use App\Models\Transaksi\Offtake;
 use App\Models\Transaksi\Pembelian;
@@ -18,6 +19,44 @@ use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
+    public function getTotalProduk()
+    {
+        $data = Produk::where('status', 1)
+            ->count();
+
+        return response()->json([
+            'status'    => true,
+            'message'   => 'Total produk berhasil ditemukan',
+            'data'      => $data
+        ]);
+    }
+
+    public function getTotalPenjualanHariIni()
+    {
+        $data = Transaksi::where('tanggal', Carbon::today())
+            ->where('status', 2)
+            ->count();
+
+        return response()->json([
+            'status'    => true,
+            'message'   => 'Total penjualan hari ini berhasil ditemukan',
+            'data'      => $data
+        ]);
+    }
+
+    public function getTotalPembelianHariIni()
+    {
+        $data = Pembelian::where('tanggal', Carbon::today())
+            ->where('status', 2)
+            ->count();
+
+        return response()->json([
+            'status'    => true,
+            'message'   => 'Total pembelian hari ini berhasil ditemukan',
+            'data'      => $data
+        ]);
+    }
+
     public function getTotalSaldoMasuk()
     {
         $data = MutasiSaldo::where('jenis', 'MASUK')

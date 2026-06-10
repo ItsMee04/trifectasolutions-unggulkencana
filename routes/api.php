@@ -62,6 +62,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('dashboard/getSalesChartPembelian', [HomeController::class, 'getSalesChartPembelian'])->middleware('check.permission:dashboard,can_view');
     Route::get('dashboard/getHargaEmas', [HomeController::class, 'getHargaEmas'])->middleware('check.permission:dashboard,can_view');
     Route::get('dashboard/getProdukPerbaikan', [HomeController::class, 'getProdukPerbaikan'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getProduk', [HomeController::class, 'getTotalProduk'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getTotalPenjualanHariIni', [HomeController::class, 'getTotalPenjualanHariIni'])->middleware('check.permission:dashboard,can_view');
+    Route::get('dashboard/getTotalPembelianHariIni', [HomeController::class, 'getTotalPembelianHariIni'])->middleware('check.permission:dashboard,can_view');
 
     Route::get('jabatan/getJabatan', [JabatanController::class, 'getJabatan'])->middleware('check.permission:jabatan,can_view');
     Route::post('jabatan/storeJabatan', [JabatanController::class, 'storeJabatan'])->middleware('check.permission:jabatan,can_create');
