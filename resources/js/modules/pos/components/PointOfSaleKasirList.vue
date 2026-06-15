@@ -145,6 +145,7 @@
 <script setup>
 import { onMounted, onUnmounted, computed, watch, nextTick, ref } from 'vue'; // Tambahkan onUnmounted
 import { usePOS } from '../composables/usePOS';
+import { useTransaksiRealtime } from '../composables/useTransaksiRealtime';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.css';
 import { formatRupiah } from '../../../helper/formatRupiah'
@@ -172,6 +173,11 @@ const {
     scanQuery,
     handleBarcodeScan
 } = usePOS();
+
+useTransaksiRealtime(() => {
+    console.log("WebSocket: Menerima sinyal update, mengambil data terbaru...");
+    fetchTransaksiDetail();
+});
 
 // 1. Deklarasi State (Pastikan tidak duplikat)
 const barcodeInput = ref(null);
@@ -259,6 +265,7 @@ onMounted(() => {
 onUnmounted(() => {
     document.removeEventListener('click', ensureFocus);
 });
+
 </script>
 <style scoped>
 .offscreen-input {

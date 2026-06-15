@@ -10,6 +10,7 @@
         "guzzlehttp/guzzle": "^7.2",
         "intervention/image": "^3",
         "laravel/framework": "^10.10",
+        "laravel/reverb": "*",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "milon/barcode": "^12.1"

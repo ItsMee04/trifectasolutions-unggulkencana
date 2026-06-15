@@ -3,6 +3,7 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia'; // 1. Impor Pinia
 import App from './views/App.vue';
 import router from './router';
+import './helper/echo.js'; // Tambahkan baris ini
 
 /**
  * RENDER ASSETS
