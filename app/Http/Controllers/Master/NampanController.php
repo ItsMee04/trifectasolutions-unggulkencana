@@ -18,7 +18,7 @@ class NampanController extends Controller
                 'status'    => false,
                 'message'   => 'Data nampan tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -62,7 +62,7 @@ class NampanController extends Controller
                 'status'    => false,
                 'message'   => 'Data nampan tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $nampan->update([
@@ -87,7 +87,7 @@ class NampanController extends Controller
                 'status'    => false,
                 'message'   => 'Data nampan tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $nampan->update([

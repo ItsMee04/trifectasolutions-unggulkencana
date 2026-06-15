@@ -17,7 +17,7 @@ class JenisKaratController extends Controller
                 'status'    => false,
                 'message'   => 'Data jenis karat tidak ditemukan',
                 'data'      => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -61,7 +61,7 @@ class JenisKaratController extends Controller
                 'status'    => false,
                 'message'   => 'Data jenis karat tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $jeniskarat->update([
@@ -85,7 +85,7 @@ class JenisKaratController extends Controller
                 'status'    => false,
                 'message'   => 'Data jenis karat tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $jeniskarat->update([

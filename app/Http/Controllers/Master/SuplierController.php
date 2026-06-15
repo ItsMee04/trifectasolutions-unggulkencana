@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class SuplierController extends Controller
 {
-    protected $suplierService;
+    protected SuplierService $suplierService;
 
     // Inject service melalui constructor
     public function __construct(SuplierService $suplierService)

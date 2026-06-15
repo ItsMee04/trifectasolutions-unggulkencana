@@ -20,10 +20,7 @@ return [
     'allowed_methods' => ['*'],
 
     // 1. UBAH INI: Daftarkan asal protokol lokal dari Capacitor Android dan iOS
-    'allowed_origins' => [
-        'http://localhost',
-        'capacitor://localhost',
-        'http://localhost:5173', // Tetap masukkan ini agar Anda bisa testing lewat browser laptop
+    'allowed_origins' => [ // Tetap masukkan ini agar Anda bisa testing lewat browser laptop
         '*'
     ],
 

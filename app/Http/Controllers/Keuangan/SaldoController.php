@@ -19,7 +19,7 @@ class SaldoController extends Controller
                 'status'    => false,
                 'message'   => 'Data saldo tidak ditemukan',
                 'data'      => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -111,7 +111,7 @@ class SaldoController extends Controller
                 'status'    => false,
                 'message'   => 'Data saldo tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $saldo->update([

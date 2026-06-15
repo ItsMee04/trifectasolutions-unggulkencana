@@ -19,7 +19,7 @@ class MutasiSaldoController extends Controller
                 'status'    => false,
                 'message'   => 'Data mutasi saldo tidak ditemukan',
                 'data'      => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -45,7 +45,7 @@ class MutasiSaldoController extends Controller
             return response()->json([
                 'status'    => false,
                 'message'   => "Data rekening tidak ditemukan"
-            ], 400);
+            ], 200);
         }
 
         $data = MutasiSaldo::create([
@@ -88,7 +88,7 @@ class MutasiSaldoController extends Controller
                 'status'    => false,
                 'message'   => 'Data mutasi saldo tidak ditemukan',
                 'data'      => [],
-            ], 400);
+            ], 200);
         }
 
         // 2. Ambil data rekening (Saldo) terkait
@@ -143,7 +143,7 @@ class MutasiSaldoController extends Controller
                 'status'    => false,
                 'message'   => 'Data mutasi tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         // 2. Ambil data rekening terkait

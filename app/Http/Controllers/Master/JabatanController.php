@@ -17,7 +17,7 @@ class JabatanController extends Controller
                 'status' => false,
                 'message' => 'Data jabatan tidak ditemukan',
                 'data' => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -58,7 +58,7 @@ class JabatanController extends Controller
                 'status' => false,
                 'message' => 'Data jabatan tidak ditemukan',
                 'data' => []
-            ], 404);
+            ], 200);
         }
 
         $jabatan->update([
@@ -81,7 +81,7 @@ class JabatanController extends Controller
                 'status' => false,
                 'message' => 'Data jabatan tidak ditemukan',
                 'data' => []
-            ], 404);
+            ], 200);
         }
 
         $jabatan->update([

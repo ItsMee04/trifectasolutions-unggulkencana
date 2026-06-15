@@ -17,7 +17,7 @@ class PesanController extends Controller
                 'status'    => false,
                 'message'   => 'Data pesan tidak ditemukan',
                 'data'      => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -65,7 +65,7 @@ class PesanController extends Controller
                 'status'    => false,
                 'message'   => 'Data pesan tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $pesan->update([
@@ -89,7 +89,7 @@ class PesanController extends Controller
                 'status'    => false,
                 'message'   => 'Data pesan tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $pesan->update([

@@ -16,7 +16,7 @@ class KaratController extends Controller
                 'status'    => false,
                 'message'   => 'Data karat tidak ditemukan',
                 'data'      => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -55,7 +55,7 @@ class KaratController extends Controller
                 'status'    => false,
                 'message'   => 'Data karat tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $karat->update([
@@ -77,7 +77,7 @@ class KaratController extends Controller
                 'status'    => false,
                 'message'   => 'Data karat tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $karat->update([

@@ -17,7 +17,7 @@ class DiskonController extends Controller
                 'status'    => false,
                 'message'   => 'Data diskon tidak ditemukan',
                 'data'      => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -60,7 +60,7 @@ class DiskonController extends Controller
                 'status'    => false,
                 'message'   => 'Data diskon tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $diskon->update([
@@ -84,7 +84,7 @@ class DiskonController extends Controller
                 'status'    => false,
                 'message'   => 'Data diskon tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $diskon->update([

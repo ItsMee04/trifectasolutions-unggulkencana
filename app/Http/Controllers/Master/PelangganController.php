@@ -26,7 +26,7 @@ class PelangganController extends Controller
                 'status'    => false,
                 'message'   => 'Data pelanggan tidak ditemukan',
                 'data'      => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -80,7 +80,7 @@ class PelangganController extends Controller
                 'status'    => false,
                 'message'   => 'Data pelanggan tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $pelanggan->update([
@@ -106,7 +106,7 @@ class PelangganController extends Controller
                 'status'    => false,
                 'message'   => 'Data pelanggan tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $pelanggan->update([

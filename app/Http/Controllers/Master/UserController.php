@@ -18,7 +18,7 @@ class UserController extends Controller
                 'status' => false,
                 'message' => 'Data user tidak ditemukan',
                 'data' => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -41,7 +41,7 @@ class UserController extends Controller
                 'status' => false,
                 'message' => 'Data user tidak ditemukan',
                 'data' => []
-            ], 404);
+            ], 200);
         }
 
         $hasEmail = !empty($user->email);
@@ -64,7 +64,7 @@ class UserController extends Controller
                         'status' => false,
                         'message' => 'Password baru tidak boleh sama dengan password lama',
                         'data' => []
-                    ], 400);
+                    ], 200);
                     $rules['password'] = 'required|string|min:6';
                 }
             }
@@ -92,7 +92,7 @@ class UserController extends Controller
                 'status' => false,
                 'message' => 'Data user tidak ditemukan',
                 'data' => []
-            ], 404);
+            ], 200);
         }
 
         $user->update([

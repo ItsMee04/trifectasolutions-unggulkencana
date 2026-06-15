@@ -32,7 +32,7 @@ class ProdukController extends Controller
                 'status' => false,
                 'message' => 'Data produk tidak ditemukan',
                 'data' => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -225,7 +225,7 @@ class ProdukController extends Controller
                 'status' => false,
                 'message' => 'Data produk tidak ditemukan',
                 'data' => []
-            ], 404);
+            ], 200);
         }
 
         $produk->update([
@@ -251,7 +251,7 @@ class ProdukController extends Controller
                 'status' => false,
                 'message' => 'Data produk tidak ditemukan',
                 'data' => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([

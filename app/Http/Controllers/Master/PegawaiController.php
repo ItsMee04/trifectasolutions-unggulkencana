@@ -18,7 +18,7 @@ class PegawaiController extends Controller
                 'status' => false,
                 'message' => 'Data pegawai tidak ditemukan',
                 'data' => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -90,7 +90,7 @@ class PegawaiController extends Controller
                 'status' => false,
                 'message' => 'Data pegawai tidak ditemukan',
                 'data' => []
-            ], 404);
+            ], 200);
         }
 
         $image = $pegawai->image;
@@ -126,7 +126,7 @@ class PegawaiController extends Controller
                 'status' => false,
                 'message' => 'Data pegawai tidak ditemukan',
                 'data' => []
-            ], 404);
+            ], 200);
         }
 
         $deletepegawai = $pegawai->update([

@@ -21,7 +21,7 @@ class JenisProdukController extends Controller
                 'status'    => false,
                 'message'   => 'Data jenis produk tidak ditemukan',
                 'data'      => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -122,7 +122,7 @@ class JenisProdukController extends Controller
                 'status'    => false,
                 'message'   => 'Data jenis produk tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $jenisproduk->update([

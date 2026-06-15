@@ -157,7 +157,7 @@ class TransaksiController extends Controller
                 'status'    => false,
                 'message'   => 'Data keranjang tidak ditemukan',
                 'data'      => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([

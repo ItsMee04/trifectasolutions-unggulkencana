@@ -17,7 +17,7 @@ class HargaController extends Controller
                 'status'    => false,
                 'message'   => 'Data harga tidak ditemukan',
                 'data'      => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -63,7 +63,7 @@ class HargaController extends Controller
                 'status'    => false,
                 'message'   => 'Data harga tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $harga->update([
@@ -88,7 +88,7 @@ class HargaController extends Controller
                 'status'    => false,
                 'message'   => 'Data harga tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $harga->update([

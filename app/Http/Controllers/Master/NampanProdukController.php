@@ -22,7 +22,7 @@ class NampanProdukController extends Controller
                 'status'    => false,
                 'message'   => 'Data nampan produk tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -43,7 +43,7 @@ class NampanProdukController extends Controller
                 'status'    => false,
                 'message'   => 'Data nampan produk tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -65,7 +65,7 @@ class NampanProdukController extends Controller
                 'status'    => false,
                 'message'   => 'Data produk tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -109,7 +109,7 @@ class NampanProdukController extends Controller
                 return response()->json([
                     'status'  => false,
                     'message' => "Gagal! Produk masih aktif di nampan: " . ($firstConflict->nampan->nampan ?? 'Lain')
-                ], 400);
+                ], 200);
             }
 
             // 3. Filter: Karena sudah dicek di atas, maka semua $produkIds adalah baru/tersedia

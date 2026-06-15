@@ -16,7 +16,7 @@ class KondisiController extends Controller
                 'status'    => false,
                 'message'   => 'Data kondisi tidak ditemukan',
                 'data'      => []
-            ], 404);
+            ], 200);
         }
 
         return response()->json([
@@ -55,7 +55,7 @@ class KondisiController extends Controller
                 'status'    => false,
                 'message'   => 'Data kondisi tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $kondisi->update([
@@ -77,7 +77,7 @@ class KondisiController extends Controller
                 'status'    => false,
                 'message'   => 'Data kondisi tidak ditemukan',
                 'data'      => [],
-            ], 404);
+            ], 200);
         }
 
         $kondisi->update([
