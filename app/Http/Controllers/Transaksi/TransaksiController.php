@@ -131,7 +131,8 @@ class TransaksiController extends Controller
             DB::commit();
 
             // Trigger sinyal ke WebSocket
-            event(new \App\Events\TransaksiUpdated());
+            // Di dalam controller storeProdukToTransaksiDetail...
+            event(new \App\Events\TransaksiUpdated($transaksi));
 
             return response()->json([
                 'status'  => true,
