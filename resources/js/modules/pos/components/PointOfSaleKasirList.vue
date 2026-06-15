@@ -151,6 +151,10 @@ import 'vue-multiselect/dist/vue-multiselect.css';
 import { formatRupiah } from '../../../helper/formatRupiah'
 import { useFeather } from '../../../helper/feather';
 
+// 1. Inisialisasi instance pos
+const pos = usePOS();
+
+// 2. Destrukturisasi untuk digunakan di template/script
 const {
     isLoading,
     errors,
@@ -172,11 +176,12 @@ const {
     calculatePotonganPoint,
     scanQuery,
     handleBarcodeScan
-} = usePOS();
+} = pos; // Destrukturisasi dari instance 'pos'
 
-useTransaksiRealtime(() => {
-    console.log("WebSocket: Menerima sinyal update, mengambil data terbaru...");
-    fetchTransaksiDetail();
+// 3. Panggil fungsi melalui instance 'pos' agar tetap sinkron
+useTransaksiRealtime(async () => {
+    console.log("WebSocket: Memperbarui data via instance pos...");
+    await pos.fetchTransaksiDetail();
 });
 
 // 1. Deklarasi State (Pastikan tidak duplikat)
