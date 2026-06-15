@@ -8,8 +8,8 @@ export function useTransaksiRealtime(callback) {
         }
 
         window.Echo.channel('transaksi-channel')
-            .listen('.TransaksiUpdated', (e) => { // Perhatikan titik (.)
-                console.log("WebSocket: Update diterima, memuat ulang tabel...");
+            .listen('TransaksiUpdated', (e) => { // Hapus titik (.) di depan
+                console.log("WebSocket: Data diterima dari event TransaksiUpdated:", e);
                 if (callback) callback();
             });
     };

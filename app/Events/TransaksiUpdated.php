@@ -27,6 +27,11 @@ class TransaksiUpdated implements ShouldBroadcast
         $this->transaksi = $transaksi;
     }
 
+    public function broadcastAs(): string
+    {
+        return 'TransaksiUpdated'; // Nama yang akan dikenali frontend
+    }
+
     public function broadcastOn(): Channel
     {
         return new Channel('transaksi-channel');
