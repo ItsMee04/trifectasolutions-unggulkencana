@@ -1,30 +1,18 @@
+// useTransaksiRealtime.js
 import { onMounted, onUnmounted } from 'vue';
 
 export function useTransaksiRealtime(callback) {
     const listenToTransaksi = () => {
-        if (!window.Echo) {
-            console.error('Echo belum diinisialisasi!');
-            return;
-        }
+        if (!window.Echo) return;
 
+        // Pastikan nama event sesuai dengan yang dikirim Laravel
         window.Echo.channel('transaksi-channel')
-            .listen('TransaksiUpdated', (e) => { // Hapus titik (.) di depan
-                console.log("WebSocket: Data diterima dari event TransaksiUpdated:", e);
+            .listen('TransaksiUpdated', (e) => {
+                console.log("WebSocket: Triggering callback...");
                 if (callback) callback();
             });
     };
 
-    const stopListening = () => {
-        if (window.Echo) {
-            window.Echo.leaveChannel('transaksi-channel');
-        }
-    };
-
-    onMounted(() => {
-        listenToTransaksi();
-    });
-
-    onUnmounted(() => {
-        stopListening();
-    });
+    onMounted(() => listenToTransaksi());
+    onUnmounted(() => window.Echo?.leaveChannel('transaksi-channel'));
 }
