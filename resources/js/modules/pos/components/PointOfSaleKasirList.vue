@@ -214,17 +214,18 @@ watch(modeScanner, async (newVal) => {
 });
 
 const calculateSubtotal = computed(() => {
-    return TransaksiDetail.value.reduce((acc, item) => acc + parseFloat(item.total), 0);
+    // Akses ke pos.TransaksiDetail secara langsung
+    return (pos.TransaksiDetail || []).reduce((acc, item) => acc + parseFloat(item.total), 0);
 });
 
 const calculateDiskon = computed(() => {
-    return (calculateSubtotal.value * selectedDiskonNilai.value) / 100;
+    return (calculateSubtotal.value * (pos.selectedDiskonNilai || 0)) / 100;
 });
 
 const calculateGrandTotal = computed(() => {
     const subtotal = calculateSubtotal.value;
     const diskon = calculateDiskon.value;
-    const potonganPoin = calculatePotonganPoint.value;
+    const potonganPoin = pos.calculatePotonganPoint || 0;
 
     return subtotal - diskon - potonganPoin;
 });

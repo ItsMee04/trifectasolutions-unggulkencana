@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'broadcasting/auth'],
 
     'allowed_methods' => ['*'],
 
@@ -23,7 +23,8 @@ return [
     'allowed_origins' => [
         'http://localhost',
         'capacitor://localhost',
-        'http://localhost:5173' // Tetap masukkan ini agar Anda bisa testing lewat browser laptop
+        'http://localhost:5173', // Tetap masukkan ini agar Anda bisa testing lewat browser laptop
+        '*'
     ],
 
     'allowed_origins_patterns' => [],
