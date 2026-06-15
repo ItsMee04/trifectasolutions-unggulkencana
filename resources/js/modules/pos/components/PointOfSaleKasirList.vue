@@ -143,55 +143,95 @@
     </div>
 </template>
 <script setup>
-import { onMounted, onUnmounted, computed, watch, nextTick, ref } from 'vue';
+import { onMounted, onUnmounted, computed, watch, nextTick, ref } from 'vue'; // Tambahkan onUnmounted
 import { usePOS } from '../composables/usePOS';
 import { useTransaksiRealtime } from '../composables/useTransaksiRealtime';
 import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.css';
-import { formatRupiah } from '../../../helper/formatRupiah';
+import { formatRupiah } from '../../../helper/formatRupiah'
 import { useFeather } from '../../../helper/feather';
 
-const pos = usePOS();
+const {
+    isLoading,
+    errors,
+    formPOS,
+    PelangganList,
+    DiskonList,
+    TransaksiID,
+    selectedDiskon,
+    selectedDiskonNilai,
+    TransaksiDetail,
+    fetchKodeTransaksi,
+    fetchPelanggan,
+    fetchDiskon,
+    fetchTransaksiDetail,
+    handleDelete,
+    paymentTransaksi,
+    usePoint,
+    inputPoint,
+    calculatePotonganPoint,
+    scanQuery,
+    handleBarcodeScan
+} = usePOS();
 
-useTransaksiRealtime(async () => {
-    console.log("WebSocket: Memperbarui data...");
-    await pos.fetchTransaksiDetail();
+useTransaksiRealtime(() => {
+    console.log("WebSocket: Menerima sinyal update, mengambil data terbaru...");
+    fetchTransaksiDetail();
 });
 
+// 1. Deklarasi State (Pastikan tidak duplikat)
 const barcodeInput = ref(null);
-const modeScanner = ref(true);
+const modeScanner = ref(true); // Set true jika ingin default terbuka, atau sesuaikan logika Anda
 
+// 2. Fungsi Focus yang lebih cerdas (tidak mencuri fokus dari input lain)
 const ensureFocus = (event) => {
+    // 1. Cek apakah user sedang fokus ke input lain (seperti cari pelanggan atau isi poin)
     const isUserTyping = event?.target.tagName === 'INPUT' ||
         event?.target.tagName === 'TEXTAREA' ||
-        event?.target.closest('.multiselect');
+        event?.target.closest('.multiselect'); // Hindari mencuri fokus dari Multiselect
+
     if (isUserTyping) return;
-    if (barcodeInput.value) barcodeInput.value.focus();
+
+    // 2. Jika tidak sedang mengetik apapun, paksa fokus kembali ke input barcode
+    if (barcodeInput.value) {
+        barcodeInput.value.focus();
+    }
 };
 
-// --- COMPUTED: Akses properti tanpa .value jika sudah di dalam object pos ---
+// 3. Watcher untuk mode scanner
+watch(modeScanner, async (newVal) => {
+    if (newVal) {
+        await nextTick();
+        if (barcodeInput.value) {
+            barcodeInput.value.focus();
+        }
+    }
+});
+
 const calculateSubtotal = computed(() => {
-    // Pastikan pos.TransaksiDetail adalah array
-    return (pos.TransaksiDetail || []).reduce((acc, item) => acc + parseFloat(item.total), 0);
+    return TransaksiDetail.value.reduce((acc, item) => acc + parseFloat(item.total), 0);
 });
 
 const calculateDiskon = computed(() => {
-    return (calculateSubtotal.value * (pos.selectedDiskonNilai || 0)) / 100;
+    return (calculateSubtotal.value * selectedDiskonNilai.value) / 100;
 });
 
 const calculateGrandTotal = computed(() => {
-    return calculateSubtotal.value - calculateDiskon.value - (pos.calculatePotonganPoint || 0);
+    const subtotal = calculateSubtotal.value;
+    const diskon = calculateDiskon.value;
+    const potonganPoin = calculatePotonganPoint.value;
+
+    return subtotal - diskon - potonganPoin;
 });
 
 const { initFeather } = useFeather();
 
 const handlePayment = () => {
-    pos.paymentTransaksi(calculateGrandTotal.value);
+    paymentTransaksi(calculateGrandTotal.value);
 };
 
-// --- WATCHER: Gunakan getter function agar reaktif ---
 watch(
-    [() => pos.TransaksiDetail, () => pos.isLoading],
+    [TransaksiDetail, isLoading],
     async () => {
         await nextTick();
         initFeather();
@@ -199,20 +239,33 @@ watch(
     { deep: true }
 );
 
+// 4. Lifecycle Hooks
 onMounted(() => {
-    pos.fetchPelanggan();
-    pos.fetchDiskon();
-    pos.fetchKodeTransaksi();
-    pos.fetchTransaksiDetail();
+    fetchPelanggan();
+    fetchDiskon();
+    fetchKodeTransaksi();
+    fetchTransaksiDetail();
 
-    nextTick(() => ensureFocus());
-    setTimeout(() => { if (barcodeInput.value) barcodeInput.value.focus(); }, 500);
+    // Jalankan focus saat awal load
+    nextTick(() => {
+        ensureFocus();
+    });
+
+    // Pasang listener klik global
+    // Jalankan focus pertama kali
+    setTimeout(() => {
+        if (barcodeInput.value) barcodeInput.value.focus();
+    }, 500);
+
+    // Pasang listener klik global agar fokus kembali jika kasir klik sembarang tempat
     document.addEventListener('click', ensureFocus);
 });
 
+// Bersihkan listener saat pindah halaman
 onUnmounted(() => {
     document.removeEventListener('click', ensureFocus);
 });
+
 </script>
 <style scoped>
 .offscreen-input {
