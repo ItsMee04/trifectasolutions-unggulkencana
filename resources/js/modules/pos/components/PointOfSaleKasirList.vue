@@ -180,7 +180,6 @@ const {
 
 // 3. Panggil fungsi melalui instance 'pos' agar tetap sinkron
 useTransaksiRealtime(async () => {
-    console.log("WebSocket: Memperbarui data via instance pos...");
     await pos.fetchTransaksiDetail();
 });
 
@@ -213,9 +212,17 @@ watch(modeScanner, async (newVal) => {
     }
 });
 
+// Di PointOfSaleKasirList.vue
 const calculateSubtotal = computed(() => {
-    // Akses ke pos.TransaksiDetail secara langsung
-    return (pos.TransaksiDetail || []).reduce((acc, item) => acc + parseFloat(item.total), 0);
+    // Pastikan TransaksiDetail ada dan berupa array
+    const details = pos.TransaksiDetail;
+    if (!Array.isArray(details)) return 0;
+
+    return details.reduce((acc, item) => {
+        // Cek apakah item dan item.total ada
+        const total = item && item.total ? parseFloat(item.total) : 0;
+        return acc + total;
+    }, 0);
 });
 
 const calculateDiskon = computed(() => {
