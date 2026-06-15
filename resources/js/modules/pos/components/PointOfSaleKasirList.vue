@@ -142,7 +142,6 @@
         </aside>
     </div>
 </template>
-
 <script setup>
 import { onMounted, onUnmounted, computed, watch, nextTick, ref } from 'vue';
 import { usePOS } from '../composables/usePOS';
@@ -152,59 +151,45 @@ import 'vue-multiselect/dist/vue-multiselect.css';
 import { formatRupiah } from '../../../helper/formatRupiah';
 import { useFeather } from '../../../helper/feather';
 
-// Inisialisasi composable utama
 const pos = usePOS();
 
-// Menghubungkan WebSocket untuk update real-time
 useTransaksiRealtime(async () => {
-    console.log("WebSocket: Menerima sinyal update, mengambil data terbaru...");
+    console.log("WebSocket: Memperbarui data...");
     await pos.fetchTransaksiDetail();
 });
 
-// State lokal untuk fungsionalitas UI
 const barcodeInput = ref(null);
 const modeScanner = ref(true);
 
-// --- LOGIKA FOKUS SCANNER ---
 const ensureFocus = (event) => {
     const isUserTyping = event?.target.tagName === 'INPUT' ||
         event?.target.tagName === 'TEXTAREA' ||
         event?.target.closest('.multiselect');
-
     if (isUserTyping) return;
-
-    if (barcodeInput.value) {
-        barcodeInput.value.focus();
-    }
+    if (barcodeInput.value) barcodeInput.value.focus();
 };
 
-// --- COMPUTED PROPERTIES ---
-// Mengakses data dari instance 'pos'
+// --- COMPUTED: Akses properti tanpa .value jika sudah di dalam object pos ---
 const calculateSubtotal = computed(() => {
-    return pos.TransaksiDetail.reduce((acc, item) => acc + parseFloat(item.total), 0);
+    // Pastikan pos.TransaksiDetail adalah array
+    return (pos.TransaksiDetail || []).reduce((acc, item) => acc + parseFloat(item.total), 0);
 });
 
 const calculateDiskon = computed(() => {
-    return (calculateSubtotal.value * pos.selectedDiskonNilai) / 100;
+    return (calculateSubtotal.value * (pos.selectedDiskonNilai || 0)) / 100;
 });
 
 const calculateGrandTotal = computed(() => {
-    const subtotal = calculateSubtotal.value;
-    const diskon = calculateDiskon.value;
-    const potonganPoin = pos.calculatePotonganPoint;
-
-    return subtotal - diskon - potonganPoin;
+    return calculateSubtotal.value - calculateDiskon.value - (pos.calculatePotonganPoint || 0);
 });
 
-// --- FUNGSI & FEATHER ---
 const { initFeather } = useFeather();
 
 const handlePayment = () => {
     pos.paymentTransaksi(calculateGrandTotal.value);
 };
 
-// --- WATCHER ---
-// Memantau perubahan pada data transaksi untuk refresh icon feather
+// --- WATCHER: Gunakan getter function agar reaktif ---
 watch(
     [() => pos.TransaksiDetail, () => pos.isLoading],
     async () => {
@@ -214,29 +199,14 @@ watch(
     { deep: true }
 );
 
-watch(modeScanner, async (newVal) => {
-    if (newVal) {
-        await nextTick();
-        if (barcodeInput.value) barcodeInput.value.focus();
-    }
-});
-
-// --- LIFECYCLE HOOKS ---
 onMounted(() => {
     pos.fetchPelanggan();
     pos.fetchDiskon();
     pos.fetchKodeTransaksi();
     pos.fetchTransaksiDetail();
 
-    // Fokus awal
-    nextTick(() => {
-        ensureFocus();
-    });
-
-    setTimeout(() => {
-        if (barcodeInput.value) barcodeInput.value.focus();
-    }, 500);
-
+    nextTick(() => ensureFocus());
+    setTimeout(() => { if (barcodeInput.value) barcodeInput.value.focus(); }, 500);
     document.addEventListener('click', ensureFocus);
 });
 
