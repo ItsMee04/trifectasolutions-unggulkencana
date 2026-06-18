@@ -19,10 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    // 1. UBAH INI: Daftarkan asal protokol lokal dari Capacitor Android dan iOS
-    'allowed_origins' => [ // Tetap masukkan ini agar Anda bisa testing lewat browser laptop
-        '*'
-    ],
+    'allowed_origins' => [ '*'],
 
     'allowed_origins_patterns' => [],
 
@@ -32,7 +29,6 @@ return [
 
     'max_age' => 0,
 
-    // 2. UBAH INI: Wajib diset true karena Axios utilitas Anda menggunakan 'withCredentials: true'
     'supports_credentials' => true,
 
 ];
