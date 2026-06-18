@@ -108,19 +108,32 @@
                     <table class="table table-responsive table-borderless">
                         <tr>
                             <td>Sub Total</td>
-                            <td class="text-end">{{ formatRupiah(calculateSubtotal) }}</td>
+                            <td class="text-end">
+                                {{ formatRupiah(calculateSubtotal) }}
+                            </td>
                         </tr>
+
                         <tr>
-                            <td class="danger">Diskon ({{ selectedDiskonNilai }}%)</td>
-                            <td class="danger text-end">- {{ formatRupiah(calculateDiskon) }}</td>
+                            <td class="danger">
+                                Diskon ({{ selectedDiskonNilai }}%)
+                            </td>
+                            <td class="danger text-end">
+                                - {{ formatRupiah(calculateDiskon) }}
+                            </td>
                         </tr>
+
                         <tr v-if="calculatePotonganPoint > 0">
                             <td class="danger">Potongan Poin</td>
-                            <td class="danger text-end">- {{ formatRupiah(calculatePotonganPoint) }}</td>
+                            <td class="danger text-end">
+                                - {{ formatRupiah(calculatePotonganPoint) }}
+                            </td>
                         </tr>
+
                         <tr>
                             <td>Total</td>
-                            <td class="text-end fw-bold">{{ formatRupiah(calculateGrandTotal) }}</td>
+                            <td class="text-end fw-bold">
+                                {{ formatRupiah(calculateGrandTotal) }}
+                            </td>
                         </tr>
                     </table>
                 </div>
@@ -214,27 +227,24 @@ watch(modeScanner, async (newVal) => {
 
 // Di PointOfSaleKasirList.vue
 const calculateSubtotal = computed(() => {
-    // Pastikan TransaksiDetail ada dan berupa array
-    const details = pos.TransaksiDetail;
-    if (!Array.isArray(details)) return 0;
-
-    return details.reduce((acc, item) => {
-        // Cek apakah item dan item.total ada
-        const total = item && item.total ? parseFloat(item.total) : 0;
-        return acc + total;
+    return TransaksiDetail.value.reduce((acc, item) => {
+        return acc + Number(item.total || 0);
     }, 0);
 });
 
 const calculateDiskon = computed(() => {
-    return (calculateSubtotal.value * (pos.selectedDiskonNilai || 0)) / 100;
+    return (
+        calculateSubtotal.value *
+        Number(selectedDiskonNilai.value || 0)
+    ) / 100;
 });
 
 const calculateGrandTotal = computed(() => {
-    const subtotal = calculateSubtotal.value;
-    const diskon = calculateDiskon.value;
-    const potonganPoin = pos.calculatePotonganPoint || 0;
-
-    return subtotal - diskon - potonganPoin;
+    return (
+        calculateSubtotal.value -
+        calculateDiskon.value -
+        Number(calculatePotonganPoint.value || 0)
+    );
 });
 
 const { initFeather } = useFeather();
