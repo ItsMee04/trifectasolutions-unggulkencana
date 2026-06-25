@@ -653,4 +653,80 @@ class LaporanController extends Controller
             return response()->json(['error' => 'Gagal membuat laporan: ' . $e->getMessage()], 500);
         }
     }
+
+    public function getSignedCetakLaporanNampanPerBakiUrl(Request $request)
+    {
+        $route_name = 'produk.cetak_laporannampanperbaki';
+        $expiration = now()->addMinutes(5);
+
+        $signedUrl = URL::temporarySignedRoute(
+            $route_name,
+            $expiration,
+            [
+                'TARGET_TANGGAL' => $request->periodedari,
+            ]
+        );
+
+        return response()->json(['url' => $signedUrl]);
+    }
+
+    public function CetakLaporanNampanPerBaki(Request $request)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '512M');
+
+        if (!$request->hasValidSignature()) {
+            abort(401, 'Invalid signature.');
+        }
+
+        $TARGET_TANGGAL  = $request->query('TARGET_TANGGAL');
+
+        if (!$TARGET_TANGGAL) {
+            abort(400, 'Tanggal awal tidak ditemukan');
+        }
+
+        $jasper_file = resource_path('reports/CetakLaporanNampanPerBaki.jasper');
+
+        $db = config('database.connections.mysql');
+
+        $parameters = [
+            'TARGET_TANGGAL' => $TARGET_TANGGAL,
+        ];
+
+        try {
+            $tempDir = storage_path('app/temp');
+            if (!file_exists($tempDir)) mkdir($tempDir, 0777, true);
+
+            $outputFile = $tempDir . '/LaporanNampanPerBaki-' . $TARGET_TANGGAL;
+
+            $jasper = new \PHPJasper\PHPJasper;
+            $jasper->process(
+                $jasper_file,
+                $outputFile,
+                [
+                    'format' => ['pdf'],
+                    'params' => $parameters,
+                    'db_connection' => [
+                        'driver' => 'mysql',
+                        'host' => $db['host'],
+                        'port' => $db['port'],
+                        'database' => $db['database'],
+                        'username' => $db['username'],
+                        'password' => $db['password'],
+                    ],
+                ]
+            )->execute();
+
+            $pdfPath = $outputFile . '.pdf';
+            $pdfContent = file_get_contents($pdfPath);
+            unlink($pdfPath);
+
+            return response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="LAPORAN-NAMPAN-PER-BAKI' . $TARGET_TANGGAL . '.pdf"',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Gagal membuat laporan: ' . $e->getMessage()], 500);
+        }
+    }
 }

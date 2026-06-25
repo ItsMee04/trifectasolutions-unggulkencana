@@ -112,6 +112,20 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm bg-soft-info h-100" @click="cetakLaporanNampanPerBaki" style="cursor: pointer;">
+                <div class="card-body p-3 d-flex align-items-center">
+                    <div class="bg-white p-2 rounded me-3 shadow-sm">
+                        <i data-feather="box" class="text-info" style="width: 20px;"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">LAPORAN NAMPAN PER BAKI</h6>
+                        <small class="text-muted">Catatan Stok</small>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script setup>
@@ -130,6 +144,7 @@ const {
     cetakLaporanMutasiSaldo,
     cetakLaporanNampan,
     cetakLaporanProduk,
+    cetakLaporanNampanPerBaki
 } = useLaporan();
 
 onMounted(() => {

@@ -157,6 +157,22 @@ export function useLaporan() {
         }
     }
 
+    const cetakLaporanNampanPerBaki = async () => {
+        if (!validateForm()) return false;
+
+        const payload = {
+            periodedari: formLaporan.tanggaldari,
+        }
+
+        try {
+            const { url } = await laporanService.cetakLaporanNampanPerBaki(payload)
+            window.open(url, '_blank')
+        } catch (e) {
+            console.log(e)
+            toast.error('Gagal mencetak laporan nampan per baki')
+        }
+    }
+
     return {
         errors,
         formLaporan,
@@ -168,5 +184,6 @@ export function useLaporan() {
         cetakLaporanMutasiSaldo,
         cetakLaporanNampan,
         cetakLaporanProduk,
+        cetakLaporanNampanPerBaki
     }
 }
