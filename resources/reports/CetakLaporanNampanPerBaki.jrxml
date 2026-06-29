@@ -254,7 +254,7 @@
 	<detail>
 		<band height="20" splitType="Stretch">
 			<textField>
-				<reportElement x="170" y="0" width="110" height="20" uuid="e8c6ab82-bf96-47d0-92cc-595e1accae62">
+				<reportElement mode="Transparent" x="170" y="0" width="110" height="20" forecolor="#05AB18" backcolor="#FFFFFF" uuid="e8c6ab82-bf96-47d0-92cc-595e1accae62">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d6c8a85-f31c-49da-8bb5-d7745b267e0d"/>
 				</reportElement>
 				<box>
@@ -294,7 +294,7 @@
 				<textFieldExpression><![CDATA[$F{totalitem} + " pt"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="280" y="0" width="110" height="20" uuid="a29fb680-084e-4307-99a5-e1858014eb9d">
+				<reportElement x="280" y="0" width="110" height="20" forecolor="#FF0703" uuid="a29fb680-084e-4307-99a5-e1858014eb9d">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d6c8a85-f31c-49da-8bb5-d7745b267e0d"/>
 				</reportElement>
 				<box>
@@ -320,7 +320,7 @@
 				<textFieldExpression><![CDATA[$F{totalberat} + " gr"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="390" y="0" width="128" height="20" uuid="a59813b0-b1ac-43f9-9093-690ef51c3bea">
+				<reportElement x="390" y="0" width="128" height="20" forecolor="#05AB18" uuid="a59813b0-b1ac-43f9-9093-690ef51c3bea">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d6c8a85-f31c-49da-8bb5-d7745b267e0d"/>
 				</reportElement>
 				<box>
@@ -333,7 +333,7 @@
 				<textFieldExpression><![CDATA[$F{totalberatmasuk} + " gr"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="518" y="0" width="122" height="20" uuid="eb15bd85-2d2c-47cc-aeda-67d8dfd88365">
+				<reportElement x="518" y="0" width="122" height="20" forecolor="#FF0703" uuid="eb15bd85-2d2c-47cc-aeda-67d8dfd88365">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d6c8a85-f31c-49da-8bb5-d7745b267e0d"/>
 				</reportElement>
 				<box>

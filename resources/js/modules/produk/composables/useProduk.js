@@ -39,12 +39,15 @@ const formProduk = reactive({
 
 export function useProduk() {
 
+    // FIX: Memastikan mengambil properti response.data sesuai struktur API Anda
     const fetchProduk = async () => {
         isLoading.value = true;
         try {
             const response = await produkService.getProduk();
-            produk.value = Array.isArray(response) ? response : (response.data || []);
+            // Karena response berupa { status: true, message: "...", data: [...] }
+            produk.value = response?.data || response;
         } catch (error) {
+            console.error("Gagal memuat produk:", error);
             produk.value = [];
         } finally {
             isLoading.value = false;
@@ -54,10 +57,9 @@ export function useProduk() {
     const fetchJenisProduk = async () => {
         try {
             const response = await jenisprodukService.getJenisProduk();
-            // Map data agar formatnya { value: id, label: 'nama' } sesuai standar Multiselect
             jenisprodukList.value = response.data.map(jenisprodukList => ({
                 value: jenisprodukList.id,
-                label: jenisprodukList.jenis // Sesuaikan field 'role' dengan nama kolom di tabel roles Anda
+                label: jenisprodukList.jenis
             }));
         } catch (error) {
             console.error("Gagal memuat Jenis Produk:", error);
@@ -76,7 +78,6 @@ export function useProduk() {
         }
     };
 
-    // Tambahkan allJenisKarat dan logic fetch-nya
     const fetchJenisKarat = async () => {
         try {
             const response = await jeniskaratService.getJenisKarat();
@@ -86,10 +87,8 @@ export function useProduk() {
         }
     };
 
-    // LOGIKA FILTER BERTINGKAT (Computed)
     const filteredJenisKaratList = computed(() => {
         if (!formProduk.karat || !formProduk.karat.value) return [];
-
         return allJenisKarat.value
             .filter(item => item.karat_id === formProduk.karat.value)
             .map(item => ({
@@ -98,10 +97,9 @@ export function useProduk() {
             }));
     });
 
-    // Reset Jenis Karat jika Karat diubah
     const handleKaratChange = () => {
         formProduk.jeniskarat = null;
-        formProduk.harga = null; // Reset harga juga karena kombinasi berubah
+        formProduk.harga = null;
     };
 
     const fetchHargaOtomatis = async () => {
@@ -110,15 +108,14 @@ export function useProduk() {
                 const response = await hargaService.getHarga();
                 const dataHarga = Array.isArray(response) ? response : response.data;
 
-                // Cari data harga yang cocok
                 const found = dataHarga.find(h =>
                     h.karat_id === formProduk.karat.value &&
                     h.jeniskarat_id === formProduk.jeniskarat.value
                 );
 
                 if (found) {
-                    formProduk.harga_id = found.id; // ID untuk database
-                    formProduk.harga_display = found.harga; // Nominal untuk UI
+                    formProduk.harga_id = found.id;
+                    formProduk.harga_display = found.harga;
                 } else {
                     formProduk.harga_id = null;
                     formProduk.harga_display = 'Harga belum diatur';
@@ -129,7 +126,6 @@ export function useProduk() {
         }
     };
 
-    // Gunakan watch untuk memantau perubahan pada jeniskarat
     watch(() => formProduk.jeniskarat, (newVal) => {
         if (newVal) {
             fetchHargaOtomatis();
@@ -145,9 +141,7 @@ export function useProduk() {
         if (!formProduk.berat || String(formProduk.berat).trim() === '') {
             errors.value.berat = 'Berat tidak boleh kosong.';
         } else {
-            // Regex untuk memastikan hanya angka dan titik, bukan koma
             const beratRegex = /^\d+(\.\d+)?$/;
-
             if (String(formProduk.berat).includes(',')) {
                 errors.value.berat = 'Gunakan titik (.) sebagai pemisah desimal, bukan koma.';
             } else if (!beratRegex.test(formProduk.berat)) {
@@ -157,20 +151,15 @@ export function useProduk() {
 
         if (!formProduk.karat || formProduk.karat === null) {
             errors.value.karat = 'Karat wajib dipilih.';
-        } else if (Array.isArray(formProduk.karat) && formProduk.karat.length === 0) {
-            errors.value.karat = 'Pilih satu karat.';
         }
 
         if (!formProduk.jeniskarat || formProduk.jeniskarat === null) {
             errors.value.jeniskarat = 'Jenis Karat wajib dipilih.';
-        } else if (Array.isArray(formProduk.jeniskarat) && formProduk.jeniskarat.length === 0) {
-            errors.value.jeniskarat = 'Pilih satu jenis karat.';
         }
 
         return Object.keys(errors.value).length === 0;
     };
 
-    // Helper untuk reset form agar DRY (Don't Repeat Yourself)
     const resetForm = () => {
         formProduk.id = null;
         formProduk.nama = '';
@@ -183,17 +172,14 @@ export function useProduk() {
         formProduk.panjang = '';
         formProduk.keterangan = '';
         formProduk.image = null;
-        currentImagePreview.value = null; // Reset preview
+        currentImagePreview.value = null;
         errors.value = {};
     };
 
     const handleFileChange = (e) => {
-        const file = e.target.files[0]; // Mengambil file asli dari input
+        const file = e.target.files[0];
         if (file) {
-            // 1. Simpan file asli ke dalam form (ini yang akan dikirim ke DB)
             formProduk.image = file;
-
-            // 2. Buat URL sementara untuk pratinjau (Preview)
             if (currentImagePreview.value && currentImagePreview.value.startsWith('blob:')) {
                 URL.revokeObjectURL(currentImagePreview.value);
             }
@@ -221,21 +207,17 @@ export function useProduk() {
         formProduk.harga_id = item.harga_id;
         formProduk.harga_display = item.harga?.harga || item.harga;
 
-        // Set Dropdown Jenis Produk
         const sj = jenisprodukList.value.find(j => j.value === item.jenisproduk_id);
         if (sj) formProduk.jenisproduk = sj;
 
-        // Set Dropdown Karat
         const sk = karatList.value.find(k => k.value === item.karat_id);
         if (sk) formProduk.karat = sk;
 
-        // Set Dropdown Jenis Karat (Cari dari master data)
         const sjk = allJenisKarat.value.find(jk => jk.id === item.jeniskarat_id);
         if (sjk) {
             formProduk.jeniskarat = { value: sjk.id, label: sjk.jenis };
         }
 
-        // Preview Image
         if (item.image) {
             currentImagePreview.value = `${STORAGE_URL}/images/produk/${item.image}`;
         }
@@ -246,13 +228,9 @@ export function useProduk() {
 
     const submitProduk = async () => {
         if (!validateForm()) return false;
-
         isLoading.value = true;
         try {
-            // Gunakan FormData untuk membungkus File
             const payload = new FormData();
-
-            // Masukkan data teks
             payload.append('id', formProduk.id || '');
             payload.append('nama', formProduk.nama);
             payload.append('berat', formProduk.berat || 0.0);
@@ -270,24 +248,19 @@ export function useProduk() {
             const jeniskaratId = formProduk.jeniskarat?.value || '';
             payload.append('jeniskarat', jeniskaratId);
 
-            // LOGIKA PENTING:
-            // Cek apakah formProduk.image berisi File (hasil dari handleFileChange)
             if (formProduk.image instanceof File) {
                 payload.append('image', formProduk.image);
             }
 
-            let response;
             if (isEdit.value) {
-                // Jika Edit, tetap gunakan POST karena FormData tidak stabil di PUT pada beberapa server
-                response = await produkService.updateProduk(payload);
+                await produkService.updateProduk(payload);
             } else {
-                response = await produkService.storeProduk(payload);
+                await produkService.storeProduk(payload);
             }
 
             toast.success('Data berhasil disimpan');
             await fetchProduk();
 
-            // Tutup modal
             const modalElement = document.getElementById('produkModal');
             const modal = bootstrap.Modal.getInstance(modalElement);
             if (modal) modal.hide();
@@ -318,9 +291,7 @@ export function useProduk() {
 
         if (result.isConfirmed) {
             try {
-                const payload = {
-                    id: item.id,
-                };
+                const payload = { id: item.id };
                 await produkService.deleteProduk(payload);
                 toast.success('Data Produk berhasil dihapus.');
                 fetchProduk();
@@ -335,20 +306,52 @@ export function useProduk() {
         await fetchProduk();
     }
 
+    // ==========================================
+    // LOGIKA FILTER & PAGINATION SECARA MANDIRI
+    // ==========================================
+
+    // 1. Ambil data tersaring (berisi seluruh hasil pencarian, tanpa dipotong slice)
+    const filteredProdukOnly = computed(() => {
+        const query = (searchQuery.value || '').trim().toLowerCase();
+
+        if (!query) return produk.value;
+
+        return produk.value.filter(item => {
+            const kodeproduk = String(item.kodeproduk || '').toLowerCase();
+            const nama = String(item.nama || '').toLowerCase();
+            const berat = String(item.berat || '').toLowerCase();
+            const lingkar = String(item.lingkar || '').toLowerCase();
+            const panjang = String(item.panjang || '').toLowerCase();
+            const keterangan = String(item.keterangan || '').toLowerCase();
+
+            // Mengambil properti dari objek relasi sesuai format JSON response Anda
+            const jenisProduk = item.jenisproduk && typeof item.jenisproduk === 'object'
+                ? String(item.jenisproduk.jenis || '').toLowerCase()
+                : '';
+
+            const karat = item.karat && typeof item.karat === 'object'
+                ? String(item.karat.karat || '').toLowerCase()
+                : '';
+
+            const jenisKarat = item.jeniskarat && typeof item.jeniskarat === 'object'
+                ? String(item.jeniskarat.jenis || '').toLowerCase()
+                : '';
+
+            return kodeproduk.includes(query) ||
+                   nama.includes(query) ||
+                   berat.includes(query) ||
+                   jenisProduk.includes(query) ||
+                   karat.includes(query) ||
+                   jenisKarat.includes(query) ||
+                   lingkar.includes(query) ||
+                   panjang.includes(query) ||
+                   keterangan.includes(query);
+        });
+    });
+
+    // 2. Hitung total halaman berdasarkan data yang sudah difilter
     const totalPages = computed(() => {
-        const query = searchQuery.value.toLowerCase();
-        const filteredCount = produk.value.filter(item =>
-            String(item.kodeproduk || '').toLowerCase().includes(query) ||
-            String(item.nama || '').toLowerCase().includes(query) ||
-            String(item.berat || '').toLowerCase().includes(query) || // Tambah String()
-            String(item.jenisproduk?.jenis || '').toLowerCase().includes(query) ||
-            String(item.karat?.karat || '').toLowerCase().includes(query) ||
-            String(item.jeniskarat?.jenis || '').toLowerCase().includes(query) ||
-            String(item.lingkar || '').toLowerCase().includes(query) || // Tambah String()
-            String(item.panjang || '').toLowerCase().includes(query) || // Tambah String()
-            String(item.keterangan || '').toLowerCase().includes(query)
-        ).length;
-        return Math.ceil(filteredCount / itemsPerPage) || 1;
+        return Math.ceil(filteredProdukOnly.value.length / itemsPerPage) || 1;
     });
 
     const displayedPages = computed(() => {
@@ -392,33 +395,16 @@ export function useProduk() {
         handleKaratChange,
         totalPages,
         displayedPages,
-        filteredProduk: computed(() => {
-            return produk.value.filter(item =>
-                String(item.kodeproduk || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.nama || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.berat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.jenisproduk?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.karat?.karat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.jeniskarat?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.lingkar || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.panjang || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.keterangan || '').toLowerCase().includes(searchQuery.value.toLowerCase())
-            ).slice((currentPage.value - 1) * itemsPerPage, currentPage.value * itemsPerPage);
-        }),
+
+        // Membawa seluruh data hasil filter (digunakan untuk text entries: 1 to 10 of 95)
+        filteredProduk: filteredProdukOnly,
+
+        // Membawa data yang dipotong per halaman khusus untuk looping baris <tr> tabel
         paginatedProduk: computed(() => {
             const start = (currentPage.value - 1) * itemsPerPage;
-            return (produk.value.filter(item =>
-                 String(item.kodeproduk || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.nama || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.berat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.jenisproduk?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.karat?.karat || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.jeniskarat?.jenis || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.lingkar || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.panjang || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                String(item.keterangan || '').toLowerCase().includes(searchQuery.value.toLowerCase())
-            )).slice(start, start + itemsPerPage);
+            return filteredProdukOnly.value.slice(start, start + itemsPerPage);
         }),
+
         handleCreate,
         handleEdit,
         submitProduk,

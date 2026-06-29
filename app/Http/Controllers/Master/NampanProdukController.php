@@ -58,6 +58,20 @@ class NampanProdukController extends Controller
         $data = Produk::with(['jenisproduk', 'karat', 'jeniskarat', 'harga', 'kondisi'])
             ->where('status', 1)
             ->where('jenisproduk_id', $request->jenisproduk)
+            ->where(function ($query) {
+                // Kondisi A: Produk yang sama sekali belum pernah masuk tabel nampanproduk
+                $query->whereDoesntHave('nampanproduk')
+
+                    // Kondisi B: Produk yang sudah ada di nampanproduk tetapi log terakhirnya KELUAR dengan status 0
+                    ->orWhereExists(function ($subQuery) {
+                        $subQuery->select(DB::raw(1))
+                            ->from('nampanproduk as np1')
+                            ->join(DB::raw('(SELECT produk_id, MAX(id) as max_id FROM nampanproduk GROUP BY produk_id) as np2'), 'np1.id', '=', 'np2.max_id')
+                            ->whereColumn('np1.produk_id', 'produk.id')
+                            ->where('np1.jenis', 'KELUAR')
+                            ->where('np1.status', 0);
+                    });
+            })
             ->get();
 
         if ($data->isEmpty()) {

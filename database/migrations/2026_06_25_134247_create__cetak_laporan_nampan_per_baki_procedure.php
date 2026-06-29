@@ -36,7 +36,8 @@ return new class extends Migration
                 JOIN nampan n ON np.nampan_id = n.id
                 JOIN produk p ON np.produk_id = p.id
                 WHERE np.tanggal <= TARGET_TANGGAL
-                GROUP BY n.id, n.nampan;
+                GROUP BY n.id, n.nampan
+                ORDER BY n.id ASC;
             END
         ");
     }

@@ -25,7 +25,10 @@ class ProdukController extends Controller
 
     public function getProduk()
     {
-        $data = Produk::with(['jenisproduk', 'karat', 'jeniskarat', 'harga', 'kondisi'])->where('status', 1)->get();
+        $data = Produk::with(['jenisproduk', 'karat', 'jeniskarat', 'harga', 'kondisi'])
+            ->where('status', 1)
+            ->orderBy('id', 'ASC')
+            ->get();
 
         if ($data->isEmpty()) {
             return response()->json([
