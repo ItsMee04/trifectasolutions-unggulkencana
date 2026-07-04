@@ -483,6 +483,27 @@ class TransaksiController extends Controller
             $produk = Produk::findOrFail($detail->produk_id);
             $produk->update(['status' => 1]);
 
+            // Cari log nampan terakhir dari produk ini untuk mengambil nampan_id-nya
+            $logTerakhir = DB::table('nampanproduk')
+                ->where('produk_id', $produk->id)
+                ->orderBy('id', 'desc')
+                ->first();
+
+            $nampanId = $logTerakhir ? $logTerakhir->nampan_id : null;
+            // jika tidak ada log sama sekali (kondisi A), diisi null atau sesuaikan defaultnya
+
+            // Masukkan log baru pembatalan
+            DB::table('nampanproduk')->insert([
+                'produk_id'  => $produk->id,
+                'nampan_id'  => $nampanId, // Menggunakan nampan terakhir
+                'jenis'      => 'KELUAR',
+                'tanggal'    => now(),
+                'oleh'       => Auth::id(),
+                'status'     => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
             // 3. ROLLBACK MUTASI SALDO
             // Cari mutasi MASUK yang memiliki referensi kode transaksi ini
             $mutasi = DB::table('mutasisaldo')

@@ -268,7 +268,11 @@ class NampanProdukController extends Controller
             'produk.karat',
             'produk.jeniskarat',
             'produk.harga'
-        ])->where('status', 1);
+        ])
+            ->where('status', 1) // Memastikan baki penempatan aktif
+            ->whereHas('produk', function ($q) {
+                $q->where('status', 1); // 🔥 KUNCI: Memastikan produk di master JUGA masih aktif (Status = 1)
+            });
 
         // Filter berdasarkan Jenis Produk (Anting, Cincin, dll) jika bukan 'all'
         if ($jenisId && $jenisId !== 'all') {
@@ -284,20 +288,24 @@ class NampanProdukController extends Controller
             $produk = $item->produk;
             $nampan = $item->nampan;
 
+            // Ditambahkan defensive check jika produk null (walau sudah pakai whereHas)
+            if (!$produk) return null;
+
             return [
-                'nampan'      => $nampan->nampan ?? '-',
+                'nampan'         => $nampan->nampan ?? '-',
                 'jenisproduk_id' => $nampan->jenisproduk_id ?? null,
-                'kodeproduk'  => $produk->kodeproduk ?? '-',
-                'nama'        => $produk->nama ?? '-',
-                'berat'       => $produk->berat ?? 0,
-                'karat'       => $produk->karat->karat ?? '-',
-                'jeniskarat'  => $produk->jeniskarat->jenis ?? '-',
-                'lingkar'     => $produk->lingkar ?? '-',
-                'panjang'     => $produk->panjang ?? '-',
-                'harga'       => $produk->harga->harga ?? 0,
-                'image'       => $produk->image ?? 'default.png',
+                'kodeproduk'     => $produk->kodeproduk ?? '-',
+                'nama'           => $produk->nama ?? '-',
+                'berat'          => $produk->berat ?? 0,
+                'karat'          => $produk->karat->karat ?? '-',
+                'jeniskarat'     => $produk->jeniskarat->jenis ?? '-',
+                'lingkar'        => $produk->lingkar ?? '-',
+                'panjang'        => $produk->panjang ?? '-',
+                'harga'          => $produk->harga->harga ?? 0,
+                'image'          => $produk->image ?? 'default.png',
+                'status'         => $produk->status ?? 1, // Menyertakan status produk asli ke frontend jika butuh
             ];
-        });
+        })->filter()->values(); // ->filter() untuk membuang array null jika ada, ->values() mereset index array
 
         return response()->json([
             'status' => true,
